@@ -320,7 +320,7 @@ export default function PrayerTimesView() {
               </span>
               {customQibla !== null && (
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                  📍 Posisi GPS Akurat
+                  📍 Lokasi GPS
                 </span>
               )}
             </div>
@@ -375,8 +375,8 @@ export default function PrayerTimesView() {
               <h3 className="text-xl font-black text-amber-700 font-mono">
                 {nextPrayer?.name} : {nextPrayer?.time} WIB
               </h3>
-              <span className="text-[11px] text-slate-600 font-medium">
-                Akurasi astronomis posisi matahari resmi
+              <span className="text-[11px] text-slate-500 font-medium">
+                Jadwal resmi Kementerian Agama Republik Indonesia
               </span>
             </div>
           </div>
@@ -429,18 +429,8 @@ export default function PrayerTimesView() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-                Kompas Kiblat Cerdas
+                Kompas Kiblat Baitullah
               </span>
-              {isSensorActive && !useManualMode ? (
-                <span className="flex items-center gap-1.5 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>Gyro HP Aktif Bergerak</span>
-                </span>
-              ) : (
-                <span className="text-[10px] text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
-                  Mode Panduan Otomatis
-                </span>
-              )}
             </div>
 
             <h3 className="text-base sm:text-lg font-bold text-slate-900 font-serif flex items-center gap-2">
@@ -453,7 +443,7 @@ export default function PrayerTimesView() {
             <button
               onClick={() => setShowCalibrationModal(true)}
               className="px-3 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition active:scale-95 shadow-xs"
-              title="Panduan Kalibrasi Angka 8 (Standar MyQuran)"
+              title="Panduan Kalibrasi Angka 8"
             >
               <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
               <span className="hidden sm:inline">Kalibrasi Angka 8</span>
@@ -468,40 +458,15 @@ export default function PrayerTimesView() {
           </div>
         </div>
 
-        {/* 📲 TOMBOL UTAMA AKTIVASI GYROSCOPE */}
-        {(!isSensorActive || permissionState === 'prompt') && (
+        {/* Tombol sinkronisasi jika browser memerlukan izin interaktif */}
+        {permissionState === 'prompt' && (
           <button
             onClick={requestCompassPermission}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2.5 transition active:scale-98 animate-pulse"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-98"
           >
-            <Smartphone className="w-5 h-5 text-white" />
-            <span>Aktifkan Kompas Gyro Otomatis (Ketuk untuk Izinkan Sensor HP)</span>
+            <Compass className="w-4 h-4 text-white" />
+            <span>Ketuk untuk Mengaktifkan Sensor Arah Kompas</span>
           </button>
-        )}
-
-        {/* Peringatan Kemiringan HP */}
-        {isSensorActive && isTilted && !useManualMode && (
-          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-xs text-amber-900 flex items-center justify-between gap-3 animate-in fade-in shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 animate-bounce" />
-              <div className="text-[11px] leading-tight">
-                <strong>Posisikan HP Lebih Rata:</strong> Kemiringan ponsel saat ini ({Math.max(Math.abs(tiltAngles.beta), Math.abs(tiltAngles.gamma))}°). Mohon letakkan HP mendatar di telapak tangan agar kompas membaca kiblat dengan 100% presisi.
-              </div>
-            </div>
-            <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2.5 py-1.5 rounded-xl flex-shrink-0 border border-amber-200">
-              Ratakan HP
-            </span>
-          </div>
-        )}
-
-        {/* Catatan jika perangkat tidak punya chip magnetik fisik */}
-        {sensorUnsupported && !isSensorActive && (
-          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-            <div className="text-[11px] leading-relaxed">
-              <strong>Info Sensor:</strong> Jika kompas tidak berputar saat HP digerakkan, kemungkinan ponsel Anda tidak memiliki chip sensor magnetik kompas fisik. Silakan gunakan tombol <strong>"Pindai Otomatis ke Kiblat"</strong> di atas.
-            </div>
-          </div>
         )}
 
         {/* 🌟 PANDUAN ARAH JELAS & BESAR */}
@@ -696,8 +661,8 @@ export default function PrayerTimesView() {
               <span className="text-sm sm:text-base font-black text-slate-900 font-mono block">
                 {Math.round(currentHeading)}°
               </span>
-              <span className="text-[8px] sm:text-[9px] text-emerald-600 block font-medium truncate">
-                {isSensorActive ? 'Sensitif Halus' : 'Manual'}
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">
+                Derajat Hadap
               </span>
             </div>
 
