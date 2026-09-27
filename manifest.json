@@ -9,16 +9,28 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/assets/logo-kanomas.png",
+      "src": "/assets/logo-kanomas-3d-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/assets/logo-kanomas.png",
+      "src": "/assets/logo-kanomas-3d-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/logo-kanomas-3d-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/logo-kanomas-3d.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/assets/logo-kanomas.ico",
