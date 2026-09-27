@@ -59,6 +59,58 @@ const PROMO_BANNERS = [
   }
 ];
 
+// Logo Resmi Kemitraan & Akreditasi Kanomas (Menggunakan file logo asli)
+const OFFICIAL_LOGOS = [
+  {
+    id: 'kan',
+    name: 'KAN',
+    desc: 'Komite Akreditasi Nasional',
+    src: '/assets/logos/logo-kan.png'
+  },
+  {
+    id: 'siskopatuh',
+    name: 'SISKOPATUH',
+    desc: 'Kemenag Terintegrasi',
+    src: '/assets/logos/logo-siskopatuh.png'
+  },
+  {
+    id: 'kemenag',
+    name: 'Kemenag RI',
+    desc: 'PPIU No. U.310',
+    src: '/assets/logos/logo-kemenag.png'
+  },
+  {
+    id: 'himpuh',
+    name: 'HIMPUH',
+    desc: 'Asosiasi Haji & Umrah',
+    src: '/assets/logos/logo-himpuh.png'
+  },
+  {
+    id: 'iata',
+    name: 'IATA',
+    desc: 'Passenger Sales Agency',
+    src: '/assets/logos/logo-iata.png'
+  },
+  {
+    id: '5pasti',
+    name: '5 Pasti Umrah',
+    desc: 'Standar Resmi Kemenag',
+    src: '/assets/logos/logo-5pasti.jpg'
+  },
+  {
+    id: 'bsi',
+    name: 'Bank BSI',
+    desc: 'Bank Syariah Indonesia',
+    src: '/assets/logos/logo-bsi.png'
+  },
+  {
+    id: 'kanomas',
+    name: 'Kanomas Travel',
+    desc: 'Penyelenggara Resmi',
+    src: '/assets/logo-kanomas.png'
+  }
+];
+
 export default function HomeView({
   packages = [],
   mentors = [],
@@ -321,8 +373,8 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* 4. LEGALITAS, AKREDITASI KAN, SISKOPATUH & KEMITRAAN RESMI */}
-      <section className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
+      {/* 4. LEGALITAS, AKREDITASI RESMI & LOGO ASLI BERJALAN KANAN KE KIRI (INFINITE MARQUEE) */}
+      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-3.5 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-3">
           <div>
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
@@ -330,7 +382,7 @@ export default function HomeView({
               <span>Legalitas & Akreditasi Resmi</span>
             </h2>
             <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
-              PT Kanomas Arasy Wisata terdaftar resmi & diawasi oleh Kementerian Agama Republik Indonesia
+              PT Kanomas Arasy Wisata terdaftar resmi & diawasi Kementerian Agama RI serta terafiliasi lembaga internasional
             </p>
           </div>
           <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 w-fit">
@@ -338,111 +390,38 @@ export default function HomeView({
           </span>
         </div>
 
-        {/* LOGO & BADGE GRID RESMI */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
-          {/* 1. LOGO KAN */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-amber-50/50 hover:border-amber-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <svg viewBox="0 0 100 60" className="w-full h-full">
-                <rect width="100" height="60" rx="8" fill="#ffffff" />
-                <path d="M12 45L22 15H30L20 45H12Z" fill="#1e3a8a" />
-                <path d="M26 45L40 15H48L34 45H26Z" fill="#dc2626" />
-                <path d="M42 45L56 15H64L50 45H42Z" fill="#1e3a8a" />
-                <text x="50" y="55" textAnchor="middle" fontSize="12" fontWeight="900" fill="#1e3a8a" fontFamily="sans-serif">KAN</text>
-              </svg>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              KAN
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              Komite Akreditasi Nasional
-            </span>
-          </div>
+        {/* LOGO RESMI BERJALAN DARI KANAN KE KIRI (INFINITE RUNNING TICKER) */}
+        <div className="relative w-full overflow-hidden py-1">
+          {/* Fading gradient edges agar logo masuk dan keluar secara mulus */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-14 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-14 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
-          {/* 2. LOGO SISKOPATUH */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-emerald-50/50 hover:border-emerald-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <circle cx="50" cy="50" r="46" fill="#047857" />
-                <circle cx="50" cy="50" r="38" fill="#ffffff" />
-                <path d="M30 65L50 25L70 65H30Z" fill="#047857" />
-                <circle cx="50" cy="50" r="8" fill="#fde047" />
-              </svg>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              SISKOPATUH
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              Kemenag Terintegrasi
-            </span>
-          </div>
-
-          {/* 3. LOGO KEMENAG RI */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-emerald-50/50 hover:border-emerald-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <polygon points="50,6 90,30 90,70 50,94 10,70 10,30" fill="#065f46" />
-                <polygon points="50,14 82,34 82,66 50,86 18,66 18,34" fill="#ffffff" />
-                <circle cx="50" cy="50" r="18" fill="#f59e0b" />
-                <path d="M50 36V64M36 50H64" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
-              </svg>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              KEMENAG RI
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              PPIU No. U.310
-            </span>
-          </div>
-
-          {/* 4. LOGO HIMPUH */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-amber-50/50 hover:border-amber-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <circle cx="50" cy="50" r="46" fill="#1e3a8a" />
-                <circle cx="50" cy="50" r="40" fill="#ffffff" />
-                <path d="M30 40C35 30 65 30 70 40C70 60 50 75 50 75C50 75 30 60 30 40Z" fill="#d97706" />
-                <text x="50" y="58" textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffffff" fontFamily="sans-serif">H</text>
-              </svg>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              HIMPUH
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              Asosiasi Resmi Haji
-            </span>
-          </div>
-
-          {/* 5. LOGO IATA */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-sky-50/50 hover:border-sky-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <svg viewBox="0 0 100 60" className="w-full h-full">
-                <rect width="100" height="60" rx="8" fill="#0284c7" />
-                <circle cx="50" cy="30" r="22" fill="#ffffff" opacity="0.2" />
-                <text x="50" y="38" textAnchor="middle" fontSize="22" fontWeight="900" fill="#ffffff" fontFamily="sans-serif" letterSpacing="1">IATA</text>
-              </svg>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              IATA
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              Passenger Agency
-            </span>
-          </div>
-
-          {/* 6. LOGO 5 PASTI UMRAH */}
-          <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-1.5 hover:bg-amber-50/50 hover:border-amber-300 transition">
-            <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-2xs">
-              <div className="w-9 h-9 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center font-mono shadow-xs">
-                5✓
+          {/* Jalur Marquee Berjalan */}
+          <div className="animate-marquee gap-3 flex items-center">
+            {/* Duplikasi array 2x agar animasi loop berjalan seamless tanpa terputus */}
+            {[...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS].map((logo, index) => (
+              <div
+                key={`${logo.id}-${index}`}
+                className="flex-shrink-0 w-44 sm:w-48 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/90 hover:border-amber-400 hover:bg-white hover:shadow-md transition-all flex items-center gap-3 select-none"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
+                  <img
+                    src={logo.src}
+                    alt={logo.name}
+                    className="max-w-full max-h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <strong className="text-xs font-black text-slate-800 block truncate leading-tight">
+                    {logo.name}
+                  </strong>
+                  <span className="text-[10px] text-slate-500 block truncate mt-0.5 leading-tight">
+                    {logo.desc}
+                  </span>
+                </div>
               </div>
-            </div>
-            <strong className="text-[11px] font-black text-slate-800 block leading-tight">
-              5 PASTI
-            </strong>
-            <span className="text-[9px] text-slate-500 block leading-tight">
-              Kemenag Bergaransi
-            </span>
+            ))}
           </div>
         </div>
 
