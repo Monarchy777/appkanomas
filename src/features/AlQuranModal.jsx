@@ -257,111 +257,79 @@ export const TAJWEED_COLORS = {
 };
 
 // FUNGSI PEMANJANG HURUF ARAB (KASHIDA / TATWEEL AMAN)
-// Hanya aktif bila dipilih oleh pengguna, menangkap seluruh tanda harakat/waqaf agar tidak merusak ligatur atau menumpuk
-function elongateArabic(text, enabled = false) {
-  if (!text || !enabled) return text;
-  // Sisipkan tatweel \u0640 hanya setelah seluruh tanda harakat/tanda baca selesai
-  return text.replace(/([بتثجحخسشصضطظعغفقكلمنهي][\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*)(?=[بتثجحخسشصضطظعغفقكلمنهي])/g, '$1\u0640');
-}
-
-// Tree Parser Tajweed Markup
-function parseTajweedTree(text) {
-  if (!text) return [];
-  let i = 0;
-  function parseSeq() {
-    let nodes = [];
-    let buf = '';
-    while (i < text.length) {
-      if (text[i] === '[' && text.slice(i).match(/^\[([a-z0-9]+)(?::[0-9]+)?\[/)) {
-        if (buf) {
-          nodes.push({ type: 'plain', text: buf });
-          buf = '';
-        }
-        const match = text.slice(i).match(/^\[([a-z0-9]+)(?::[0-9]+)?\[/);
-        const tag = match[1];
-        i += match[0].length;
-        const children = parseSeq();
-        nodes.push({ type: tag, children });
-      } else if (text[i] === ']') {
-        if (buf) {
-          nodes.push({ type: 'plain', text: buf });
-          buf = '';
-        }
-        i++;
-        return nodes;
-      } else {
-        buf += text[i];
-        i++;
-      }
-    }
-    if (buf) {
-      nodes.push({ type: 'plain', text: buf });
-    }
-    return nodes;
-  }
-  return parseSeq();
-}
-
-function renderTajweedNodes(nodes, isDark = false, isKashida = false) {
-  const palette = isDark ? TAJWEED_COLORS.dark : TAJWEED_COLORS.mushaf;
-
-  return nodes.map((node, idx) => {
-    if (node.type === 'plain') {
-      return <React.Fragment key={idx}>{elongateArabic(node.text, isKashida)}</React.Fragment>;
-    }
-    const info = palette[node.type] || palette.m;
-    const renderedText = node.children
-      ? renderTajweedNodes(node.children, isDark, isKashida)
-      : elongateArabic(node.text, isKashida);
-
-    return (
-      <span
-        key={idx}
-        style={{ color: info.color }}
-        className="font-bold inline select-text transition-colors"
-        title={info.name}
-      >
-        {renderedText}
-      </span>
-    );
-  });
-}
-
-function renderFallbackTajweed(text, isDark = false, isKashida = false) {
+// RENDER TAJWID AMAN (GRAPHEME-AWARE)
+// Menjamin ligatur huruf Arab tidak pernah terputus dan tanda harakat tidak pernah terlepas atau menumpuk
+function renderSafeTajweed(text, isDark = false) {
   if (!text) return null;
-  const processed = elongateArabic(text, isKashida);
-  // 1. Ghunnah/Idgham (Pink), 2. Qalqalah (Biru), 3. Mad (Hijau), 4. Tanwin/Ikhfa (Hijau), 5. Iqlab (Biru)
-  const regex = /([\u0646\u0645]\u0651)|([بجدطق]\u0652)|([\u0653~])|(نْ|[ًٌٍ])|([\u06E2\u06D8])/g;
-  const elements = [];
-  let lastIndex = 0;
-  let match;
-
   const pink = isDark ? '#fb7185' : '#f43f5e';
   const blue = isDark ? '#38bdf8' : '#0284c7';
   const green = isDark ? '#4ade80' : '#16a34a';
 
-  while ((match = regex.exec(processed)) !== null) {
-    if (match.index > lastIndex) {
-      elements.push(processed.substring(lastIndex, match.index));
-    }
-    let color = pink;
-    if (match[1]) color = pink; // Ghunnah / Idgam Bigunnah
-    else if (match[2]) color = blue; // Qalqalah
-    else if (match[3]) color = green; // Mad
-    else if (match[4]) color = green; // Ikhfa
-    else if (match[5]) color = blue; // Iqlab
+  const words = text.split(' ');
+  return words.map((word, wordIdx) => {
+    // Regex grapheme cluster: menangkap satu konsonan beserta SEMUA tanda harakat/waqaf yang menempel
+    const GRAPHEME_REGEX = /([\u0621-\u064A\u0671-\u06D3])([\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
 
-    elements.push(
-      <span key={`fb-${match.index}`} style={{ color }} className="font-bold inline select-text">
-        {match[0]}
+    while ((match = GRAPHEME_REGEX.exec(word)) !== null) {
+      const base = match[1];
+      const marks = match[2] || '';
+      const fullGrapheme = match[0];
+
+      let color = null;
+      let title = '';
+
+      if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
+        color = pink;
+        title = 'Idgham Bigunnah / Ghunnah';
+      } else if ('قطبجد'.includes(base) && marks.includes('\u0652')) {
+        color = blue;
+        title = 'Qalqalah';
+      } else if (marks.includes('\u0653')) {
+        color = pink;
+        title = 'Madd 6 Harakat';
+      } else if (marks.includes('\u0670') || marks.includes('~')) {
+        color = green;
+        title = 'Madd';
+      } else if (
+        marks.includes('\u064B') ||
+        marks.includes('\u064C') ||
+        marks.includes('\u064D') ||
+        (base === 'ن' && marks.includes('\u0652'))
+      ) {
+        color = green;
+        title = 'Ikhfa / Tanwin';
+      }
+
+      if (color) {
+        parts.push(
+          <span
+            key={`g-${match.index}`}
+            style={{ color }}
+            className="font-bold inline select-text transition-colors"
+            title={title}
+          >
+            {fullGrapheme}
+          </span>
+        );
+      } else {
+        parts.push(fullGrapheme);
+      }
+      lastIndex = GRAPHEME_REGEX.lastIndex;
+    }
+
+    if (lastIndex < word.length) {
+      parts.push(word.substring(lastIndex));
+    }
+
+    return (
+      <span key={`w-${wordIdx}`} className="inline-block whitespace-nowrap mx-0.5">
+        {parts}
       </span>
     );
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < processed.length) {
-    elements.push(processed.substring(lastIndex));
-  }
-  return elements;
+  });
 }
 
 export default function AlQuranModal({ onClose }) {
@@ -482,7 +450,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v4_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v5_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -496,19 +464,10 @@ export default function AlQuranModal({ onClose }) {
       } catch (e) {}
 
       try {
-        const [equranRes, tajweedRes] = await Promise.allSettled([
-          fetch(`https://equran.id/api/v2/surat/${selectedSurah.nomor}`).then((r) => r.json()),
-          fetch(`https://api.alquran.cloud/v1/surah/${selectedSurah.nomor}/quran-tajweed`).then((r) => r.json())
-        ]);
-
-        if (equranRes.status === 'fulfilled' && equranRes.value?.data) {
-          const data = equranRes.value.data;
-          if (tajweedRes.status === 'fulfilled' && tajweedRes.value?.data?.ayahs) {
-            const tajweedAyahs = tajweedRes.value.data.ayahs;
-            data.ayat.forEach((ayah, idx) => {
-              ayah.tajweedRaw = tajweedAyahs[idx]?.text || null;
-            });
-          }
+        const res = await fetch(`https://equran.id/api/v2/surat/${selectedSurah.nomor}`);
+        const json = await res.json();
+        if (json && json.data) {
+          const data = json.data;
           if (!isCancelled) {
             setSurahDetail(data);
             try {
@@ -750,19 +709,16 @@ export default function AlQuranModal({ onClose }) {
   const currentTheme = THEME_PALETTES[themeMode] || THEME_PALETTES.mushaf;
   const isDark = currentTheme.isDark;
 
-  // Rasio tinggi baris dinamis agar huruf Arab dan harakat tidak tumpang tindih saat font dibesarkan
-  const dynamicArabicLineHeight = Math.max(3.2, 3.0 + ((arabicFontSize - 22) * 0.045));
+  // Rasio tinggi baris proporsional agar huruf Arab dan harakat tidak tumpang tindih
+  const dynamicArabicLineHeight = Math.max(2.6, 2.5 + ((arabicFontSize - 22) * 0.03));
 
-  // Render Arab dengan Tajwid & Elongation
+  // Render Arab dengan Tajwid Grapheme-Aware atau Teks Asli Bersih Kemenag
   const renderArabic = (ayat) => {
+    if (!ayat || !ayat.teksArab) return null;
     if (!showTajweed) {
-      return elongateArabic(ayat.teksArab, isKashidaLong);
+      return ayat.teksArab;
     }
-    if (ayat.tajweedRaw) {
-      const tree = parseTajweedTree(ayat.tajweedRaw);
-      return renderTajweedNodes(tree, isDark, isKashidaLong);
-    }
-    return renderFallbackTajweed(ayat.teksArab, isDark, isKashidaLong);
+    return renderSafeTajweed(ayat.teksArab, isDark);
   };
 
   // Hitung perkiraan nomor halaman berdasarkan urutan ayat

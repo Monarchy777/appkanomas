@@ -541,16 +541,20 @@ export default function DzikirPagiPetangModal({ onClose }) {
 
                 {/* TRANSLITERASI LATIN */}
                 {showLatin && item.latin && (
-                  <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-400 italic font-medium pt-1 leading-relaxed">
-                    {item.latin}
-                  </p>
+                  <div className="mt-4 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                    <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-400 italic font-medium leading-relaxed">
+                      {item.latin}
+                    </p>
+                  </div>
                 )}
 
                 {/* TERJEMAHAN BAHASA INDONESIA */}
                 {showTranslation && (
-                  <p className="text-xs sm:text-sm pt-2 text-slate-700 dark:text-slate-300 leading-relaxed font-normal opacity-90">
-                    "{item.translation}"
-                  </p>
+                  <div className="mt-2.5">
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-normal opacity-90">
+                      "{item.translation}"
+                    </p>
+                  </div>
                 )}
 
                 {/* FAEDAH & DALIL HADITS SHAHIH */}

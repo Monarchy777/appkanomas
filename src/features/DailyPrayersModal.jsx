@@ -355,14 +355,18 @@ export default function DailyPrayersModal({ onClose }) {
               </div>
 
               {/* Transliterasi Latin */}
-              <p className="text-xs sm:text-sm text-amber-700 italic font-medium leading-relaxed">
-                {prayer.latin}
-              </p>
+              <div className="mt-3 pt-2 border-t border-slate-100">
+                <p className="text-xs sm:text-sm text-amber-700 italic font-medium leading-relaxed">
+                  {prayer.latin}
+                </p>
+              </div>
 
               {/* Terjemahan */}
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                "{prayer.meaning}"
-              </p>
+              <div className="mt-2">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  "{prayer.meaning}"
+                </p>
+              </div>
 
               {/* Riwayat Dalil */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
