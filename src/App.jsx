@@ -10,7 +10,8 @@ import AccountView from './views/AccountView';
 import MitraDashboardView from './views/MitraDashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
 import GoogleSignInModal from './components/GoogleSignInModal';
-import UpdateModal, { APP_BUILD_VERSION } from './components/UpdateModal';
+import UpdateModal from './components/UpdateModal';
+import { APP_BUILD_VERSION, isRemoteVersionNewer } from './config/version';
 
 // Code-splitting via React.lazy for instant launch & lightweight bundle
 const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
@@ -67,21 +68,45 @@ export default function App() {
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [showDaftarMitraModal, setShowDaftarMitraModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateModalProps, setUpdateModalProps] = useState({ isManualCheck: false, isMandatory: false });
+  const [remoteUpdateInfo, setRemoteUpdateInfo] = useState(null);
 
   // Auto-check version from server on launch
+  // KETENTUAN:
+  // - Jika versi TIDAK SESUAI dengan versi terbaru: HARUS DIUPDATE TERLEBIH DULU (Mandatori).
+  // - Jika versi SUDAH SESUAI: NOTIFIKASI JANGAN DITAMPILKAN SAMA SEKALI.
   useEffect(() => {
-    fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && data.version && data.version !== APP_BUILD_VERSION) {
-          const dismissed = sessionStorage.getItem('kanomas_dismissed_update');
-          if (dismissed !== data.version) {
+    const checkVersionOnLaunch = async () => {
+      try {
+        const remoteUrl = `https://appkanomas.mediasosial.net/version.json?t=${Date.now()}`;
+        let data = null;
+
+        try {
+          const res = await fetch(remoteUrl, { cache: 'no-store' });
+          if (res.ok) data = await res.json();
+        } catch (netErr) {
+          const localRes = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+          if (localRes.ok) data = await localRes.json();
+        }
+
+        if (data && data.version) {
+          setRemoteUpdateInfo(data);
+          const needsUpdate = isRemoteVersionNewer(data.version, APP_BUILD_VERSION);
+          if (needsUpdate) {
+            // Versi tidak sesuai: HARUS DIUPDATE TERLEBIH DULU (MANDATORI)!
+            setUpdateModalProps({ isManualCheck: false, isMandatory: true });
             setShowUpdateModal(true);
-            sessionStorage.setItem('kanomas_dismissed_update', data.version);
+          } else {
+            // Sudah sesuai: JANGAN TAMPILKAN NOTIFIKASI SAMA SEKALI!
+            setShowUpdateModal(false);
           }
         }
-      })
-      .catch(() => {});
+      } catch (err) {
+        console.warn('Check version on launch error:', err);
+      }
+    };
+
+    checkVersionOnLaunch();
   }, []);
 
   // Subscribe to database changes
@@ -175,7 +200,10 @@ export default function App() {
         onOpenLookup={() => setShowLookup(true)}
         onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
         onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
-        onOpenUpdateModal={() => setShowUpdateModal(true)}
+        onOpenUpdateModal={() => {
+          setUpdateModalProps({ isManualCheck: true, isMandatory: false });
+          setShowUpdateModal(true);
+        }}
       />
 
       {/* Main View Area */}
@@ -404,7 +432,14 @@ export default function App() {
 
         <UpdateModal
           isOpen={showUpdateModal}
-          onClose={() => setShowUpdateModal(false)}
+          onClose={() => {
+            if (!updateModalProps.isMandatory) {
+              setShowUpdateModal(false);
+            }
+          }}
+          isManualCheck={updateModalProps.isManualCheck}
+          isMandatory={updateModalProps.isMandatory}
+          initialRemoteInfo={remoteUpdateInfo}
         />
       </Suspense>
     </div>

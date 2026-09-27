@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Download, RefreshCw, X, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Download, RefreshCw, X, Sparkles, CheckCircle2, AlertCircle, ShieldAlert } from 'lucide-react';
+import { APP_BUILD_VERSION, isRemoteVersionNewer } from '../config/version';
 
-export const APP_BUILD_VERSION = '2026.1.1'; // Versi saat ini dalam bundle lokal
+export { APP_BUILD_VERSION };
 
-export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) {
-  const [remoteInfo, setRemoteInfo] = useState(null);
+export default function UpdateModal({
+  isOpen,
+  onClose,
+  isManualCheck = false,
+  isMandatory = false,
+  initialRemoteInfo = null
+}) {
+  const [remoteInfo, setRemoteInfo] = useState(initialRemoteInfo);
   const [hasUpdate, setHasUpdate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -13,19 +20,34 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Gagal memeriksa versi server.');
-      const data = await res.json();
+      const remoteUrl = `https://appkanomas.mediasosial.net/version.json?t=${Date.now()}`;
+      let data = null;
+
+      try {
+        const res = await fetch(remoteUrl, { cache: 'no-store' });
+        if (res.ok) data = await res.json();
+      } catch (netErr) {
+        // Fallback ke local version.json jika offline / server remote tidak terjangkau
+        const localRes = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (localRes.ok) data = await localRes.json();
+      }
+
+      if (!data) throw new Error('Gagal memeriksa versi server.');
       setRemoteInfo(data);
 
-      // Cek apakah versi remote berbeda / lebih baru
-      if (data.version && data.version !== APP_BUILD_VERSION) {
-        setHasUpdate(true);
-      } else {
-        setHasUpdate(false);
+      const isNewer = isRemoteVersionNewer(data.version, APP_BUILD_VERSION);
+      setHasUpdate(isNewer);
+
+      // KETENTUAN UTAMA:
+      // Pada saat sudah sesuai dan BUKAN cek manual, notifikasi jangan ditampilkan!
+      if (!isNewer && !isManualCheck) {
+        onClose();
       }
     } catch (err) {
       setErrorMsg('Tidak dapat terhubung ke server pembaruan.');
+      if (!isManualCheck) {
+        onClose();
+      }
     } finally {
       setIsLoading(false);
     }
@@ -33,14 +55,23 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
 
   useEffect(() => {
     if (isOpen) {
-      checkVersion();
+      if (initialRemoteInfo) {
+        setRemoteInfo(initialRemoteInfo);
+        const isNewer = isRemoteVersionNewer(initialRemoteInfo.version, APP_BUILD_VERSION);
+        setHasUpdate(isNewer);
+        if (!isNewer && !isManualCheck) {
+          onClose();
+        }
+      } else {
+        checkVersion();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialRemoteInfo]);
 
   if (!isOpen) return null;
 
   const handleDownloadApk = () => {
-    const apkUrl = remoteInfo?.apkUrl || '/kanomas.apk';
+    const apkUrl = remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk';
     window.location.href = apkUrl;
   };
 
@@ -60,21 +91,47 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
     window.location.reload(true);
   };
 
+  const effectiveIsMandatory = isMandatory || (hasUpdate && !isManualCheck);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={(e) => {
+        // Jika pembaruan wajib, jangan izinkan tutup modal via klik backdrop
+        if (!effectiveIsMandatory && e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-950 via-[#064e3b] to-emerald-900 p-4 text-white flex items-center justify-between border-b border-emerald-800">
+        {/* Header Modal */}
+        <div
+          className={`p-4 text-white flex items-center justify-between border-b ${
+            effectiveIsMandatory
+              ? 'bg-gradient-to-r from-amber-700 via-orange-600 to-amber-800 border-amber-600'
+              : 'bg-gradient-to-r from-emerald-950 via-[#064e3b] to-emerald-900 border-emerald-800'
+          }`}
+        >
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-300" />
-            <h3 className="text-base font-black">Pembaruan Aplikasi Kanomas</h3>
+            {effectiveIsMandatory ? (
+              <ShieldAlert className="w-5 h-5 text-amber-200 animate-pulse" />
+            ) : (
+              <Sparkles className="w-5 h-5 text-amber-300" />
+            )}
+            <h3 className="text-base font-black">
+              {effectiveIsMandatory ? 'Pembaruan Wajib Aplikasi' : 'Pembaruan Aplikasi Kanomas'}
+            </h3>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition active:scale-95"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {/* Tombol X hanya jika BUKAN pembaruan wajib */}
+          {!effectiveIsMandatory && (
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition active:scale-95"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -94,37 +151,60 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
             </div>
           ) : hasUpdate ? (
             <div className="space-y-3.5">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-                <div>
-                  <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">Versi Baru Tersedia</span>
-                  <strong className="text-base font-black text-slate-900 block">
-                    v{remoteInfo?.version || '2026.1.2'}
-                  </strong>
+              {/* Pesan Peringatan Wajib */}
+              {effectiveIsMandatory && (
+                <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-400 text-amber-950 text-xs leading-relaxed font-medium">
+                  <p className="font-bold flex items-center gap-1.5 text-amber-900 mb-1">
+                    <span>⚠️ Pembaruan Wajib Diperlukan:</span>
+                  </p>
+                  <p>
+                    Versi aplikasi di perangkat Anda (<strong className="font-black text-slate-900">v{APP_BUILD_VERSION}</strong>) tidak sesuai dengan versi terbaru (<strong className="font-black text-emerald-800">v{remoteInfo?.version}</strong>). Anda harus memperbarui aplikasi terlebih dahulu agar dapat melanjutkan.
+                  </p>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-600 text-white font-mono shadow-xs">
-                  {remoteInfo?.apkSize || '19.3 MB'}
+              )}
+
+              {/* Info Versi */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <div>
+                  <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
+                    Versi Baru Tersedia
+                  </span>
+                  <strong className="text-base font-black text-slate-900 block">
+                    v{remoteInfo?.version || '2026.1.3'}
+                  </strong>
+                  <span className="text-[11px] text-slate-500 block">
+                    Versi saat ini: v{APP_BUILD_VERSION}
+                  </span>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-600 text-white font-mono shadow-xs">
+                  {remoteInfo?.apkSize || '22.7 MB'}
                 </span>
               </div>
 
+              {/* Rincian Fitur Baru */}
               {remoteInfo?.notes && (
                 <div className="space-y-1.5 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-black uppercase text-slate-700 block">Rincian Pembaruan Fitur:</span>
+                  <span className="text-[11px] font-black uppercase text-slate-700 block">
+                    Rincian Pembaruan Fitur:
+                  </span>
                   <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside leading-relaxed">
                     {remoteInfo.notes.map((note, idx) => (
-                      <li key={idx} className="font-medium">{note}</li>
+                      <li key={idx} className="font-medium">
+                        {note}
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {/* Tombol Aksi Utama */}
+              {/* Tombol Aksi Update Utama */}
               <div className="space-y-2 pt-1">
                 <button
                   onClick={handleDownloadApk}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition active:scale-95"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm tracking-wide uppercase flex items-center justify-center gap-2 shadow-lg transition active:scale-95 text-center"
                 >
                   <Download className="w-5 h-5" />
-                  <span>Unduh & Pasang APK Terbaru</span>
+                  <span>UNDUH & PASANG APK TERBARU</span>
                 </button>
 
                 <button
@@ -132,19 +212,22 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
                   className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95"
                 >
                   <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Muat Ulang Tampilan Langsung (Web)</span>
+                  <span>Perbarui & Muat Ulang Versi Web</span>
                 </button>
               </div>
             </div>
           ) : (
+            /* Versi Sudah Sesuai (Hanya muncul saat cek manual) */
             <div className="py-6 text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <strong className="text-base font-black text-slate-900 block">Aplikasi Anda Sudah Versi Terbaru</strong>
+                <strong className="text-base font-black text-slate-900 block">
+                  Aplikasi Anda Sudah Versi Terbaru
+                </strong>
                 <span className="text-xs text-slate-500 mt-0.5 block">
-                  Versi saat ini: v{APP_BUILD_VERSION} (Rilis 2026)
+                  Versi aktif: v{APP_BUILD_VERSION} (Rilis Terbaru 2026)
                 </span>
               </div>
               <button
@@ -152,21 +235,23 @@ export default function UpdateModal({ isOpen, onClose, isManualCheck = false }) 
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition active:scale-95"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Unduh Ulang File APK (19.3 MB)</span>
+                <span>Unduh Ulang File APK ({remoteInfo?.apkSize || '22.7 MB'})</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition active:scale-95"
-          >
-            Tutup
-          </button>
-        </div>
+        {/* Footer (Tombol Tutup disembunyikan jika Pembaruan Wajib) */}
+        {!effectiveIsMandatory && (
+          <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition active:scale-95"
+            >
+              Tutup
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
