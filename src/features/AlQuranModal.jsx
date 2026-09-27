@@ -2347,11 +2347,8 @@ export default function AlQuranModal({ onClose }) {
               type: 'photo',
               badge: 'Foto Asli',
               icon: '🕋',
-              bgStyle: {
-                backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.88)), url(/assets/bg-kabah.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              },
+              imageUrl: '/assets/bg-kabah.jpg',
+              bgStyle: { backgroundColor: '#09111c' },
               borderColor: 'border-amber-400/70',
               isDark: true
             },
@@ -2361,11 +2358,8 @@ export default function AlQuranModal({ onClose }) {
               type: 'photo',
               badge: 'Foto Asli',
               icon: '🌄',
-              bgStyle: {
-                backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.88)), url(/assets/bg-nature.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              },
+              imageUrl: '/assets/bg-nature.jpg',
+              bgStyle: { backgroundColor: '#09111c' },
               borderColor: 'border-emerald-400/70',
               isDark: true
             },
@@ -2375,11 +2369,8 @@ export default function AlQuranModal({ onClose }) {
               type: 'photo',
               badge: 'Foto Asli',
               icon: '🕌',
-              bgStyle: {
-                backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.88)), url(/assets/banners/banner-3-promo.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              },
+              imageUrl: '/assets/banners/banner-3-promo.jpg',
+              bgStyle: { backgroundColor: '#09111c' },
               borderColor: 'border-amber-300/70',
               isDark: true
             },
@@ -2389,11 +2380,8 @@ export default function AlQuranModal({ onClose }) {
               type: 'photo',
               badge: 'Foto Asli',
               icon: '🕋',
-              bgStyle: {
-                backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.88)), url(/assets/banners/banner-2-hotel.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              },
+              imageUrl: '/assets/banners/banner-2-hotel.jpg',
+              bgStyle: { backgroundColor: '#09111c' },
               borderColor: 'border-amber-400/70',
               isDark: true
             },
@@ -2490,6 +2478,19 @@ export default function AlQuranModal({ onClose }) {
                       shareCardFormat === 'kotak' ? 'aspect-square' : 'min-h-[380px]'
                     }`}
                   >
+                    {/* Background Foto Asli & Overlay (Khusus Tipe Photo) */}
+                    {activeShareStyle.imageUrl && (
+                      <img
+                        src={activeShareStyle.imageUrl}
+                        alt="Background"
+                        crossOrigin="anonymous"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      />
+                    )}
+                    {activeShareStyle.imageUrl && (
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/75 to-black/90 pointer-events-none" />
+                    )}
+
                     {/* Decorative Islamic Radial Glow */}
                     <div className="absolute inset-0 bg-radial from-amber-400/10 to-transparent pointer-events-none" />
 
@@ -2535,7 +2536,7 @@ export default function AlQuranModal({ onClose }) {
                       isShareDark ? 'border-white/20' : 'border-amber-900/20'
                     }`}>
                       <div className="flex items-center gap-2">
-                        <img src="/assets/logo-kanomas-3d.png" alt="Kanomas" className="w-6 h-6 rounded-lg object-cover" />
+                        <img src="/assets/logo-kanomas-3d.png" alt="Kanomas" crossOrigin="anonymous" className="w-6 h-6 rounded-lg object-cover" />
                         <div className="text-left">
                           <span className={`text-xs font-black block leading-tight ${
                             isShareDark ? 'text-amber-200' : 'text-amber-950'

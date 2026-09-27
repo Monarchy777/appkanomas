@@ -1,9 +1,13 @@
 /**
  * WhatsApp Commander Bridge Service for Aplikasi Kanomas (Two-Way AI Agent)
  * Seamlessly connects WhatsApp (+6282112114222) with Google Antigravity AI IDE.
- * Any prompt sent from WhatsApp is automatically fed into Antigravity's chat canvas,
- * executed by the AI agent with full tool capabilities, and the agent's response
- * is automatically sent back to WhatsApp!
+ * 
+ * Rules:
+ * 1. STRICT: Only messages sent to ONESELF ("Message Yourself") are recognized as commands.
+ *    Messages sent to other people or groups are strictly IGNORED.
+ * 2. QUEUE: If a command is already executing, new commands are queued up and executed sequentially.
+ * 3. NOTIFY: Automatically delivers AI responses & status updates back to WhatsApp.
+ * 4. SELF-HEALING: Auto-reconnects on stream error or disconnection.
  */
 
 if (!process.env.NODE_PATH) {
@@ -45,6 +49,11 @@ let transcriptFileSize = 0;
 const sentMessageIds = new Set();
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
+// Antrian Perintah (Command Queue)
+const commandQueue = [];
+let isBusyExecuting = false;
+let executionTimeoutTimer = null;
+
 function updateStatus(statusObj) {
   let current = {};
   try {
@@ -56,6 +65,8 @@ function updateStatus(statusObj) {
   const updated = {
     ...current,
     ...statusObj,
+    queueLength: commandQueue.length,
+    isBusyExecuting,
     updatedAt: new Date().toISOString()
   };
   fs.writeFileSync(STATUS_FILE, JSON.stringify(updated, null, 2), 'utf8');
@@ -69,7 +80,6 @@ async function sendWhatsAppMessage(jid, text, quoted = null) {
     return null;
   }
   try {
-    // Truncate or clean if too large for standard WA message
     let payloadText = text;
     if (payloadText.length > 4000) {
       payloadText = payloadText.slice(0, 3950) + '\n... [pesan dipotong agar muat di WhatsApp]';
@@ -112,7 +122,7 @@ function forwardToAntigravity(promptText) {
         'Content-Length': Buffer.byteLength(data)
       },
       agent: httpsAgent,
-      timeout: 10000
+      timeout: 15000
     }, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
@@ -133,14 +143,46 @@ function forwardToAntigravity(promptText) {
   });
 }
 
-// Initialize transcript position to ignore past logs on startup
+// Eksekusi Antrian Perintah Secara Sekuensial
+async function processNextInQueue() {
+  if (isBusyExecuting || commandQueue.length === 0) return;
+
+  const nextItem = commandQueue.shift();
+  isBusyExecuting = true;
+  updateStatus({ isBusyExecuting: true, currentCommand: nextItem.text });
+
+  console.log(`[QUEUE] Memulai eksekusi antrian: "${nextItem.text}" (${commandQueue.length} tersisa di antrian)`);
+
+  // Beritahu pengguna bahwa perintahnya mulai dieksekusi
+  await sendWhatsAppMessage(
+    nextItem.remoteJid,
+    `🚀 *Mengeksekusi Antrian Perintah:*\n"${nextItem.text}"\n\n🤖 Sedang diproses oleh AI Antigravity...`
+  );
+
+  // Set timeout batas waktu eksekusi 4 menit agar antrian tidak macet jika terjadi crash
+  if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
+  executionTimeoutTimer = setTimeout(() => {
+    console.warn('[QUEUE] Batas waktu eksekusi terlampaui (timeout 4 menit). Melepaskan antrian...');
+    isBusyExecuting = false;
+    processNextInQueue();
+  }, 240000);
+
+  try {
+    await forwardToAntigravity(nextItem.text);
+  } catch (err) {
+    console.error('[QUEUE-ERR]', err.message);
+    isBusyExecuting = false;
+    processNextInQueue();
+  }
+}
+
+// Inisialisasi posisi transcript agar log lama tidak dikirim ulang
 function initTranscriptMonitoring() {
   try {
     if (fs.existsSync(TRANSCRIPT_PATH)) {
       const stats = fs.statSync(TRANSCRIPT_PATH);
       transcriptFileSize = stats.size;
       
-      // Find the latest step_index
       const content = fs.readFileSync(TRANSCRIPT_PATH, 'utf8');
       const lines = content.trim().split('\n');
       for (let i = lines.length - 1; i >= 0; i--) {
@@ -159,14 +201,13 @@ function initTranscriptMonitoring() {
   }
 }
 
-// Periodically check transcript for AI model final responses
+// Cek pembaruan transcript untuk menangkap jawaban selesai dari AI
 function checkTranscriptUpdates() {
   try {
     if (!fs.existsSync(TRANSCRIPT_PATH)) return;
     const stats = fs.statSync(TRANSCRIPT_PATH);
     if (stats.size <= transcriptFileSize) return;
 
-    // Read newly appended bytes
     const fd = fs.openSync(TRANSCRIPT_PATH, 'r');
     const newBytesLength = stats.size - transcriptFileSize;
     const buffer = Buffer.alloc(newBytesLength);
@@ -183,18 +224,27 @@ function checkTranscriptUpdates() {
         if (entry.step_index <= lastProcessedStepIndex) continue;
         lastProcessedStepIndex = entry.step_index;
 
-        // Check if this is a completed model response intended for the user
         if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
-          // If it has content and no tool calls, it's the final answer to the user!
           const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
           if (entry.content && !hasToolCalls) {
-            console.log(`[TRANSCRIPT] Detected final AI answer (step ${entry.step_index})! Sending to WhatsApp...`);
+            console.log(`[TRANSCRIPT] Terdeteksi jawaban final AI (step ${entry.step_index})! Mengirim ke WhatsApp...`);
             
-            // Format response for WhatsApp (clean markdown if needed)
-            const waResponse = `🤖 *Jawaban Antigravity AI:*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${entry.content}`;
+            const waResponse = `🤖 *Jawaban Antigravity AI:*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${entry.content}\n━━━━━━━━━━━━━━━━━━━━━━━━\n✅ *Status: Selesai.*`;
             
             const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
             sendWhatsAppMessage(targetJid, waResponse);
+
+            // Perintah selesai! Bersihkan timer timeout
+            if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
+            isBusyExecuting = false;
+            updateStatus({ isBusyExecuting: false, currentCommand: null });
+
+            // Jalankan antrian berikutnya jika ada
+            if (commandQueue.length > 0) {
+              setTimeout(() => {
+                processNextInQueue();
+              }, 1500);
+            }
           }
         }
       } catch (e) {}
@@ -236,6 +286,8 @@ function startHttpServer() {
       res.end(JSON.stringify({
         status: sock ? 'CONNECTED' : 'DISCONNECTED',
         targetPhone: TARGET_PHONE,
+        queueLength: commandQueue.length,
+        isBusyExecuting,
         lastProcessedStepIndex
       }));
     } else {
@@ -301,7 +353,7 @@ async function startWhatsAppBridge() {
         setTimeout(() => startWhatsAppBridge(), 5000);
       } else {
         updateStatus({ status: 'RECONNECTING' });
-        setTimeout(() => startWhatsAppBridge(), 4000);
+        setTimeout(() => startWhatsAppBridge(), 3000);
       }
     } else if (connection === 'open') {
       const userJid = sock.user?.id || '';
@@ -327,18 +379,32 @@ async function startWhatsAppBridge() {
 
       if (sentMessageIds.has(msg.key.id)) return;
 
-      const remoteJid = msg.key.remoteJid;
-      const senderJid = msg.key.participant || remoteJid || '';
-      const senderDigits = senderJid.replace(/@.*$/, '').replace(/[^0-9]/g, '');
+      const remoteJid = msg.key.remoteJid || '';
 
-      // Verify authorization: target phone, self chat, or matching LID
-      const isTarget = senderDigits.includes(TARGET_PHONE) || 
-                       senderDigits.includes(TARGET_PHONE_ALT) || 
-                       senderDigits.includes('8211211422') ||
-                       remoteJid.includes('@lid'); // WhatsApp Multi-device LID
-      const isSelf = msg.key.fromMe;
+      // ATURAN KETAT:
+      // Hanya pesan yang dikirim ke DIRI SENDIRI ("Message Yourself") yang diakui sebagai perintah!
+      // Jika remoteJid adalah kontak orang lain atau grup (@g.us), ABAIKAN 100%!
+      if (remoteJid.endsWith('@g.us')) {
+        return; // Abaikan pesan grup
+      }
 
-      if (!isTarget && !isSelf) return;
+      const remoteDigits = remoteJid.replace(/@.*$/, '').replace(/[^0-9]/g, '');
+      const myPhoneDigits = (sock.user?.id || '').split(':')[0].replace(/[^0-9]/g, '');
+      const myLidDigits = (sock.user?.lid || '').split(':')[0].replace(/[^0-9]/g, '');
+
+      const isSelfChat = (
+        remoteDigits === TARGET_PHONE ||
+        remoteDigits === TARGET_PHONE_ALT ||
+        remoteDigits === myPhoneDigits ||
+        (myLidDigits && remoteDigits === myLidDigits) ||
+        remoteJid.includes(TARGET_PHONE) ||
+        remoteJid.includes(TARGET_PHONE_ALT)
+      );
+
+      if (!isSelfChat) {
+        // PESAN UNTUK ORANG LAIN: JANGAN PROSES SAMA SEKALI!
+        return;
+      }
 
       let text = '';
       if (msg.message?.conversation) text = msg.message.conversation;
@@ -347,14 +413,16 @@ async function startWhatsAppBridge() {
       text = text ? text.trim() : '';
       if (!text) return;
 
-      // Ignore messages generated by our bot itself
+      // Abaikan pesan otomatis yang berasal dari bot sendiri
       if (text.includes('Jawaban Antigravity AI:') || 
           text.includes('Instruksi Diterima') || 
+          text.includes('Perintah Masuk Antrian') || 
+          text.includes('Mengeksekusi Antrian Perintah') || 
           text.includes('MENU WHATSAPP COMMANDER')) {
         return;
       }
 
-      console.log(`[WA-RECEIVE] Pesan dari ${remoteJid}: "${text}"`);
+      console.log(`[WA-RECEIVE-SELF] Perintah ke Diri Sendiri dari ${remoteJid}: "${text}"`);
 
       // Quick command: PING
       if (text.toLowerCase() === 'ping') {
@@ -362,26 +430,58 @@ async function startWhatsAppBridge() {
         return;
       }
 
-      // Quick command: MENU
+      // Quick command: STATUS
+      if (text.toLowerCase() === 'status') {
+        const queueInfo = commandQueue.length > 0 
+          ? `⏳ Sedang mengantri: ${commandQueue.length} perintah.` 
+          : '✨ Tidak ada antrian pending.';
+        const execInfo = isBusyExecuting 
+          ? '⚙️ Status AI: Sedang aktif memproses tugas.' 
+          : '💤 Status AI: Siap menerima instruksi baru.';
+        
+        await sendWhatsAppMessage(remoteJid, `📊 *STATUS WHATSAPP COMMANDER*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${execInfo}\n${queueInfo}\n🌐 Server: Online (Port ${BRIDGE_HTTP_PORT})\n🕒 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
+        return;
+      }
+
+      // Quick command: MENU / HELP
       if (text.toLowerCase() === 'menu' || text.toLowerCase() === 'help') {
         const helpText = `🤖 *ANTIGRAVITY AI WHATSAPP BRIDGE*
 ━━━━━━━━━━━━━━━━━━━━━━━━
-✨ *Anda sekarang bisa mengetik perintah APA SAJA persis seperti di chat box IDE!*
+✨ *Kirim perintah ke Diri Sendiri kapan saja:*
+• Bebas ketik teks instruksi apa saja (bahasa Indonesia natural).
+• Jika sedang ada tugas yang berjalan, perintah Anda otomatis masuk ANTRIAN.
+• Pesan ke orang lain atau grup otomatis diabaikan aman.
 
-Contoh yang bisa Anda ketik langsung:
-• _"Rapihkan folder dan file kanomasnya"_
-• _"Ubah tema dzikir jadi hijau zamrud"_
-• _"Build APK terbaru dan deploy ke hostinger"_
-• _"Cek apakah ada error di kode"_
-• _"Tambahkan tombol baru di Al-Quran"_
-
-Setiap pesan yang Anda kirim akan langsung diproses oleh AI Antigravity, dan jawabannya akan dikirimkan kembali ke sini!`;
+*Perintah Khusus:*
+• *status* : Cek status AI dan antrian saat ini
+• *ping* : Cek koneksi bot`;
         await sendWhatsAppMessage(remoteJid, helpText, msg);
         return;
       }
 
-      // FOR ALL OTHER PROMPTS: Forward to Antigravity AI!
-      await sendWhatsAppMessage(remoteJid, `⏳ *Instruksi Diterima:*\n"${text}"\n\n🤖 Sedang diproses langsung oleh AI Antigravity... Mohon tunggu sebentar.`, msg);
+      // MANAJEMEN ANTRIAN PERINTAH:
+      // Jika AI sedang sibuk menjalankan perintah sebelumnya, masukkan ke antrian!
+      if (isBusyExecuting) {
+        commandQueue.push({ remoteJid, text, msg });
+        updateStatus({ queueLength: commandQueue.length });
+        
+        const queueNotice = `⏳ *Perintah Masuk Antrian (#${commandQueue.length}):*\n"${text}"\n\nSedang ada perintah lain yang sedang diproses oleh AI Antigravity. Perintah Anda akan otomatis dieksekusi setelah giliran tiba.`;
+        await sendWhatsAppMessage(remoteJid, queueNotice, msg);
+        return;
+      }
+
+      // Jika AI sedang idle, langsung jalankan!
+      isBusyExecuting = true;
+      updateStatus({ isBusyExecuting: true, currentCommand: text });
+
+      await sendWhatsAppMessage(remoteJid, `⏳ *Instruksi Diterima & Sedang Diproses:*\n"${text}"\n\n🤖 Sedang diproses langsung oleh AI Antigravity... Mohon tunggu sebentar.`, msg);
+
+      if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
+      executionTimeoutTimer = setTimeout(() => {
+        console.warn('[QUEUE] Timeout 4 menit terlampaui. Melepaskan status busy...');
+        isBusyExecuting = false;
+        processNextInQueue();
+      }, 240000);
 
       await forwardToAntigravity(text);
 
@@ -390,6 +490,15 @@ Setiap pesan yang Anda kirim akan langsung diproses oleh AI Antigravity, dan jaw
     }
   });
 }
+
+// Global Exception Handlers agar server tidak crash
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[UNHANDLED REJECTION]', reason);
+});
 
 startHttpServer();
 startWhatsAppBridge();
