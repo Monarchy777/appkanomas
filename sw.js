@@ -1,7 +1,21 @@
 // Service Worker for Aplikasi Kanomas PWA (Lightweight & Safe)
-const CACHE_NAME = 'kanomas-cache-v2';
+const CACHE_NAME = 'kanomas-cache-v3';
+const PRECACHE_ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/assets/logo-kanomas-3d-192.png',
+  '/assets/logo-kanomas-3d-512.png'
+];
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn('Precache partial fallback:', err);
+      });
+    })
+  );
   self.skipWaiting();
 });
 

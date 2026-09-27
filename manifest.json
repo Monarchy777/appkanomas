@@ -1,12 +1,14 @@
 {
+  "id": "/",
   "name": "Kanomas Umrah & Haji Khusus",
   "short_name": "Kanomas",
   "description": "Aplikasi Resmi PT Kanomas Artha Wisata untuk Panduan Ibadah Umrah & Haji Khusus, Manasik, Doa, Tabungan BSI, dan Jadwal Sholat.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0b141d",
-  "theme_color": "#14222e",
-  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0a7c29",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/assets/logo-kanomas-3d-192.png",
