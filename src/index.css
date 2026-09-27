@@ -30,7 +30,7 @@
     font-family: inherit;
   }
 
-  [dir="rtl"], .font-arabic {
+  .font-arabic {
     font-family: 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
   }
 }
