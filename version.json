@@ -1,0 +1,14 @@
+{
+  "version": "2026.1.2",
+  "versionCode": 2026,
+  "releaseDate": "28 September 2026",
+  "title": "Pembaruan Fitur Kanomas 2026",
+  "notes": [
+    "Ikon Aplikasi Baru diperbesar maksimal (ujung panah merah atas & bawah menyentuh tepi batas icon).",
+    "Tampilan Dzikir Pagi Petang baru diselaraskan 100% dengan format Al-Qur'an (Slider font, Kaligrafi, Gestur cubit 2 jari, 5 Tema warna bacaan).",
+    "Pembersihan tombol header ke menu garis 3 yang lebih rapi & terstruktur.",
+    "Perbaikan warna tajwid Al-Qur'an agar goresan kaligrafi proporsional."
+  ],
+  "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
+  "apkSize": "19.3 MB"
+}
