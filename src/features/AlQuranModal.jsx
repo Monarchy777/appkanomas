@@ -32,8 +32,11 @@ import {
   Palette,
   Info,
   Sliders,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+
 
 // DAFTAR 114 SURAH LENGKAP DENGAN METADATA RESMI (WAHYU, JUZ, HALAMAN)
 export const SURAH_LIST = [
@@ -535,6 +538,9 @@ export default function AlQuranModal({ onClose }) {
   const [showShareModal, setShowShareModal] = useState(null); // Ayat object for Share Card
   const [shareCardFormat, setShareCardFormat] = useState('portrait'); // 'portrait' | 'kotak'
   const [shareBgTheme, setShareBgTheme] = useState('mushaf'); // otomatis sinkron dengan tema bacaan aktif
+  const shareCardRef = useRef(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
 
   const [showNoteModal, setShowNoteModal] = useState(null); // Ayat object for Note
   const [noteInput, setNoteInput] = useState('');
@@ -957,6 +963,96 @@ export default function AlQuranModal({ onClose }) {
   const handleOpenJumpModal = (initialAyat = 1) => {
     setJumpInput(String(initialAyat || 1));
     setShowJumpModal(true);
+  };
+
+  // 1. Generate Canvas dari Kartu Ayat DOM
+  const generateCardCanvas = async () => {
+    if (!shareCardRef.current) return null;
+    setIsGeneratingImage(true);
+    setShareFeedback('🎨 Sedang merender gambar kartu ayat HD...');
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2, // High resolution (Retina / HD)
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false
+      });
+      return canvas;
+    } catch (err) {
+      console.error('Gagal generate gambar kartu ayat:', err);
+      return null;
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // 2. Bagikan Gambar Kartu Ayat Langsung ke WhatsApp / Sosmed
+  const handleShareCardImage = async (ayat) => {
+    if (!ayat) return;
+    const canvas = await generateCardCanvas();
+    const arabText = (mushafType === 'madinah' && ayat.teksArabMadinah) ? ayat.teksArabMadinah : ayat.teksArab;
+    const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
+
+    if (canvas) {
+      try {
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        if (blob) {
+          const file = new File([blob], `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`, { type: 'image/png' });
+
+          // Coba Web Share API dengan file gambar (Android / iOS / Modern WebView)
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
+              text: captionText
+            });
+            setShareFeedback('✅ Gambar kartu ayat berhasil dibagikan!');
+            setTimeout(() => setShareFeedback(''), 3000);
+            return;
+          }
+
+          // Fallback: Jika browser/perangkat tidak mendukung share file gambar via API, otomatis download gambarnya
+          const downloadUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
+          link.click();
+          URL.revokeObjectURL(downloadUrl);
+
+          setShareFeedback('📸 Gambar HD berhasil diunduh ke galeri! Membuka WhatsApp...');
+          setTimeout(() => {
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(captionText)}`;
+            window.open(waUrl, '_blank');
+          }, 800);
+          setTimeout(() => setShareFeedback(''), 4500);
+          return;
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing image:', err);
+        }
+      }
+    }
+
+    // Fallback teks jika canvas gagal
+    handleQuickShareWA(ayat);
+  };
+
+  // 3. Unduh File Gambar Kartu Ayat (HD PNG)
+  const handleDownloadCardImage = async (ayat) => {
+    if (!ayat) return;
+    const canvas = await generateCardCanvas();
+    if (!canvas) {
+      alert('Gagal membuat gambar kartu ayat.');
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
+    a.click();
+    setShareFeedback('✅ Gambar kartu ayat berhasil disimpan ke perangkat!');
+    setTimeout(() => setShareFeedback(''), 3000);
   };
 
   const handleQuickShareWA = (ayat) => {
@@ -2388,6 +2484,7 @@ export default function AlQuranModal({ onClose }) {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {/* PREVIEW KARTU AYAT LIVE */}
                   <div
+                    ref={shareCardRef}
                     style={activeShareStyle.bgStyle}
                     className={`w-full rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all border ${activeShareStyle.borderColor} ${
                       shareCardFormat === 'kotak' ? 'aspect-square' : 'min-h-[380px]'
@@ -2539,22 +2636,51 @@ export default function AlQuranModal({ onClose }) {
                     </div>
                   </div>
 
+                  {/* Feedback Status Toast */}
+                  {shareFeedback && (
+                    <div className="p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs font-bold text-center animate-in fade-in">
+                      {shareFeedback}
+                    </div>
+                  )}
+
                   {/* Tombol Aksi SHARE */}
                   <div className="space-y-2 pt-2 border-t border-slate-800">
                     <button
-                      onClick={() => handleQuickShareWA(showShareModal)}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-sm tracking-wider uppercase shadow-lg active:scale-95 transition flex items-center justify-center gap-2"
+                      onClick={() => handleShareCardImage(showShareModal)}
+                      disabled={isGeneratingImage}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0a7c29] via-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm tracking-wider uppercase shadow-lg active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-75"
                     >
-                      <Share2 className="w-5 h-5" />
-                      <span>BAGIKAN KE WHATSAPP</span>
+                      {isGeneratingImage ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>MEMBUAT GAMBAR KARTU AYAT...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-5 h-5" />
+                          <span>BAGIKAN GAMBAR KE WHATSAPP</span>
+                        </>
+                      )}
                     </button>
-                    <button
-                      onClick={() => handleCopyAyat(showShareModal)}
-                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
-                    >
-                      <Copy className="w-4 h-4" />
-                      <span>{copiedAyatNum === showShareModal.nomorAyat ? 'Teks Ayat Telah Disalin!' : 'Salin Teks Kutipan Ayat'}</span>
-                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleDownloadCardImage(showShareModal)}
+                        disabled={isGeneratingImage}
+                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
+                      >
+                        <Download className="w-4 h-4 text-emerald-400" />
+                        <span>Unduh Gambar HD</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleCopyAyat(showShareModal)}
+                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
+                      >
+                        <Copy className="w-4 h-4 text-amber-400" />
+                        <span>{copiedAyatNum === showShareModal.nomorAyat ? 'Teks Tersalin!' : 'Salin Teks'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
