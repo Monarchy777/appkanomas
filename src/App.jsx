@@ -170,6 +170,9 @@ export default function App() {
           <AccountView
             onOpenLookup={() => setShowLookup(true)}
             onOpenNusuk={() => setShowNusuk(true)}
+            onOpenChecklist={() => setShowChecklist(true)}
+            onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
+            onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
             onRoleChange={handleRoleChange}
             role={role}
           />

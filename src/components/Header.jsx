@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Phone, User, Briefcase, Award, MessageSquare, Printer, UserCheck, Menu, X, ChevronDown } from 'lucide-react';
+import { ShieldCheck, Phone, User, Briefcase, Award, MessageSquare, Printer, UserCheck, Menu, X, ChevronDown, Sparkles } from 'lucide-react';
 
 export default function Header({
   role,
@@ -9,44 +9,38 @@ export default function Header({
   onOpenWhatsAppCenter,
   onOpenDocumentPrint
 }) {
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0f1922] border-b border-amber-900/30 text-slate-100 shadow-md transition-all">
-      {/* Top Bar Syar'i & Legalitas */}
-      <div className="bg-[#091118] text-[10px] sm:text-xs py-1.5 px-3 sm:px-6 flex items-center justify-between border-b border-white/5 text-slate-300">
+    <header className="sticky top-0 z-40 bg-[#0c1620]/95 backdrop-blur-md border-b border-amber-900/30 text-slate-100 shadow-lg transition-all">
+      {/* 1. Baris Legalitas Resmi (Tipis & Elegan) */}
+      <div className="bg-[#070e15] text-[10px] sm:text-xs py-1 px-3 sm:px-6 flex items-center justify-between border-b border-white/5 text-slate-400">
         <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-          <span className="flex items-center gap-1 text-amber-400 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>Resmi Kemenag RI: PPIU No. U.310 | PIHK No. 9120313132406</span>
+          <span className="flex items-center gap-1 text-amber-400 font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+            <span>Kemenag RI: PPIU U.310 • PIHK 9120313132406</span>
           </span>
-          <span className="text-slate-600 hidden md:inline">•</span>
-          <span className="text-emerald-400 hidden md:inline font-medium">Akreditasi A</span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="text-emerald-400 hidden sm:inline font-bold">Akreditasi A</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {nextPrayer && (
-            <div className="hidden sm:flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-0.5 rounded-full text-slate-300 border border-amber-900/40">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px]">{nextPrayer.name}</span>
-              <span className="text-amber-300 font-mono font-bold text-[11px]">{nextPrayer.time} WIB</span>
-            </div>
-          )}
+        <div className="flex items-center gap-3 text-[10px] text-slate-300">
+          <span className="hidden sm:inline text-slate-400">Cabang Tasikmalaya</span>
           <a
             href="https://wa.me/628112113363"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-amber-300 hover:text-amber-200 transition font-medium"
+            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition font-bold"
           >
-            <Phone className="w-3 h-3 text-orange-400" />
-            <span className="font-mono">0811-2113-363</span>
+            <Phone className="w-3 h-3 text-emerald-400" />
+            <span>0811-2113-363</span>
           </a>
         </div>
       </div>
 
-      {/* Main Header Bar */}
+      {/* 2. Bar Utama Aplikasi */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
-        {/* Brand & Logo */}
+        {/* Logo & Identitas Kanomas */}
         <div className="flex items-center gap-2.5 min-w-0">
           <img
             src="/assets/logo-kanomas.png"
@@ -61,110 +55,138 @@ export default function Header({
               <span className="text-base sm:text-lg font-black tracking-tight text-white font-sans">
                 KANOMAS
               </span>
-              <span className="bg-[#b45309] text-white font-bold text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="bg-gradient-to-r from-amber-600 to-amber-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm">
                 TASIKMALAYA
               </span>
             </div>
-            <p className="text-[10px] text-amber-200/70 font-serif italic truncate">
-              Biro Perjalanan Umrah & Haji Khusus
+            <p className="text-[10px] text-amber-200/80 font-serif italic truncate">
+              Sahabat Ibadah & Ziarah Anda
             </p>
           </div>
         </div>
 
-        {/* Desktop Quick Action Buttons */}
-        <div className="hidden lg:flex items-center gap-2">
-          <button
-            onClick={onOpenWhatsAppCenter}
-            className="flex items-center gap-1.5 bg-[#142d20] hover:bg-[#1b3d2b] text-emerald-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-emerald-600/40 transition shadow-sm"
+        {/* Tombol Aksi Cepat & Menu */}
+        <div className="flex items-center gap-2">
+          {/* Tombol Cepat WhatsApp CS */}
+          <a
+            href="https://wa.me/628112113363"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 bg-[#142d20] hover:bg-[#1b3d2b] text-emerald-300 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-600/40 transition shadow-sm active:scale-95"
           >
             <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
-            <span>WA Center</span>
-          </button>
+            <span className="hidden sm:inline">Bantuan CS</span>
+            <span className="sm:hidden">CS</span>
+          </a>
 
+          {/* Tombol Menu Layanan */}
           <button
-            onClick={onOpenDocumentPrint}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-amber-900/50 transition shadow-sm"
-          >
-            <Printer className="w-3.5 h-3.5 text-orange-400" />
-            <span>Cetak Dokumen</span>
-          </button>
-
-          <button
-            onClick={onOpenLookup}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition shadow-sm"
-          >
-            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Cek Status</span>
-          </button>
-        </div>
-
-        {/* Role Switcher Pill & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2">
-          {/* Simple Syar'i Role Switcher */}
-          <button
-            onClick={() => onRoleChange(role === 'jamaah' ? 'mitra' : role === 'mitra' ? 'admin' : 'jamaah')}
-            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition shadow-sm ${
-              role === 'admin'
-                ? 'bg-purple-950/80 border-purple-500/60 text-purple-200 hover:bg-purple-900'
-                : role === 'mitra'
-                ? 'bg-blue-950/80 border-blue-500/60 text-blue-200 hover:bg-blue-900'
-                : 'bg-[#1a2e24] border-emerald-600/50 text-emerald-200 hover:bg-[#233e31]'
-            }`}
-          >
-            {role === 'admin' && <Briefcase className="w-3.5 h-3.5 text-purple-300" />}
-            {role === 'mitra' && <Award className="w-3.5 h-3.5 text-blue-300" />}
-            {role === 'jamaah' && <User className="w-3.5 h-3.5 text-emerald-300" />}
-            <span className="capitalize">{role === 'jamaah' ? 'Jamaah' : role === 'mitra' ? 'Mitra' : 'Admin'}</span>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
-          </button>
-
-          {/* Mobile Utility Menu Button (Clean, prevents overflow on phone screen) */}
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="lg:hidden p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition"
+            onClick={() => setShowMenu(!showMenu)}
+            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-200 transition relative active:scale-95"
             aria-label="Menu Layanan"
           >
-            {showMobileMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {showMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Dropdown (Clean, Simple, Never Collides) */}
-      {showMobileMenu && (
-        <div className="lg:hidden px-4 py-3 bg-[#0d1720] border-t border-amber-900/30 space-y-2 animate-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-3 gap-2 text-xs">
+      {/* 3. Dropdown Menu Layanan Tambahan (Ringkas & Terkonsep) */}
+      {showMenu && (
+        <div className="px-4 py-3 bg-[#0a131b] border-t border-amber-900/30 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             <button
               onClick={() => {
-                setShowMobileMenu(false);
-                onOpenWhatsAppCenter();
-              }}
-              className="p-2.5 rounded-xl bg-[#142d20] border border-emerald-600/40 text-emerald-300 text-center flex flex-col items-center justify-center gap-1 font-bold"
-            >
-              <MessageSquare className="w-4 h-4 text-emerald-400" />
-              <span className="text-[10px]">WA Center</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowMobileMenu(false);
-                onOpenDocumentPrint();
-              }}
-              className="p-2.5 rounded-xl bg-slate-800 border border-amber-900/40 text-amber-200 text-center flex flex-col items-center justify-center gap-1 font-bold"
-            >
-              <Printer className="w-4 h-4 text-orange-400" />
-              <span className="text-[10px]">Cetak Surat</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowMobileMenu(false);
+                setShowMenu(false);
                 onOpenLookup();
               }}
-              className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-center flex flex-col items-center justify-center gap-1 font-bold"
+              className="p-3 rounded-2xl bg-[#101b25] border border-white/5 hover:border-emerald-500/40 text-left transition flex items-center gap-2.5"
             >
-              <UserCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-[10px]">Cek Status</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-600/30 flex items-center justify-center flex-shrink-0">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <strong className="text-white block text-xs">Cek Status</strong>
+                <span className="text-[10px] text-slate-400">Pendaftaran jamaah</span>
+              </div>
             </button>
+
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                onOpenDocumentPrint();
+              }}
+              className="p-3 rounded-2xl bg-[#101b25] border border-white/5 hover:border-amber-500/40 text-left transition flex items-center gap-2.5"
+            >
+              <div className="w-8 h-8 rounded-xl bg-amber-950 text-amber-400 border border-amber-600/30 flex items-center justify-center flex-shrink-0">
+                <Printer className="w-4 h-4" />
+              </div>
+              <div>
+                <strong className="text-white block text-xs">Cetak Dokumen</strong>
+                <span className="text-[10px] text-slate-400">Kuitansi & surat</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                onOpenWhatsAppCenter();
+              }}
+              className="p-3 rounded-2xl bg-[#101b25] border border-white/5 hover:border-emerald-500/40 text-left transition flex items-center gap-2.5 col-span-2 sm:col-span-1"
+            >
+              <div className="w-8 h-8 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-600/30 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-4 h-4" />
+              </div>
+              <div>
+                <strong className="text-white block text-xs">WhatsApp Center</strong>
+                <span className="text-[10px] text-slate-400">Kirim pesan resmi</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Opsi Ganti Mode Akun */}
+          <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">Mode Tampilan:</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  onRoleChange('jamaah');
+                  setShowMenu(false);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${
+                  role === 'jamaah'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                Jamaah
+              </button>
+              <button
+                onClick={() => {
+                  onRoleChange('mitra');
+                  setShowMenu(false);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${
+                  role === 'mitra'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                Mitra
+              </button>
+              <button
+                onClick={() => {
+                  onRoleChange('admin');
+                  setShowMenu(false);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${
+                  role === 'admin'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                Admin
+              </button>
+            </div>
           </div>
         </div>
       )}

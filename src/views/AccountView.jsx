@@ -2,6 +2,10 @@ import React from 'react';
 import {
   ShieldCheck,
   UserCheck,
+  Printer,
+  Luggage,
+  CheckSquare,
+  MessageSquare,
   ExternalLink,
   Phone,
   Mail,
@@ -9,26 +13,29 @@ import {
   Clock,
   Award,
   Briefcase,
-  Users,
   Building2,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  HelpCircle
 } from 'lucide-react';
 import { COMPANY_PROFILE, EXTERNAL_SERVICES } from '../services/initialSeed';
 
 export default function AccountView({
   onOpenLookup,
   onOpenNusuk,
+  onOpenChecklist,
+  onOpenDocumentPrint,
+  onOpenWhatsAppCenter,
   onRoleChange,
   role
 }) {
   return (
-    <div className="space-y-6 pb-24 mx-3 sm:mx-6 mt-3">
-      {/* Header Profile Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#14222e] via-[#1a2d3d] to-[#0f1b25] border border-white/10 shadow-xl space-y-4">
+    <div className="space-y-5 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
+      {/* 1. KARTU PROFIL PERUSAHAAN & LEGALITAS */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#122332] via-[#0d1a24] to-[#070f16] border border-amber-900/40 shadow-xl space-y-4 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-white p-2 flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-2xl bg-white p-2 flex items-center justify-center shadow-lg flex-shrink-0">
               <img
                 src={COMPANY_PROFILE.logo}
                 alt="Logo Kanomas"
@@ -40,17 +47,17 @@ export default function AccountView({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-black text-white">
+                <h1 className="text-base sm:text-lg font-black text-white">
                   PT Kanomas Artha Wisata
-                </h2>
-                <span className="bg-orange-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase">
+                </h1>
+                <span className="bg-[#b45309] text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase shadow-sm">
                   Tasikmalaya
                 </span>
               </div>
               <p className="text-xs text-slate-300">
                 Biro Perjalanan Umrah & Haji Khusus Resmi Kemenag RI
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-amber-300 font-mono mt-1">
+              <div className="flex items-center gap-2 text-[11px] text-amber-300 font-mono mt-0.5">
                 <span>PPIU: <strong>{COMPANY_PROFILE.ppiu}</strong></span>
                 <span>•</span>
                 <span>PIHK: <strong>{COMPANY_PROFILE.pihk}</strong></span>
@@ -58,141 +65,144 @@ export default function AccountView({
             </div>
           </div>
 
-          {/* Cek Status Jamaah Action */}
-          <button
-            onClick={onOpenLookup}
-            className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2 self-start sm:self-center"
-          >
-            <UserCheck className="w-4 h-4" />
-            <span>Cek Status Jamaah</span>
-          </button>
-        </div>
-      </div>
-
-      {/* External Applications Grid (Nusuk, Siskopatuh, etc.) */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Aplikasi Resmi Terkait Ibadah Haji & Umrah
+          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-600/40 self-start sm:self-center">
+            Akreditasi A Resmi
           </span>
-          <span className="text-[10px] text-emerald-400 font-semibold">Tautan Resmi Pemerintah</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {EXTERNAL_SERVICES.map((srv) => (
-            <div
-              key={srv.id}
-              className="p-4 rounded-3xl bg-[#14222e] border border-white/10 hover:border-emerald-500/40 transition shadow-md flex flex-col justify-between space-y-3"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    {srv.badge}
-                  </span>
-                  {srv.id === 'nusuk' && (
-                    <button
-                      onClick={onOpenNusuk}
-                      className="text-[11px] text-orange-400 font-bold hover:underline"
-                    >
-                      Buka Panduan
-                    </button>
-                  )}
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-extrabold text-white">{srv.title}</h4>
-                  <p className="text-[11px] text-slate-300 leading-relaxed mt-1">
-                    {srv.desc}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-mono">Platform Resmi</span>
-                <a
-                  href={srv.webUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700"
-                >
-                  <span>Kunjungi Web</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-                </a>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
-      {/* Role Switcher Portal */}
-      <div className="p-5 rounded-3xl bg-[#101b25] border border-white/10 space-y-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-          Pusat Akses Mitra & Manajemen Internal
-        </span>
+      {/* 2. MENU LAYANAN MANDIRI JAMAAH (5 KARTU SANGAT JELAS) */}
+      <div className="space-y-2.5">
+        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
+          Layanan Mandiri Jamaah
+        </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Mitra Syiar Hub */}
+          {/* Layanan 1: Cek Status Pendaftaran */}
           <div
-            onClick={() => onRoleChange('mitra')}
-            className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
-              role === 'mitra'
-                ? 'bg-blue-950/60 border-blue-500 shadow-md'
-                : 'bg-[#14222e] border-white/5 hover:border-white/20'
-            }`}
+            onClick={onOpenLookup}
+            className="p-4 rounded-2xl bg-[#0f1922] border border-white/5 hover:border-emerald-500/40 transition cursor-pointer flex items-center justify-between group shadow-sm active:scale-98"
           >
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                <Award className="w-5 h-5" />
-              </span>
+              <div className="w-10 h-10 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-600/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <UserCheck className="w-5 h-5" />
+              </div>
               <div>
-                <strong className="text-xs text-white block">Portal Mitra Syiar (Marketing)</strong>
-                <span className="text-[10px] text-slate-400">Referral komisi & pendaftaran prospek</span>
+                <strong className="text-sm font-bold text-white block group-hover:text-emerald-300 transition">
+                  Cek Status Pendaftaran
+                </strong>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  Lacak manifest, status visa & hotel jamaah
+                </span>
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
           </div>
 
-          {/* Admin Perusahaan Hub */}
+          {/* Layanan 2: Cetak Kuitansi & Dokumen */}
           <div
-            onClick={() => onRoleChange('admin')}
-            className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
-              role === 'admin'
-                ? 'bg-purple-950/60 border-purple-500 shadow-md'
-                : 'bg-[#14222e] border-white/5 hover:border-white/20'
-            }`}
+            onClick={onOpenDocumentPrint}
+            className="p-4 rounded-2xl bg-[#0f1922] border border-white/5 hover:border-amber-500/40 transition cursor-pointer flex items-center justify-between group shadow-sm active:scale-98"
           >
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
-                <Briefcase className="w-5 h-5" />
-              </span>
+              <div className="w-10 h-10 rounded-xl bg-amber-950/80 text-amber-400 border border-amber-600/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <Printer className="w-5 h-5" />
+              </div>
               <div>
-                <strong className="text-xs text-white block">Portal Admin Perusahaan</strong>
-                <span className="text-[10px] text-slate-400">Kelola paket, jamaah, tabungan BSI</span>
+                <strong className="text-sm font-bold text-white block group-hover:text-amber-300 transition">
+                  Cetak Kuitansi & Surat
+                </strong>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  Surat rekomendasi paspor & kuitansi resmi
+                </span>
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
+          </div>
+
+          {/* Layanan 3: Checklist Koper */}
+          <div
+            onClick={onOpenChecklist}
+            className="p-4 rounded-2xl bg-[#0f1922] border border-white/5 hover:border-amber-500/40 transition cursor-pointer flex items-center justify-between group shadow-sm active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-950/80 text-amber-400 border border-amber-600/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <Luggage className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-sm font-bold text-white block group-hover:text-amber-300 transition">
+                  Checklist Koper Umrah
+                </strong>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  Daftar bawaan ihram, dokumen & obat pribadi
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
+          </div>
+
+          {/* Layanan 4: Panduan Nusuk */}
+          <div
+            onClick={onOpenNusuk}
+            className="p-4 rounded-2xl bg-[#0f1922] border border-white/5 hover:border-emerald-500/40 transition cursor-pointer flex items-center justify-between group shadow-sm active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-600/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-sm font-bold text-white block group-hover:text-emerald-300 transition">
+                  Panduan Aplikasi Nusuk KSA
+                </strong>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  Tutorial booking izin sholat di Raudhah
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
+          </div>
+
+          {/* Layanan 5: WhatsApp Center */}
+          <div
+            onClick={onOpenWhatsAppCenter}
+            className="p-4 rounded-2xl bg-[#0f1922] border border-white/5 hover:border-emerald-500/40 transition cursor-pointer flex items-center justify-between group shadow-sm active:scale-98 sm:col-span-2"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-600/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <div>
+                <strong className="text-sm font-bold text-white block group-hover:text-emerald-300 transition">
+                  WhatsApp Center 24 Jam
+                </strong>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  Kirim pesan cepat ke admin atau layanan bantuan keberangkatan
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
           </div>
         </div>
       </div>
 
-      {/* Office & Legal Details */}
-      <div className="p-6 rounded-3xl bg-[#14222e] border border-white/10 space-y-4">
-        <h3 className="text-sm font-black text-white uppercase tracking-wider">
-          Informasi Kantor Pelayanan & Legalitas
-        </h3>
+      {/* 3. KONTAK & ALAMAT KANTOR TASIKMALAYA */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-[#0f1922] border border-white/5 space-y-3.5 text-xs text-slate-300 shadow-md">
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+          Alamat Kantor Cabang Tasikmalaya
+        </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-2">
             <div className="flex items-start gap-2.5">
-              <MapPin className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+              <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <strong className="text-white block">Alamat Kantor Tasikmalaya:</strong>
+                <strong className="text-white block">Lokasi:</strong>
                 <span className="text-slate-400">{COMPANY_PROFILE.address}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5">
-              <Clock className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <Clock className="w-4 h-4 text-amber-300 flex-shrink-0" />
               <div>
                 <strong className="text-white">Jam Operasional:</strong>
                 <span className="text-slate-400 block">{COMPANY_PROFILE.operatingHours}</span>
@@ -204,20 +214,57 @@ export default function AccountView({
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-emerald-400 flex-shrink-0" />
               <div>
-                <strong className="text-white">WhatsApp & CS:</strong>
-                <a href={`https://wa.me/${COMPANY_PROFILE.csPhone}`} className="text-orange-400 hover:underline block font-mono">
+                <strong className="text-white">Hotline WhatsApp:</strong>
+                <a href={`https://wa.me/${COMPANY_PROFILE.csPhone}`} className="text-emerald-400 hover:underline block font-mono font-bold">
                   {COMPANY_PROFILE.displayPhone}
                 </a>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5">
-              <Building2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <Building2 className="w-4 h-4 text-amber-400 flex-shrink-0" />
               <div>
-                <strong className="text-white">Mitra Perbankan:</strong>
+                <strong className="text-white">Mitra Bank Syariah:</strong>
                 <span className="text-slate-400 block">{COMPANY_PROFILE.bankMitra}</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. AKSES KHUSUS MITRA & ADMIN PERUSAHAAN */}
+      <div className="p-4 rounded-2xl bg-[#0a131b] border border-white/5 space-y-2 text-xs">
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+          Pusat Akses Khusus
+        </span>
+
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-slate-300 text-xs">Mode Saat Ini: <strong className="text-white capitalize">{role}</strong></span>
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onRoleChange('jamaah')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition text-xs ${
+                role === 'jamaah' ? 'bg-emerald-600 text-white shadow' : 'bg-white/5 text-slate-400 hover:text-white'
+              }`}
+            >
+              Jamaah
+            </button>
+            <button
+              onClick={() => onRoleChange('mitra')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition text-xs ${
+                role === 'mitra' ? 'bg-blue-600 text-white shadow' : 'bg-white/5 text-slate-400 hover:text-white'
+              }`}
+            >
+              Mitra Syiar
+            </button>
+            <button
+              onClick={() => onRoleChange('admin')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition text-xs ${
+                role === 'admin' ? 'bg-purple-600 text-white shadow' : 'bg-white/5 text-slate-400 hover:text-white'
+              }`}
+            >
+              Admin
+            </button>
           </div>
         </div>
       </div>
