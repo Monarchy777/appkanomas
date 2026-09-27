@@ -89,7 +89,7 @@ export default function AutoDownloadModal() {
   if (isInstalled || !showModal) return null;
 
   return (
-    <div className="fixed inset-0 z-70 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-300">
       <div className="w-full max-w-sm rounded-3xl bg-gradient-to-b from-slate-900 via-[#0d2218] to-slate-950 border-2 border-emerald-500/50 shadow-2xl p-5 sm:p-6 text-white text-center space-y-4 relative overflow-hidden max-h-[95vh] overflow-y-auto">
         
         {/* Tombol Tutup */}

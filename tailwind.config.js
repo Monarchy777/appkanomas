@@ -21,6 +21,14 @@ export default {
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         arabic: ['Amiri', 'Traditional Arabic', 'serif']
+      },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
+        'max': '9999',
       }
     },
   },
