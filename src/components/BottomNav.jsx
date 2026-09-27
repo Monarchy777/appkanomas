@@ -5,9 +5,9 @@ export default function BottomNav({ activeTab, onSelectTab, role }) {
   const tabs = [
     { id: 'home', label: 'Beranda', icon: Home },
     { id: 'packages', label: 'Paket', icon: Compass },
-    { id: 'worship', label: 'Ibadah', icon: BookOpen },
-    { id: 'prayer', label: 'Sholat', icon: Clock },
-    { id: 'services', label: 'Layanan', icon: Grid },
+    { id: 'prayer', label: 'Kiblat', icon: Clock },
+    { id: 'worship', label: 'Doa', icon: BookOpen },
+    { id: 'services', label: 'Bantuan', icon: Grid },
   ];
 
   if (role === 'mitra') {

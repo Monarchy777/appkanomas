@@ -49,7 +49,7 @@ export default function App() {
   const [showWhatsAppCenter, setShowWhatsAppCenter] = useState(false);
   const [whatsAppRecipient, setWhatsAppRecipient] = useState(null);
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
-  const [showInstallBanner, setShowInstallBanner] = useState(true);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   // Subscribe to database changes
   useEffect(() => {
