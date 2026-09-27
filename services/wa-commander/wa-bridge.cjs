@@ -1,7 +1,9 @@
 /**
- * WhatsApp Commander Bridge Service for Aplikasi Kanomas
- * Allows remote control, execution of updates, deploy, build APK,
- * and command running via WhatsApp messages from +6282112114222.
+ * WhatsApp Commander Bridge Service for Aplikasi Kanomas (Two-Way AI Agent)
+ * Seamlessly connects WhatsApp (+6282112114222) with Google Antigravity AI IDE.
+ * Any prompt sent from WhatsApp is automatically fed into Antigravity's chat canvas,
+ * executed by the AI agent with full tool capabilities, and the agent's response
+ * is automatically sent back to WhatsApp!
  */
 
 if (!process.env.NODE_PATH) {
@@ -18,7 +20,8 @@ const {
 } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const QRCode = require('qrcode');
-const { exec } = require('child_process');
+const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
@@ -26,18 +29,21 @@ const BASE_DIR = path.resolve(__dirname, '../../');
 const AUTH_DIR = path.resolve(__dirname, 'auth_info');
 const STATUS_FILE = path.resolve(__dirname, 'status.json');
 const QR_IMAGE_PATH = path.resolve(__dirname, 'qr-code.png');
+const TRANSCRIPT_PATH = 'C:/Users/Desktop/.gemini/antigravity/brain/ff63607c-fe79-4756-a256-9a007b4b484c/.system_generated/logs/transcript.jsonl';
 
-// Target phone numbers (handles 12 digits or 11 digits format)
+const CASCADE_ID = 'ff63607c-fe79-4756-a256-9a007b4b484c';
+const CSRF_TOKEN = '2fe04268-a077-4265-bf2d-dc96df730999';
+const LS_PORT = 54162;
+const BRIDGE_HTTP_PORT = 3899;
+
 const TARGET_PHONE = '6282112114222';
 const TARGET_PHONE_ALT = '628211211422';
 
-if (!fs.existsSync(AUTH_DIR)) {
-  fs.mkdirSync(AUTH_DIR, { recursive: true });
-}
-
 let sock = null;
-let isExecuting = false;
+let lastProcessedStepIndex = -1;
+let transcriptFileSize = 0;
 const sentMessageIds = new Set();
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 function updateStatus(statusObj) {
   let current = {};
@@ -56,32 +62,28 @@ function updateStatus(statusObj) {
   return updated;
 }
 
-function runShellCommand(cmd, cwd = BASE_DIR, timeoutMs = 300000) {
-  return new Promise((resolve) => {
-    console.log(`[SHELL] Executing: ${cmd} (in ${cwd})`);
-    exec(cmd, { cwd, timeout: timeoutMs, maxBuffer: 10 * 1024 * 1024, shell: 'powershell.exe' }, (error, stdout, stderr) => {
-      resolve({
-        success: !error,
-        code: error ? error.code : 0,
-        stdout: stdout ? stdout.trim() : '',
-        stderr: stderr ? stderr.trim() : ''
-      });
-    });
-  });
-}
-
+// Send WhatsApp message through Baileys socket
 async function sendWhatsAppMessage(jid, text, quoted = null) {
-  if (!sock) return null;
+  if (!sock) {
+    console.error('[WA-SEND] Socket not connected');
+    return null;
+  }
   try {
-    const sent = await sock.sendMessage(jid, { text }, quoted ? { quoted } : {});
+    // Truncate or clean if too large for standard WA message
+    let payloadText = text;
+    if (payloadText.length > 4000) {
+      payloadText = payloadText.slice(0, 3950) + '\n... [pesan dipotong agar muat di WhatsApp]';
+    }
+
+    const sent = await sock.sendMessage(jid, { text: payloadText }, quoted ? { quoted } : {});
     if (sent?.key?.id) {
       sentMessageIds.add(sent.key.id);
-      // Clean old IDs to prevent memory leak
-      if (sentMessageIds.size > 200) {
+      if (sentMessageIds.size > 500) {
         const first = sentMessageIds.values().next().value;
         sentMessageIds.delete(first);
       }
     }
+    console.log(`[WA-SEND] Message delivered to ${jid}`);
     return sent;
   } catch (err) {
     console.error(`[WA-SEND-ERROR] Failed to send message to ${jid}:`, err.message);
@@ -89,204 +91,170 @@ async function sendWhatsAppMessage(jid, text, quoted = null) {
   }
 }
 
-async function handleCommand(remoteJid, userMessage, rawMsg) {
-  const cleanText = userMessage.trim();
-  const lower = cleanText.toLowerCase();
+// Forward incoming user prompt into Antigravity AI IDE
+function forwardToAntigravity(promptText) {
+  return new Promise((resolve, reject) => {
+    console.log(`[ANTIGRAVITY-FWD] Forwarding prompt to IDE: "${promptText}"`);
 
-  console.log(`[WA-CMD] Processing instruction: "${cleanText}" from ${remoteJid}`);
+    const data = JSON.stringify({
+      cascadeId: CASCADE_ID,
+      items: [{ text: promptText }]
+    });
 
-  // 1. HELP / MENU
-  if (lower === 'menu' || lower === 'help' || lower === 'bantuan' || lower === '?') {
-    const menuText = `🤖 *MENU WHATSAPP COMMANDER - APLIKASI KANOMAS*
-━━━━━━━━━━━━━━━━━━━━━━━━
-Silakan kirim salah satu perintah berikut:
+    const req = https.request({
+      hostname: '127.0.0.1',
+      port: LS_PORT,
+      path: '/exa.language_server_pb.LanguageServerService/SendUserCascadeMessage',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-codeium-csrf-token': CSRF_TOKEN,
+        'Content-Length': Buffer.byteLength(data)
+      },
+      agent: httpsAgent,
+      timeout: 10000
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        const ok = res.statusCode === 200;
+        console.log(`[ANTIGRAVITY-FWD] Status: ${res.statusCode}, Body: ${body}`);
+        resolve(ok);
+      });
+    });
 
-1️⃣ *status*
-   🔍 Cek status aplikasi, branch Git, commit, dan koneksi server.
+    req.on('error', (err) => {
+      console.error('[ANTIGRAVITY-FWD-ERR]', err.message);
+      reject(err);
+    });
 
-2️⃣ *deploy*
-   🚀 Build produksi Vite & sinkronisasi otomatis ke server Hostinger.
+    req.write(data);
+    req.end();
+  });
+}
 
-3️⃣ *build apk*
-   📱 Kompilasi file APK Android terbaru (v2026.1.2) siap unduh.
-
-4️⃣ *update*
-   ⚡ Jalankan full build (web & APK) dan publish ke Hostinger.
-
-5️⃣ *cmd <perintah>*
-   💻 Eksekusi perintah PowerShell apa pun langsung di server.
-   _Contoh: \`cmd git log -n 3 --oneline\`_
-
-6️⃣ *ping*
-   🏓 Tes koneksi bridge dan bot WhatsApp.
-━━━━━━━━━━━━━━━━━━━━━━━━
-_Kirim pesan kapan saja untuk mengeksekusi instruksi._`;
-    await sendWhatsAppMessage(remoteJid, menuText, rawMsg);
-    return;
-  }
-
-  // 2. PING
-  if (lower === 'ping') {
-    await sendWhatsAppMessage(remoteJid, `🏓 *Pong!*\nSistem WhatsApp Bridge Aplikasi Kanomas AKTIF dan siap menerima perintah.\n🕒 Waktu Server: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, rawMsg);
-    return;
-  }
-
-  // 3. STATUS
-  if (lower === 'status' || lower === 'cek') {
-    await sendWhatsAppMessage(remoteJid, `⏳ Sedang memeriksa status server dan aplikasi...`, rawMsg);
-    
-    const gitBranch = await runShellCommand('git branch --show-current');
-    const gitLog = await runShellCommand('git log -1 --pretty=format:"%h - %s (%cr)"');
-    const gitStatus = await runShellCommand('git status --short');
-    
-    let apkSize = 'Tidak ditemukan';
-    const apkPath = path.resolve(BASE_DIR, 'public/kanomas.apk');
-    if (fs.existsSync(apkPath)) {
-      const stats = fs.statSync(apkPath);
-      apkSize = (stats.size / (1024 * 1024)).toFixed(2) + ' MB';
-    }
-
-    const report = `📊 *STATUS APLIKASI KANOMAS*
-━━━━━━━━━━━━━━━━━━━━━━━━
-🌿 *Branch Aktif:* ${gitBranch.stdout || 'dev'}
-🔖 *Commit Terakhir:* ${gitLog.stdout || '-'}
-📂 *Perubahan Lokal:* ${gitStatus.stdout ? '\n' + gitStatus.stdout : 'Bersih (Clean Tree)'}
-📱 *Ukuran APK Siap Unduh:* ${apkSize}
-🌐 *Domain Utama:* https://appkanomas.mediasosial.net
-🕒 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
-━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Sistem beroperasi dengan normal.`;
-    await sendWhatsAppMessage(remoteJid, report, rawMsg);
-    return;
-  }
-
-  // 4. DEPLOY / UPDATE
-  if (lower === 'deploy' || lower === 'update') {
-    if (isExecuting) {
-      await sendWhatsAppMessage(remoteJid, `⚠️ Sedang ada proses lain yang berjalan. Harap tunggu sebentar sampai selesai.`, rawMsg);
-      return;
-    }
-
-    isExecuting = true;
-    updateStatus({ lastCommand: 'deploy', commandRunning: true });
-
-    await sendWhatsAppMessage(remoteJid, `🚀 *Memulai Proses Deploy ke Server Hostinger...*\n\n1. Menjalankan npm run build\n2. Menyiapkan paket produksi\n3. Sinkronisasi ke branch main & hostinger GitHub\n\n⏳ Mohon tunggu sekitar 30-60 detik...`, rawMsg);
-
-    try {
-      const result = await runShellCommand('powershell -ExecutionPolicy Bypass -File .\\deploy_hostinger.ps1');
-      isExecuting = false;
-      updateStatus({ commandRunning: false, lastDeployResult: result.success ? 'SUCCESS' : 'FAILED' });
-
-      if (result.success) {
-        const successMsg = `✅ *Deploy Hostinger Berhasil Selesai!*
-━━━━━━━━━━━━━━━━━━━━━━━━
-Kode produksi terbaru sudah berhasil di-push ke branch \`main\` dan \`hostinger\` di GitHub.
-
-🌐 *Akses Web:* https://appkanomas.mediasosial.net
-📱 *File APK:* Tersedia di server
-🕒 *Selesai:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB
-
-_Catatan: Jika diperlukan, buka hPanel Hostinger -> Git -> Klik 'Deploy' untuk refresh server langsung._`;
-        await sendWhatsAppMessage(remoteJid, successMsg, rawMsg);
-      } else {
-        const errorMsg = `❌ *Deploy Mengalami Kendala:*
-━━━━━━━━━━━━━━━━━━━━━━━━
-\`\`\`
-${result.stderr || result.stdout || 'Terjadi kesalahan saat deploy'}
-\`\`\`
-Silakan periksa log terminal.`;
-        await sendWhatsAppMessage(remoteJid, errorMsg, rawMsg);
+// Initialize transcript position to ignore past logs on startup
+function initTranscriptMonitoring() {
+  try {
+    if (fs.existsSync(TRANSCRIPT_PATH)) {
+      const stats = fs.statSync(TRANSCRIPT_PATH);
+      transcriptFileSize = stats.size;
+      
+      // Find the latest step_index
+      const content = fs.readFileSync(TRANSCRIPT_PATH, 'utf8');
+      const lines = content.trim().split('\n');
+      for (let i = lines.length - 1; i >= 0; i--) {
+        try {
+          const entry = JSON.parse(lines[i]);
+          if (entry.step_index !== undefined) {
+            lastProcessedStepIndex = entry.step_index;
+            break;
+          }
+        } catch (e) {}
       }
-    } catch (e) {
-      isExecuting = false;
-      await sendWhatsAppMessage(remoteJid, `❌ Error eksekusi deploy: ${e.message}`, rawMsg);
+      console.log(`[TRANSCRIPT] Initialized at byte ${transcriptFileSize}, last stepIndex: ${lastProcessedStepIndex}`);
     }
-    return;
+  } catch (e) {
+    console.error('[TRANSCRIPT-INIT-ERR]', e.message);
   }
+}
 
-  // 5. BUILD APK
-  if (lower === 'build apk' || lower === 'apk' || lower === 'rebuild apk') {
-    if (isExecuting) {
-      await sendWhatsAppMessage(remoteJid, `⚠️ Sedang ada proses lain yang berjalan. Harap tunggu.`, rawMsg);
-      return;
+// Periodically check transcript for AI model final responses
+function checkTranscriptUpdates() {
+  try {
+    if (!fs.existsSync(TRANSCRIPT_PATH)) return;
+    const stats = fs.statSync(TRANSCRIPT_PATH);
+    if (stats.size <= transcriptFileSize) return;
+
+    // Read newly appended bytes
+    const fd = fs.openSync(TRANSCRIPT_PATH, 'r');
+    const newBytesLength = stats.size - transcriptFileSize;
+    const buffer = Buffer.alloc(newBytesLength);
+    fs.readSync(fd, buffer, 0, newBytesLength, transcriptFileSize);
+    fs.closeSync(fd);
+
+    transcriptFileSize = stats.size;
+    const newContent = buffer.toString('utf8');
+    const lines = newContent.split('\n').map(l => l.trim()).filter(Boolean);
+
+    for (const line of lines) {
+      try {
+        const entry = JSON.parse(line);
+        if (entry.step_index <= lastProcessedStepIndex) continue;
+        lastProcessedStepIndex = entry.step_index;
+
+        // Check if this is a completed model response intended for the user
+        if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
+          // If it has content and no tool calls, it's the final answer to the user!
+          const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
+          if (entry.content && !hasToolCalls) {
+            console.log(`[TRANSCRIPT] Detected final AI answer (step ${entry.step_index})! Sending to WhatsApp...`);
+            
+            // Format response for WhatsApp (clean markdown if needed)
+            const waResponse = `🤖 *Jawaban Antigravity AI:*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${entry.content}`;
+            
+            const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+            sendWhatsAppMessage(targetJid, waResponse);
+          }
+        }
+      } catch (e) {}
     }
-
-    isExecuting = true;
-    updateStatus({ lastCommand: 'build-apk', commandRunning: true });
-
-    await sendWhatsAppMessage(remoteJid, `📱 *Memulai Kompilasi APK Android Terbaru...*\n\n1. Build aset Vite\n2. Sync Capacitor Android\n3. Gradle assembleDebug\n\n⏳ Proses ini memerlukan waktu 1-2 menit. Anda akan dikabari begitu selesai.`, rawMsg);
-
-    try {
-      const buildVite = await runShellCommand('npm run build');
-      if (!buildVite.success) throw new Error('Vite build gagal: ' + (buildVite.stderr || buildVite.stdout));
-
-      const capSync = await runShellCommand('npx cap sync android');
-      if (!capSync.success) throw new Error('Capacitor sync gagal');
-
-      const gradleBuild = await runShellCommand('cd android; .\\gradlew.bat assembleDebug');
-      if (!gradleBuild.success) throw new Error('Gradle assembleDebug gagal');
-
-      // Copy APK to public and dist
-      await runShellCommand('Copy-Item "android\\app\\build\\outputs\\apk\\debug\\app-debug.apk" -Destination "public\\kanomas.apk" -Force');
-      await runShellCommand('Copy-Item "android\\app\\build\\outputs\\apk\\debug\\app-debug.apk" -Destination "dist\\kanomas.apk" -Force');
-
-      let apkSize = '19.4 MB';
-      const apkPath = path.resolve(BASE_DIR, 'public/kanomas.apk');
-      if (fs.existsSync(apkPath)) {
-        apkSize = (fs.statSync(apkPath).size / (1024 * 1024)).toFixed(2) + ' MB';
-      }
-
-      isExecuting = false;
-      updateStatus({ commandRunning: false, lastApkBuild: new Date().toISOString() });
-
-      const apkSuccessMsg = `🎉 *Build APK Berhasil Diselesaikan!*
-━━━━━━━━━━━━━━━━━━━━━━━━
-📦 *Nama File:* kanomas.apk
-⚖️ *Ukuran:* ${apkSize}
-📱 *Versi:* 2026.1.2 (Terbaru)
-🔗 *Link Download Langsung:*
-https://appkanomas.mediasosial.net/kanomas.apk
-
-_Silakan unduh dan pasang di HP Anda!_`;
-      await sendWhatsAppMessage(remoteJid, apkSuccessMsg, rawMsg);
-    } catch (e) {
-      isExecuting = false;
-      await sendWhatsAppMessage(remoteJid, `❌ Gagal membuat APK: ${e.message}`, rawMsg);
-    }
-    return;
+  } catch (err) {
+    console.error('[TRANSCRIPT-CHECK-ERR]', err.message);
   }
+}
 
-  // 6. CMD (Custom PowerShell Command Execution)
-  if (lower.startsWith('cmd ')) {
-    const cmdToRun = cleanText.slice(4).trim();
-    if (!cmdToRun) {
-      await sendWhatsAppMessage(remoteJid, `⚠️ Perintah kosong. Format: \`cmd <perintah>\``, rawMsg);
-      return;
+// Local HTTP Server on Port 3899 for programmatic dispatch
+function startHttpServer() {
+  const server = http.createServer((req, res) => {
+    if (req.method === 'POST' && req.url === '/send') {
+      let body = '';
+      req.on('data', chunk => body += chunk);
+      req.on('end', async () => {
+        try {
+          const payload = JSON.parse(body || '{}');
+          const messageText = payload.text || payload.message || '';
+          const target = payload.to || TARGET_PHONE;
+          const jid = target.includes('@') ? target : `${target}@s.whatsapp.net`;
+
+          if (!messageText) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Text is required' }));
+            return;
+          }
+
+          const result = await sendWhatsAppMessage(jid, messageText);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: !!result }));
+        } catch (e) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+    } else if (req.method === 'GET' && req.url === '/status') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: sock ? 'CONNECTED' : 'DISCONNECTED',
+        targetPhone: TARGET_PHONE,
+        lastProcessedStepIndex
+      }));
+    } else {
+      res.writeHead(404);
+      res.end();
     }
+  });
 
-    await sendWhatsAppMessage(remoteJid, `⏳ Menjalankan: \`${cmdToRun}\`...`, rawMsg);
-
-    const res = await runShellCommand(cmdToRun);
-    let output = res.stdout || res.stderr || (res.success ? '(Perintah berhasil dijalankan tanpa output)' : 'Gagal');
-
-    // Limit output length for WhatsApp
-    if (output.length > 2500) {
-      output = output.slice(0, 2500) + '\n... [output dipotong karena terlalu panjang]';
-    }
-
-    const cmdReply = `💻 *Hasil Eksekusi:*\n\`${cmdToRun}\`\n━━━━━━━━━━━━━━━━━━━━━━━━\n\`\`\`\n${output}\n\`\`\`\nExit Code: ${res.code}`;
-    await sendWhatsAppMessage(remoteJid, cmdReply, rawMsg);
-    return;
-  }
-
-  // 7. DEFAULT / UNKNOWN COMMAND
-  const defaultReply = `Halo Pak! 👋 Perintah "*${cleanText}*" diterima.\n\nKetik *menu* untuk melihat daftar tindakan cepat yang tersedia (seperti *deploy*, *status*, atau *build apk*), atau gunakan format *cmd <perintah>* untuk menjalankan perintah terminal.`;
-  await sendWhatsAppMessage(remoteJid, defaultReply, rawMsg);
+  server.listen(BRIDGE_HTTP_PORT, '127.0.0.1', () => {
+    console.log(`[HTTP-BRIDGE] Local API running on http://127.0.0.1:${BRIDGE_HTTP_PORT}`);
+  });
 }
 
 async function startWhatsAppBridge() {
   console.log('[WA-BRIDGE] Menginisialisasi koneksi WhatsApp...');
   updateStatus({ status: 'CONNECTING' });
+
+  initTranscriptMonitoring();
+  setInterval(checkTranscriptUpdates, 1000);
 
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -305,61 +273,31 @@ async function startWhatsAppBridge() {
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-    // Pairing code logic
     if (qr && !sock.authState.creds.registered) {
-      console.log('[WA-BRIDGE] Sesi belum terautentikasi. Meminta Kode Pairing...');
+      console.log('[WA-BRIDGE] Meminta Kode Pairing...');
       try {
         await QRCode.toFile(QR_IMAGE_PATH, qr);
       } catch (e) {}
 
-      // Wait 3 seconds for connection to be ready for pairing code request
       await delay(3000);
       try {
         const rawCode = await sock.requestPairingCode(TARGET_PHONE);
         const formattedCode = rawCode ? `${rawCode.slice(0, 4)}-${rawCode.slice(4)}` : rawCode;
-        
-        console.log('\n============================================================');
-        console.log(`📲 KODE PAIRING WHATSAPP: ${formattedCode}`);
-        console.log(`Target Nomor: +${TARGET_PHONE}`);
-        console.log('Buka WhatsApp di HP -> Perangkat Tertaut -> Tautkan Perangkat');
-        console.log('-> Pilih "Tautkan dengan nomor telepon saja"');
-        console.log(`-> Masukkan Kode: ${formattedCode}`);
-        console.log('============================================================\n');
-
-        updateStatus({
-          status: 'WAITING_PAIRING_CODE',
-          pairingCode: formattedCode,
-          targetPhone: TARGET_PHONE,
-          qrImagePath: QR_IMAGE_PATH
-        });
+        console.log(`\n📲 KODE PAIRING WHATSAPP: ${formattedCode}\n`);
+        updateStatus({ status: 'WAITING_PAIRING_CODE', pairingCode: formattedCode });
       } catch (err) {
-        console.error('[WA-BRIDGE] Gagal meminta kode pairing:', err.message);
-        try {
-          const rawCodeAlt = await sock.requestPairingCode(TARGET_PHONE_ALT);
-          const formattedCodeAlt = rawCodeAlt ? `${rawCodeAlt.slice(0, 4)}-${rawCodeAlt.slice(4)}` : rawCodeAlt;
-          console.log(`📲 KODE PAIRING ALTERNATIF: ${formattedCodeAlt}`);
-          updateStatus({
-            status: 'WAITING_PAIRING_CODE',
-            pairingCode: formattedCodeAlt,
-            targetPhone: TARGET_PHONE_ALT
-          });
-        } catch (errAlt) {
-          console.error('[WA-BRIDGE] Gagal meminta kode pairing alternatif:', errAlt.message);
-        }
+        console.error('[WA-BRIDGE] Gagal meminta pairing code:', err.message);
       }
     }
 
     if (connection === 'close') {
-      const statusCode = (lastDisconnect && lastDisconnect.error && lastDisconnect.error.output && lastDisconnect.error.output.statusCode);
+      const statusCode = (lastDisconnect?.error?.output?.statusCode);
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      console.log(`[WA-BRIDGE] Koneksi terputus: ${lastDisconnect?.error?.message || statusCode}, Reconnect: ${shouldReconnect}`);
+      console.log(`[WA-BRIDGE] Koneksi terputus: ${lastDisconnect?.error?.message}, Reconnect: ${shouldReconnect}`);
 
       if (statusCode === DisconnectReason.loggedOut) {
-        console.log('[WA-BRIDGE] Sesi keluar/logged out. Menghapus folder auth...');
-        try {
-          fs.rmSync(AUTH_DIR, { recursive: true, force: true });
-        } catch (e) {}
-        updateStatus({ status: 'LOGGED_OUT', pairingCode: null });
+        try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
+        updateStatus({ status: 'LOGGED_OUT' });
         setTimeout(() => startWhatsAppBridge(), 5000);
       } else {
         updateStatus({ status: 'RECONNECTING' });
@@ -369,9 +307,8 @@ async function startWhatsAppBridge() {
       const userJid = sock.user?.id || '';
       const phone = userJid.split(':')[0] || userJid.split('@')[0];
       const name = sock.user?.name || 'Admin Kanomas';
-      
-      console.log(`\n🎉 [WA-BRIDGE] TERHUBUNG KE WHATSAPP!`);
-      console.log(`Nama Akun: ${name} (+${phone})\n`);
+
+      console.log(`\n🎉 [WA-BRIDGE] TERHUBUNG KE WHATSAPP! Akun: ${name} (+${phone})\n`);
 
       updateStatus({
         status: 'CONNECTED',
@@ -379,57 +316,30 @@ async function startWhatsAppBridge() {
         connectedName: name,
         pairingCode: null
       });
-
-      // Send initial confirmation test message directly to user!
-      const initialGreeting = `Assalamu'alaikum Warahmatullahi Wabarakatuh Pak! 🌟
-
-🤖 *Modul Eksekusi WhatsApp Aplikasi Kanomas Berhasil Terhubung!*
-
-Sistem bridge komputer ini sekarang sudah AKTIF dan siap menerima serta mengeksekusi instruksi Anda kapan saja.
-
-📋 *Daftar Perintah Cepat:*
-• *menu* : Tampilkan menu lengkap
-• *status* : Cek status git & server
-• *deploy* : Build web & update Hostinger
-• *build apk* : Kompilasi APK Android terbaru
-• *cmd <perintah>* : Eksekusi perintah PowerShell apa pun
-
-_Silakan kirim pesan ke chat ini atau ke diri sendiri untuk mencoba!_`;
-
-      const primaryJid = `${TARGET_PHONE}@s.whatsapp.net`;
-      await sendWhatsAppMessage(primaryJid, initialGreeting);
-
-      // Also send to self userJid if different
-      if (phone && phone !== TARGET_PHONE) {
-        await sendWhatsAppMessage(`${phone}@s.whatsapp.net`, initialGreeting);
-      }
     }
   });
 
-  // Message Listener
+  // Message Listener (Catch user instructions & forward to Antigravity)
   sock.ev.on('messages.upsert', async (m) => {
     try {
       if (!m.messages || m.messages.length === 0) return;
       const msg = m.messages[0];
 
-      // Ignore if sent by our bot
       if (sentMessageIds.has(msg.key.id)) return;
 
       const remoteJid = msg.key.remoteJid;
       const senderJid = msg.key.participant || remoteJid || '';
       const senderDigits = senderJid.replace(/@.*$/, '').replace(/[^0-9]/g, '');
 
-      // Verify authorization: must match target phone or self chat
-      const isTargetSender = senderDigits.includes(TARGET_PHONE) || 
-                             senderDigits.includes(TARGET_PHONE_ALT) || 
-                             senderDigits.includes('8211211422');
-      const isSelfChat = msg.key.fromMe && (remoteJid.includes(TARGET_PHONE) || remoteJid.includes(TARGET_PHONE_ALT) || remoteJid.includes('8211211422') || remoteJid.includes(senderDigits));
+      // Verify authorization: target phone, self chat, or matching LID
+      const isTarget = senderDigits.includes(TARGET_PHONE) || 
+                       senderDigits.includes(TARGET_PHONE_ALT) || 
+                       senderDigits.includes('8211211422') ||
+                       remoteJid.includes('@lid'); // WhatsApp Multi-device LID
+      const isSelf = msg.key.fromMe;
 
-      if (!isTargetSender && !isSelfChat) {
-        return; // Ignore unauthorized messages
-      }
+      if (!isTarget && !isSelf) return;
 
-      // Extract message text
       let text = '';
       if (msg.message?.conversation) text = msg.message.conversation;
       else if (msg.message?.extendedTextMessage?.text) text = msg.message.extendedTextMessage.text;
@@ -437,35 +347,49 @@ _Silakan kirim pesan ke chat ini atau ke diri sendiri untuk mencoba!_`;
       text = text ? text.trim() : '';
       if (!text) return;
 
-      // Prevent bot from replying to its own messages that have bot signatures
-      if (text.includes('MENU WHATSAPP COMMANDER') || 
-          text.includes('STATUS APLIKASI KANOMAS') || 
-          text.includes('Memulai Proses Deploy') || 
-          text.includes('Deploy Hostinger Berhasil') || 
-          text.includes('Build APK Berhasil')) {
+      // Ignore messages generated by our bot itself
+      if (text.includes('Jawaban Antigravity AI:') || 
+          text.includes('Instruksi Diterima') || 
+          text.includes('MENU WHATSAPP COMMANDER')) {
         return;
       }
 
-      // Execute command
-      await handleCommand(remoteJid, text, msg);
+      console.log(`[WA-RECEIVE] Pesan dari ${remoteJid}: "${text}"`);
+
+      // Quick command: PING
+      if (text.toLowerCase() === 'ping') {
+        await sendWhatsAppMessage(remoteJid, `🏓 Pong! Antigravity AI Bridge aktif.\nWaktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
+        return;
+      }
+
+      // Quick command: MENU
+      if (text.toLowerCase() === 'menu' || text.toLowerCase() === 'help') {
+        const helpText = `🤖 *ANTIGRAVITY AI WHATSAPP BRIDGE*
+━━━━━━━━━━━━━━━━━━━━━━━━
+✨ *Anda sekarang bisa mengetik perintah APA SAJA persis seperti di chat box IDE!*
+
+Contoh yang bisa Anda ketik langsung:
+• _"Rapihkan folder dan file kanomasnya"_
+• _"Ubah tema dzikir jadi hijau zamrud"_
+• _"Build APK terbaru dan deploy ke hostinger"_
+• _"Cek apakah ada error di kode"_
+• _"Tambahkan tombol baru di Al-Quran"_
+
+Setiap pesan yang Anda kirim akan langsung diproses oleh AI Antigravity, dan jawabannya akan dikirimkan kembali ke sini!`;
+        await sendWhatsAppMessage(remoteJid, helpText, msg);
+        return;
+      }
+
+      // FOR ALL OTHER PROMPTS: Forward to Antigravity AI!
+      await sendWhatsAppMessage(remoteJid, `⏳ *Instruksi Diterima:*\n"${text}"\n\n🤖 Sedang diproses langsung oleh AI Antigravity... Mohon tunggu sebentar.`, msg);
+
+      await forwardToAntigravity(text);
+
     } catch (err) {
-      console.error('[WA-BRIDGE] Error handling message:', err);
+      console.error('[WA-MSG-ERR]', err);
     }
   });
 }
 
-// Check arguments
-const action = process.argv[2];
-if (action === 'logout') {
-  console.log('[WA-BRIDGE] Melakukan logout dan membersihkan autentikasi...');
-  try {
-    fs.rmSync(AUTH_DIR, { recursive: true, force: true });
-    updateStatus({ status: 'LOGGED_OUT', pairingCode: null });
-    console.log('[WA-BRIDGE] Selesai logout.');
-  } catch (e) {
-    console.error('[WA-BRIDGE] Error logout:', e);
-  }
-  process.exit(0);
-} else {
-  startWhatsAppBridge();
-}
+startHttpServer();
+startWhatsAppBridge();
