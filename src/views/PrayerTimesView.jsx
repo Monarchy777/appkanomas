@@ -346,39 +346,43 @@ export default function PrayerTimesView() {
   }, [isFacingQibla]);
 
   return (
-    <div className="space-y-6 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
-      {/* 1. Header Card with City Selector & GPS Auto Detection (Putih Bersih) */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
+    <div className="space-y-6 sm:space-y-7 pb-28 mx-3 sm:mx-6 mt-4 max-w-4xl mx-auto">
+      {/* 1. KARTU JADWAL SHOLAT & LOKASI (Putih Bersih, Proporsional & Lega) */}
+      <div className="p-5 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-5">
+        {/* Header & Location Switcher */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block">
-                Waktu Sholat & Arah Kiblat Otomatis
+              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs inline-flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-emerald-600" />
+                <span>Waktu Sholat & Arah Kiblat</span>
               </span>
               {customQibla !== null ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shadow-xs flex items-center gap-1">
                   <LocateFixed className="w-3 h-3" /> Lokasi GPS Saya
                 </span>
               ) : isSaudi ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs flex items-center gap-1">
                   🕋 Waktu Arab Saudi (WAS)
                 </span>
               ) : null}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-sans">
+
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-sans tracking-tight leading-snug">
               Jadwal Sholat {customQibla !== null ? 'Lokasi GPS Anda' : city.name}
             </h2>
-            <p className="text-xs text-slate-500">
+
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               {prayerData.dateStr}
             </p>
           </div>
 
-          {/* Location switcher: GPS, Makkah, Madinah, Tasikmalaya, etc. */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          {/* Location switcher buttons */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             {/* 1. Tombol Deteksi GPS */}
             <button
               onClick={handleDetectGPS}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
                 selectedCityId === 'gps' || customQibla !== null
                   ? 'bg-emerald-600 text-white border-emerald-500 ring-2 ring-emerald-300'
                   : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
@@ -391,10 +395,10 @@ export default function PrayerTimesView() {
             {/* 2. Tombol Makkah */}
             <button
               onClick={() => handleCityChange('makkah')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
                 selectedCityId === 'makkah' && customQibla === null
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-500 ring-2 ring-amber-300'
-                  : 'bg-amber-50/80 text-amber-900 border-amber-200 hover:bg-amber-100'
+                  : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
               }`}
             >
               <span>🕋 Makkah</span>
@@ -403,10 +407,10 @@ export default function PrayerTimesView() {
             {/* 3. Tombol Madinah */}
             <button
               onClick={() => handleCityChange('madinah')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
                 selectedCityId === 'madinah' && customQibla === null
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-500 ring-2 ring-emerald-300'
-                  : 'bg-emerald-50/80 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
               }`}
             >
               <span>🕌 Madinah</span>
@@ -415,7 +419,7 @@ export default function PrayerTimesView() {
             {/* 4. Tombol Tasikmalaya */}
             <button
               onClick={() => handleCityChange('tasikmalaya')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border shadow-xs ${
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition border shadow-xs ${
                 selectedCityId === 'tasikmalaya' && customQibla === null
                   ? 'bg-slate-800 text-white border-slate-700 ring-2 ring-slate-400'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
@@ -424,7 +428,7 @@ export default function PrayerTimesView() {
               Tasikmalaya
             </button>
 
-            {/* Kota Tambahan (Jakarta, Bandung) */}
+            {/* Kota Tambahan */}
             {['jakarta', 'bandung'].map((cid) => {
               const c = CITIES.find((item) => item.id === cid);
               if (!c) return null;
@@ -432,7 +436,7 @@ export default function PrayerTimesView() {
                 <button
                   key={c.id}
                   onClick={() => handleCityChange(c.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border ${
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition border shadow-xs ${
                     selectedCityId === c.id && customQibla === null
                       ? 'bg-slate-800 text-white border-slate-700'
                       : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -446,86 +450,94 @@ export default function PrayerTimesView() {
         </div>
 
         {/* Next Prayer Highlight Banner with WAS/WIB Clock */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/90 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 w-full sm:w-auto">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <Clock className="w-6 h-6 animate-pulse" />
             </div>
-            <div>
-              <span className="text-[10px] text-amber-800 uppercase font-bold tracking-wider">
+            <div className="space-y-1">
+              <span className="text-[11px] text-amber-800 uppercase font-bold tracking-wider block">
                 Waktu Sholat Berikutnya ({timeZoneCode})
               </span>
-              <h3 className="text-lg sm:text-xl font-black text-amber-700 font-mono leading-tight">
+              <h3 className="text-xl sm:text-2xl font-black text-amber-700 font-mono tracking-tight leading-snug">
                 {nextPrayer?.name} : {nextPrayer?.time} {timeZoneCode}
               </h3>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">
                 {isSaudi ? 'Waktu lokal Tanah Suci (Arab Saudi / UTC+3)' : 'Jadwal resmi Kementerian Agama Republik Indonesia'}
-              </span>
+              </p>
             </div>
           </div>
 
-          <div className="text-center sm:text-right w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-amber-200/60">
-            <span className="text-[10px] text-slate-500 block uppercase font-bold">
+          <div className="text-center sm:text-right w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-amber-200/70 space-y-1 flex-shrink-0">
+            <span className="text-[11px] text-slate-500 block uppercase font-bold tracking-wider">
               {isSaudi ? 'Jam Sekarang di Madinah & Makkah' : 'Jam Digital Saat Ini'}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono tracking-tight">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight block">
               {formatDigitalClock(currentTime, isSaudi)}
             </span>
           </div>
         </div>
-      </div>
 
-      {/* 2. Jadwal Sholat dalam 1 Baris Kompak (Menghemat Waktu & Ruang Layar) */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-1.5 sm:p-2.5">
-        <div className="grid grid-cols-6 divide-x divide-slate-100 sm:divide-slate-200">
-          {prayerData.prayers.map((prayer) => {
-            const isNext = nextPrayer?.name === prayer.name;
+        {/* Jadwal Sholat 6 Waktu dalam 1 Baris Kompak & Proporsional */}
+        <div className="space-y-2.5 pt-1">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+              Jadwal 6 Waktu Sholat Hari Ini ({timeZoneCode})
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">
+              {customQibla !== null ? 'Lokasi GPS' : city.name}
+            </span>
+          </div>
 
-            return (
-              <div
-                key={prayer.name}
-                className={`py-2 px-0.5 sm:px-3 text-center transition-all rounded-xl ${
-                  isNext
-                    ? 'bg-amber-50/90 text-amber-900 font-bold ring-1 ring-amber-300 shadow-xs'
-                    : 'hover:bg-slate-50/80 text-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate ${
-                    isNext ? 'text-amber-800' : 'text-slate-500'
-                  }`}>
-                    {prayer.name}
-                  </span>
-                  {isNext && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping inline-block" />
-                  )}
-                </div>
-                <div className={`text-xs sm:text-base font-black font-mono mt-0.5 ${
-                  isNext ? 'text-amber-700' : 'text-slate-900'
-                }`}>
-                  {prayer.time}
-                </div>
-                <div className={`text-[8px] sm:text-[9px] font-mono mt-0.5 ${
-                  isNext ? 'text-amber-600 font-bold' : 'text-slate-400'
-                }`}>
-                  {timeZoneCode}
-                </div>
-              </div>
-            );
-          })}
+          <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
+            <div className="grid grid-cols-6 gap-2 sm:gap-2.5 min-w-[340px]">
+              {prayerData.prayers.map((prayer) => {
+                const isNext = nextPrayer?.name === prayer.name;
+
+                return (
+                  <div
+                    key={prayer.name}
+                    className={`py-3 px-1 sm:px-2.5 text-center rounded-2xl transition-all flex flex-col items-center justify-center space-y-1 ${
+                      isNext
+                        ? 'bg-gradient-to-b from-amber-500 to-amber-600 text-white font-bold shadow-md shadow-amber-500/20 ring-2 ring-amber-300'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 shadow-xs'
+                    }`}
+                  >
+                    <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider block ${
+                      isNext ? 'text-amber-100' : 'text-slate-500'
+                    }`}>
+                      {prayer.name}
+                    </span>
+
+                    <span className={`text-sm sm:text-lg font-black font-mono block leading-none py-0.5 ${
+                      isNext ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {prayer.time}
+                    </span>
+
+                    <span className={`text-[9px] sm:text-[10px] font-mono block ${
+                      isNext ? 'text-amber-100 font-bold' : 'text-slate-400'
+                    }`}>
+                      {timeZoneCode}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 3. KOMPAS KIBLAT: PENANDA BULATAN, ARAH ANGIN & GAMBAR KA'BAH */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+      {/* 2. KOMPAS KIBLAT: PENANDA BULATAN, ARAH ANGIN & GAMBAR KA'BAH */}
+      <div className="p-5 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-6">
         {/* Header Kompas & Keterangan Kalibrasi (tanpa logo) */}
-        <div className="space-y-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-                Kompas Kiblat
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 inline-block">
+                Kompas Kiblat Presisi
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-sans flex items-center gap-2 mt-1">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 font-sans flex items-center gap-2 mt-1">
                 <Compass className="w-5 h-5 text-amber-500" />
                 <span>Arah Kiblat Baitullah Makkah</span>
               </h3>
@@ -534,22 +546,26 @@ export default function PrayerTimesView() {
             {/* Tombol Panduan Kalibrasi (tanpa logo) */}
             <button
               onClick={() => setShowCalibrationModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition active:scale-95 text-left sm:text-center shadow-xs self-start sm:self-center"
+              className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition active:scale-95 text-left sm:text-center shadow-xs self-start sm:self-center"
             >
               Panduan Kalibrasi Angka 8
             </button>
           </div>
 
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Keterangan Kalibrasi: Ayunkan ponsel perlahan di udara membentuk pola angka 8 (∞) beberapa kali jika kompas belum presisi. Pegang ponsel mendatar dan putar badan hingga gambar Ka'bah berada di posisi atas (arah depan ponsel).
-          </p>
+          {/* Kotak Tips Kalibrasi Lega & Proporsional */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 leading-relaxed space-y-1">
+            <span className="font-bold text-slate-800 block">💡 Panduan Penggunaan:</span>
+            <p>
+              Pegang smartphone mendatar di telapak tangan, lalu putar badan perlahan hingga penanda gambar Ka'bah berada di posisi atas (arah depan ponsel). Jika kompas belum presisi, ayunkan ponsel di udara membentuk pola angka 8 (∞) untuk kalibrasi sensor magnetik.
+            </p>
+          </div>
         </div>
 
         {/* Tombol izin sensor jika diperlukan browser (iOS / Safari) */}
         {permissionState === 'prompt' && (
           <button
             onClick={requestCompassPermission}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-98"
+            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-98"
           >
             <Compass className="w-4 h-4 text-white" />
             <span>Ketuk untuk Mengaktifkan Sensor Kompas HP</span>
@@ -727,14 +743,16 @@ export default function PrayerTimesView() {
             </div>
           </div>
 
-          {/* Kartu Derajat */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full max-w-lg text-center pt-2">
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
-              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Kiblat</span>
-              <span className="text-sm sm:text-base font-black text-amber-700 font-mono block">
+          {/* Kartu Derajat Proporsional & Lega */}
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 w-full max-w-lg text-center pt-2">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5 min-w-0 shadow-xs">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+                Arah Kiblat
+              </span>
+              <span className="text-base sm:text-lg font-black text-amber-700 font-mono block">
                 {selectedCityId === 'makkah' && customQibla === null ? 'Pusat' : `${Math.round(targetQibla)}°`}
               </span>
-              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium truncate">
                 {selectedCityId === 'makkah' && customQibla === null
                   ? 'Baitullah Makkah'
                   : selectedCityId === 'madinah' && customQibla === null
@@ -743,26 +761,30 @@ export default function PrayerTimesView() {
               </span>
             </div>
 
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
-              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Ponsel</span>
-              <span className="text-sm sm:text-base font-black text-slate-900 font-mono block">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5 min-w-0 shadow-xs">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+                Arah Ponsel
+              </span>
+              <span className="text-base sm:text-lg font-black text-slate-900 font-mono block">
                 {Math.round(currentHeading)}°
               </span>
-              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium truncate">
                 Derajat Hadap
               </span>
             </div>
 
-            <div className={`p-2 sm:p-2.5 rounded-2xl border space-y-0.5 transition-colors min-w-0 ${
+            <div className={`p-3 sm:p-3.5 rounded-2xl border space-y-1.5 transition-colors min-w-0 shadow-xs ${
               isFacingQibla
-                ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm'
-                : 'bg-slate-50 border-slate-200 text-amber-700'
+                ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
+                : 'bg-slate-50 border-slate-200/90 text-amber-700'
             }`}>
-              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Selisih Sudut</span>
-              <span className="text-sm sm:text-base font-black font-mono block">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+                Selisih Sudut
+              </span>
+              <span className="text-base sm:text-lg font-black font-mono block">
                 {selectedCityId === 'makkah' && customQibla === null ? '0°' : `${Math.abs(Math.round(diffAngle))}°`}
               </span>
-              <span className="text-[8px] sm:text-[9px] block font-bold truncate">
+              <span className="text-[10px] sm:text-[11px] block font-bold truncate">
                 {selectedCityId === 'makkah' && customQibla === null
                   ? 'Di Tanah Suci'
                   : isFacingQibla
