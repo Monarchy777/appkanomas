@@ -12,7 +12,7 @@ export default defineConfig({
     cors: true,
     allowedHosts: true,
     watch: {
-      ignored: ['**/*.mp3', '**/public/assets/audio/**', '**/public/assets/*.mp3']
+      ignored: ['**/*.mp3', '**/public/assets/audio/**', '**/public/assets/*.mp3', '**/*.apk', '**/android/**']
     }
   }
 });

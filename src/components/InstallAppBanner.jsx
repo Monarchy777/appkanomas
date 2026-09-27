@@ -68,13 +68,22 @@ export default function InstallAppBanner({ onClose }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <a
+          href="/kanomas.apk"
+          download="Kanomas.apk"
+          className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5 whitespace-nowrap active:scale-95"
+          title="Download File APK Android Asli"
+        >
+          <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Download APK</span>
+        </a>
+
         <button
           onClick={handleInstallClick}
-          className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5 whitespace-nowrap active:scale-95"
+          className="hidden sm:flex px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition items-center gap-1.5 whitespace-nowrap active:scale-95"
         >
-          <Download className="w-3.5 h-3.5" />
-          <span>{isIos ? 'Panduan Pasang' : 'Pasang di HP'}</span>
+          <span>{isIos ? 'Panduan iPhone' : 'Pasang di Chrome'}</span>
         </button>
 
         {onClose && (

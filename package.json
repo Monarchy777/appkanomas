@@ -10,6 +10,9 @@
     "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy_hostinger.ps1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
     "react": "^18.3.1",

@@ -35,3 +35,14 @@ dist-ssr
 # Executables
 cloudflared.exe
 *.exe
+
+# Root duplicate APK (production APK lives in public/ and dist/)
+/Kanomas.apk
+
+# Android builds & caches
+.gradle/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/

@@ -196,23 +196,45 @@ export default function AutoDownloadModal() {
           </div>
         )}
 
-        {/* Tombol Aksi Download / Pasang Langsung */}
-        <div className="space-y-2 pt-1">
-          <button
-            onClick={handleInstallNow}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-2"
+        {/* Tombol Aksi Download APK & Pasang Langsung */}
+        <div className="space-y-2.5 pt-1">
+          {/* 1. TOMBOL UTAMA: DOWNLOAD BERKAS APK RESMI (.APK) */}
+          <a
+            href="/kanomas.apk"
+            download="Kanomas.apk"
+            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-slate-950 font-black text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-2 border-2 border-emerald-200"
           >
-            <Download className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-            <span>
-              {isInApp
-                ? 'BUKA DI GOOGLE CHROME'
-                : isIos
-                ? 'LIHAT PANDUAN PASANG'
-                : deferredPrompt
-                ? 'PASANG SEKARANG KE HP'
-                : 'PANDUAN PASANG KE LAYAR UTAMA'}
-            </span>
-          </button>
+            <Download className="w-5 h-5 stroke-[2.5]" />
+            <span>DOWNLOAD FILE APK (.APK)</span>
+          </a>
+
+          {/* Sub-keterangan unduh APK */}
+          <p className="text-[11px] text-emerald-200/90 font-medium">
+            File APK Android asli • Bisa disimpan & dibagikan bebas via WhatsApp
+          </p>
+
+          {/* 2. TOMBOL BAGIKAN KE WHATSAPP */}
+          <a
+            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+              "Assalamu'alaikum, silakan unduh dan pasang Aplikasi Resmi Kanomas Tour & Travel (File APK Android) melalui link resmi berikut:\n\n👉 https://appkanomas.mediasosial.net/kanomas.apk\n\n📌 Izin Resmi Kemenag RI: PPIU U.310 | PIHK 9120313132406\nBimbingan Ibadah Haji & Umrah Sesuai Sunnah."
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs tracking-wide border border-white/20 active:scale-95 transition flex items-center justify-center gap-2"
+          >
+            <Share2 className="w-4 h-4 text-emerald-400" />
+            <span>BAGIKAN LINK APK KE WHATSAPP</span>
+          </a>
+
+          {/* 3. TOMBOL ALTERNATIF: PASANG LANGSUNG VIA BROWSER (PWA) */}
+          {!isInApp && (
+            <button
+              onClick={handleInstallNow}
+              className="w-full py-2 text-[11px] text-amber-300 hover:text-amber-200 transition font-bold underline"
+            >
+              {deferredPrompt ? 'Atau pasang langsung via Chrome (Tanpa unduh file)' : 'Petunjuk pasang ke layar utama HP'}
+            </button>
+          )}
 
           <button
             onClick={handleDismiss}

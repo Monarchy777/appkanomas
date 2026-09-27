@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Phone, Menu, X, ChevronDown, Sparkles } from 'lucide-react';
+import { ShieldCheck, Phone, Menu, X, ChevronDown, Sparkles, Download } from 'lucide-react';
 import { Icon3DStatus, Icon3DCetak, Icon3DWhatsApp } from './Icons3D';
 
 export default function Header({
@@ -66,6 +66,18 @@ export default function Header({
 
         {/* Tombol Aksi Cepat & Menu */}
         <div className="flex items-center gap-2">
+          {/* Tombol Download APK Android */}
+          <a
+            href="/kanomas.apk"
+            download="Kanomas.apk"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 text-xs font-black px-2.5 sm:px-3 py-1.5 rounded-xl shadow-[0_4px_12px_rgba(245,158,11,0.25)] transition active:scale-95 border border-amber-300"
+            title="Download File APK Android Asli"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-900 shrink-0" />
+            <span className="hidden sm:inline">Download APK</span>
+            <span className="sm:hidden font-black text-[11px]">APK</span>
+          </a>
+
           {/* Tombol Cepat WhatsApp CS */}
           <a
             href="https://wa.me/628112113363"
@@ -135,6 +147,30 @@ export default function Header({
               </div>
             </button>
           </div>
+
+          {/* Baris Khusus Download File APK Android */}
+          <a
+            href="/kanomas.apk"
+            download="Kanomas.apk"
+            onClick={() => setShowMenu(false)}
+            className="p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 hover:border-amber-400 flex items-center justify-between gap-3 shadow-xs transition group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-900 flex items-center justify-center font-black shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Download className="w-5 h-5 text-slate-900" />
+              </div>
+              <div>
+                <strong className="text-slate-900 block text-xs font-bold flex items-center gap-1.5">
+                  Download File APK Android
+                  <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black tracking-wide">69 MB</span>
+                </strong>
+                <span className="text-[10px] text-slate-600 block">Bisa disimpan & dibagikan via WhatsApp tanpa browser</span>
+              </div>
+            </div>
+            <span className="text-xs font-bold text-amber-800 bg-white border border-amber-200 px-2.5 py-1 rounded-lg shrink-0 group-hover:bg-amber-500 group-hover:text-white transition">
+              Unduh
+            </span>
+          </a>
 
           {/* Opsi Ganti Mode Akun */}
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
