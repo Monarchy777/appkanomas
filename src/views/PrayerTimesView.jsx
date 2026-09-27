@@ -16,7 +16,10 @@ import {
   Sun,
   Moon,
   Volume2,
-  LocateFixed
+  LocateFixed,
+  X,
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 import { CITIES, calculatePrayerTimes, calculateQiblaDirection } from '../services/prayerTimes';
 import { sounds } from '../services/soundEffects';
@@ -31,14 +34,27 @@ export default function PrayerTimesView() {
   const [customQibla, setCustomQibla] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
 
-  // Compass Heading & Sensor State
-  const [deviceHeading, setDeviceHeading] = useState(0); // Heading in degrees (0-360)
+  // Compass Heading & Sensor State (MyQuran Standard Engine)
+  const [deviceHeading, setDeviceHeading] = useState(0); // Displayed integer heading (0-360)
+  const [continuousHeading, setContinuousHeading] = useState(0); // 60 FPS smoothly interpolated continuous angle
   const [isSensorActive, setIsSensorActive] = useState(false);
   const [permissionState, setPermissionState] = useState('unknown'); // 'unknown' | 'prompt' | 'granted' | 'denied'
   const [isAutoScanning, setIsAutoScanning] = useState(false);
   const [manualHeading, setManualHeading] = useState(0);
   const [useManualMode, setUseManualMode] = useState(false);
+  const [sensorUnsupported, setSensorUnsupported] = useState(false);
 
+  // Phone Tilt & Waterpass Level (Like MyQuran Flatness Detection)
+  const [isTilted, setIsTilted] = useState(false);
+  const [tiltAngles, setTiltAngles] = useState({ beta: 0, gamma: 0 });
+  const [showCalibrationModal, setShowCalibrationModal] = useState(false);
+
+  // Engine Refs
+  const continuousTargetRef = useRef(0);
+  const continuousRenderedRef = useRef(0);
+  const animFrameIdRef = useRef(null);
+  const lastStateUpdateRef = useRef(0);
+  const hasReceivedAbsoluteRef = useRef(false);
   const lastVibratedRef = useRef(false);
   const autoScanTimerRef = useRef(null);
 
@@ -63,7 +79,6 @@ export default function PrayerTimesView() {
           setCustomQibla(calculatedQibla);
         },
         (err) => {
-          // GPS silent fallback to city
           console.log('GPS auto-detect skipped, using default city');
         },
         { enableHighAccuracy: true, timeout: 8000 }
@@ -81,11 +96,61 @@ export default function PrayerTimesView() {
   const nextPrayer = prayerData.nextPrayer;
   const targetQibla = customQibla !== null ? customQibla : (city.qibla || 295.2);
 
-  // 2. Sensor Gyroscope & Magnetometer Smartphone (Android & iOS)
-  const hasReceivedAbsoluteRef = useRef(false);
-  const sensorTestedRef = useRef(false);
-  const [sensorUnsupported, setSensorUnsupported] = useState(false);
+  // Helper: Shortest angular difference between two angles (-180 to 180)
+  const getShortestAngleDelta = (target, current) => {
+    let diff = (target - current) % 360;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return diff;
+  };
 
+  // 2. MyQuran Fluid 60 FPS Damping Engine (Exponential Moving Average / Low-Pass Filter)
+  useEffect(() => {
+    let active = true;
+
+    const animate = () => {
+      if (!active) return;
+
+      const target = useManualMode ? manualHeading : continuousTargetRef.current;
+      const current = continuousRenderedRef.current;
+      const diff = target - current;
+      const absDiff = Math.abs(diff);
+
+      // Deadband: < 0.15° ignores tremor from hand, stabilizing needle like physical fluid
+      if (absDiff > 0.15) {
+        let factor = 0.12; // Base smooth fluid damping
+        if (absDiff < 4) {
+          factor = 0.08; // Ultra-smooth gentle settle (peredam kompas minyak MyQuran)
+        } else if (absDiff > 25) {
+          factor = 0.28; // Responsive rotation when user actively rotates body
+        }
+
+        continuousRenderedRef.current += diff * factor;
+        const rendered = continuousRenderedRef.current;
+
+        setContinuousHeading(rendered);
+
+        // Update integer degree text every 50ms to prevent CPU overload and number jitter
+        const now = performance.now();
+        if (now - lastStateUpdateRef.current > 50) {
+          lastStateUpdateRef.current = now;
+          const normalized = Math.round(((rendered % 360) + 360) % 360);
+          setDeviceHeading(normalized);
+        }
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(animate);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      active = false;
+      if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+    };
+  }, [useManualMode, manualHeading]);
+
+  // 3. Sensor Gyroscope & Magnetometer Smartphone (Android & iOS Sync)
   useEffect(() => {
     let isMounted = true;
 
@@ -96,68 +161,48 @@ export default function PrayerTimesView() {
       setPermissionState('granted');
     }
 
-    const calculateTiltCompensatedHeading = (alpha, beta, gamma) => {
-      if (alpha === null || typeof alpha === 'undefined') return null;
-      if (beta === null || gamma === null) {
-        return (360 - alpha) % 360;
-      }
-      const rad = Math.PI / 180;
-      const _x = (beta || 0) * rad;
-      const _y = (gamma || 0) * rad;
-      const _z = (alpha || 0) * rad;
-
-      const cX = Math.cos(_x);
-      const cY = Math.cos(_y);
-      const cZ = Math.cos(_z);
-      const sX = Math.sin(_x);
-      const sY = Math.sin(_y);
-      const sZ = Math.sin(_z);
-
-      const Vx = -cZ * sY - sZ * sX * cY;
-      const Vy = -sZ * sY + cZ * sX * cY;
-
-      let heading = Math.atan2(Vx, Vy) * (180 / Math.PI);
-      if (heading < 0) heading += 360;
-      return heading;
-    };
-
-    const handleAbsoluteOrientation = (e) => {
+    const processOrientation = (e, isAbsolute = false) => {
       if (!isMounted || useManualMode || isAutoScanning) return;
-      hasReceivedAbsoluteRef.current = true;
 
-      let heading = null;
+      let rawHeading = null;
+
+      // 1. iOS: webkitCompassHeading (0-360 clockwise from North)
       if (typeof e.webkitCompassHeading !== 'undefined' && e.webkitCompassHeading !== null) {
-        heading = e.webkitCompassHeading;
-      } else if (typeof e.alpha === 'number' && e.alpha !== null) {
-        heading = calculateTiltCompensatedHeading(e.alpha, e.beta, e.gamma);
+        rawHeading = e.webkitCompassHeading;
+      }
+      // 2. Android: alpha on absolute orientation (0-360 counter-clockwise from North)
+      else if (typeof e.alpha === 'number' && e.alpha !== null) {
+        rawHeading = (360 - e.alpha) % 360;
       }
 
-      if (heading !== null && !isNaN(heading)) {
+      if (rawHeading !== null && !isNaN(rawHeading)) {
+        // Compensate for screen orientation (Portrait vs Landscape)
+        const screenAngle = window.screen?.orientation?.angle ?? (typeof window.orientation === 'number' ? window.orientation : 0);
+        const trueHeading = (rawHeading + screenAngle + 360) % 360;
+
+        hasReceivedAbsoluteRef.current = true;
         setIsSensorActive(true);
         setSensorUnsupported(false);
-        setDeviceHeading(Math.round(heading));
+
+        // Detect device tilt (MyQuran waterpass check)
+        const beta = typeof e.beta === 'number' ? e.beta : 0;
+        const gamma = typeof e.gamma === 'number' ? e.gamma : 0;
+        const tilted = Math.abs(beta) > 35 || Math.abs(gamma) > 30;
+        setIsTilted(tilted);
+        setTiltAngles({ beta: Math.round(beta), gamma: Math.round(gamma) });
+
+        // Unwrapped continuous target update (prevents 360 degree spin glitch across North!)
+        const currentNorm = ((continuousTargetRef.current % 360) + 360) % 360;
+        const delta = getShortestAngleDelta(trueHeading, currentNorm);
+        continuousTargetRef.current += delta;
       }
     };
 
+    const handleAbsoluteOrientation = (e) => processOrientation(e, true);
     const handleStandardOrientation = (e) => {
-      if (!isMounted || useManualMode || isAutoScanning) return;
-      // If absolute orientation is already active, ignore relative orientation
+      // If absolute orientation event is supported on device, ignore relative events
       if (hasReceivedAbsoluteRef.current) return;
-
-      let heading = null;
-      if (typeof e.webkitCompassHeading !== 'undefined' && e.webkitCompassHeading !== null) {
-        heading = e.webkitCompassHeading;
-      } else if (e.absolute && typeof e.alpha === 'number' && e.alpha !== null) {
-        heading = calculateTiltCompensatedHeading(e.alpha, e.beta, e.gamma);
-      } else if (typeof e.alpha === 'number' && e.alpha !== null) {
-        heading = (360 - e.alpha) % 360;
-      }
-
-      if (heading !== null && !isNaN(heading)) {
-        setIsSensorActive(true);
-        setSensorUnsupported(false);
-        setDeviceHeading(Math.round(heading));
-      }
+      processOrientation(e, false);
     };
 
     if ('ondeviceorientationabsolute' in window) {
@@ -167,7 +212,6 @@ export default function PrayerTimesView() {
       window.addEventListener('deviceorientation', handleStandardOrientation, true);
     }
 
-    // Diagnostic check after 3 seconds: if no sensor fired, notify user gently
     const sensorTimer = setTimeout(() => {
       if (isMounted && !hasReceivedAbsoluteRef.current && !isSensorActive && permissionState !== 'prompt') {
         setSensorUnsupported(true);
@@ -208,14 +252,17 @@ export default function PrayerTimesView() {
     }
   };
 
-  // 3. Fitur Pindai / Putar Otomatis ke Arah Kiblat (Bagi User yang Tidak Tahu Arah / Device Tanpa Gyro)
+  // 4. Fitur Pindai / Putar Otomatis ke Arah Kiblat (Smooth Cubic Lerp)
   const handleAutoScanToQibla = () => {
     setIsAutoScanning(true);
     setUseManualMode(true);
     sounds.playIntroTone();
 
-    let start = currentHeading;
-    const target = Math.round(targetQibla);
+    const start = continuousRenderedRef.current;
+    const startNorm = ((start % 360) + 360) % 360;
+    const delta = getShortestAngleDelta(targetQibla, startNorm);
+    const targetContinuous = start + delta;
+
     let step = 0;
     const totalSteps = 45;
 
@@ -224,14 +271,15 @@ export default function PrayerTimesView() {
     autoScanTimerRef.current = setInterval(() => {
       step++;
       const progress = step / totalSteps;
-      // Smooth ease-out cubic interpolation
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = (start + (target - start) * eased + 360) % 360;
-      setManualHeading(Math.round(current));
+      const current = start + (targetContinuous - start) * eased;
+      setManualHeading(current);
+      continuousTargetRef.current = current;
 
       if (step >= totalSteps) {
         clearInterval(autoScanTimerRef.current);
-        setManualHeading(target);
+        setManualHeading(targetContinuous);
+        continuousTargetRef.current = targetContinuous;
         setIsAutoScanning(false);
         sounds.playRoundComplete();
       }
@@ -260,24 +308,25 @@ export default function PrayerTimesView() {
     );
   };
 
-  // Effective current heading of the phone
-  const currentHeading = useManualMode || !isSensorActive ? manualHeading : deviceHeading;
+  // Effective current heading of the phone (normalized 0-360)
+  const currentHeading = useManualMode ? manualHeading : ((continuousHeading % 360) + 360) % 360;
 
-  // Relative angle from top of phone to Ka'bah (0° = Ka'bah straight ahead)
-  const relativeAngle = (targetQibla - currentHeading + 360) % 360;
+  // Shortest angular difference to Ka'bah (-180 to 180)
+  const diffAngle = getShortestAngleDelta(targetQibla, currentHeading);
 
-  // Difference in degrees (-180 to 180)
-  let diffAngle = relativeAngle;
-  if (diffAngle > 180) diffAngle -= 360;
+  // Locked condition (aligned within ±3.5 degrees)
+  const isFacingQibla = Math.abs(diffAngle) <= 3.5;
 
-  // Locked condition (aligned within ±4 degrees)
-  const isFacingQibla = Math.abs(diffAngle) <= 4;
+  // Waterpass Bubble coordinates for center level indicator
+  const bubbleX = Math.max(-10, Math.min(10, (tiltAngles.gamma / 25) * 10));
+  const bubbleY = Math.max(-10, Math.min(10, (tiltAngles.beta / 25) * 10));
+  const isLevel = Math.abs(tiltAngles.beta) < 12 && Math.abs(tiltAngles.gamma) < 12;
 
   // Haptic chime & vibration when locked onto Qibla
   useEffect(() => {
     if (isFacingQibla && !lastVibratedRef.current) {
       if (navigator.vibrate) {
-        navigator.vibrate([60, 40, 80]);
+        navigator.vibrate([50, 40, 60]);
       }
       sounds.playIntroTone();
       lastVibratedRef.current = true;
@@ -429,6 +478,14 @@ export default function PrayerTimesView() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setShowCalibrationModal(true)}
+              className="px-3 py-2.5 rounded-2xl bg-black/40 hover:bg-white/10 text-amber-300 font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 transition active:scale-95 shadow-md"
+              title="Panduan Kalibrasi Angka 8 (Standar MyQuran)"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Kalibrasi Angka 8</span>
+            </button>
+            <button
               onClick={handleAutoScanToQibla}
               className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#b45309] to-[#d97706] hover:from-[#c2410c] hover:to-[#ea580c] text-white font-extrabold text-xs shadow-lg flex items-center gap-2 transition active:scale-95 border border-amber-400/30"
             >
@@ -447,6 +504,21 @@ export default function PrayerTimesView() {
             <Smartphone className="w-5 h-5 text-white" />
             <span>Aktifkan Kompas Gyro Otomatis (Ketuk untuk Izinkan Sensor HP)</span>
           </button>
+        )}
+
+        {/* Peringatan Kemiringan HP (Waterpass Alert seperti MyQuran) */}
+        {isSensorActive && isTilted && !useManualMode && (
+          <div className="p-3.5 rounded-2xl bg-amber-950/70 border border-amber-500/60 text-xs text-amber-200 flex items-center justify-between gap-3 animate-in fade-in shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 animate-bounce" />
+              <div className="text-[11px] leading-tight">
+                <strong>Posisikan HP Lebih Rata:</strong> Kemiringan ponsel saat ini ({Math.max(Math.abs(tiltAngles.beta), Math.abs(tiltAngles.gamma))}°). Mohon letakkan HP mendatar di telapak tangan agar kompas membaca kiblat dengan 100% presisi tanpa terpengaruh gravitasi.
+              </div>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-amber-300 bg-black/60 px-2.5 py-1.5 rounded-xl flex-shrink-0 border border-amber-500/30">
+              Ratakan HP
+            </span>
+          </div>
         )}
 
         {/* Catatan jika perangkat tidak punya chip magnetik fisik */}
@@ -524,7 +596,7 @@ export default function PrayerTimesView() {
           )}
         </div>
 
-        {/* 4. VISUAL INSTRUMEN KOMPAS BERGERAK */}
+        {/* 4. VISUAL INSTRUMEN KOMPAS BERGERAK (STANDAR FLUID MYQURAN) */}
         <div className="flex flex-col items-center justify-center py-2 space-y-4">
           {/* Top Direction Indicator of Phone */}
           <div className="flex flex-col items-center">
@@ -547,10 +619,13 @@ export default function PrayerTimesView() {
               }`}
             />
 
-            {/* Rotating Dial (Rotates opposite to device heading so North aligns with true Earth North) */}
+            {/* Rotating Dial (Rotates opposite to continuous heading so North aligns with true Earth North) */}
             <div
-              className="absolute inset-2 rounded-full bg-[#070d13] transition-transform duration-300 ease-out flex items-center justify-center"
-              style={{ transform: `rotate(${-currentHeading}deg)` }}
+              className="absolute inset-2 rounded-full bg-[#070d13] flex items-center justify-center pointer-events-none"
+              style={{
+                transform: `rotate(${-continuousHeading}deg)`,
+                willChange: 'transform'
+              }}
             >
               {/* Cardinal Markers */}
               <span className="absolute top-2 text-xs font-black text-rose-500 font-mono">U (0°)</span>
@@ -576,17 +651,20 @@ export default function PrayerTimesView() {
               </div>
             </div>
 
-            {/* Pointer Needle to Ka'bah (relative to top of device screen) */}
+            {/* Pointer Needle to Ka'bah (relative to top of device screen, smoothly synchronized) */}
             <div
-              className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none transition-transform duration-300 ease-out z-20"
-              style={{ transform: `rotate(${relativeAngle}deg)` }}
+              className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none z-20"
+              style={{
+                transform: `rotate(${targetQibla - continuousHeading}deg)`,
+                willChange: 'transform'
+              }}
             >
               {/* Pointer Tip */}
               <div className="flex flex-col items-center -mt-3.5">
-                <div className={`w-5 h-7 transition-colors ${
-                  isFacingQibla ? 'text-emerald-400' : 'text-amber-400'
+                <div className={`w-5 h-7 transition-colors duration-200 ${
+                  isFacingQibla ? 'text-emerald-400 drop-shadow-[0_0_12px_#34d399]' : 'text-amber-400 drop-shadow-md'
                 }`}>
-                  <Navigation className="w-6 h-6 fill-current transform rotate-0 drop-shadow-md" />
+                  <Navigation className="w-6 h-6 fill-current transform rotate-0" />
                 </div>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded font-mono shadow ${
                   isFacingQibla ? 'bg-emerald-600 text-white' : 'bg-[#b45309] text-white'
@@ -599,11 +677,70 @@ export default function PrayerTimesView() {
               <div className="w-3 h-3 rounded-full bg-slate-600 -mb-1 opacity-70" />
             </div>
 
-            {/* Center Pivot */}
-            <div className={`w-7 h-7 rounded-full border-2 border-white shadow-lg z-30 flex items-center justify-center transition-colors ${
-              isFacingQibla ? 'bg-emerald-500' : 'bg-[#b45309]'
+            {/* Center Pivot with Integrated MyQuran-style Waterpass / Level Indicator */}
+            <div
+              title={isLevel ? "Posisi HP Mendatar Sempurna" : "Miring: Luruskan HP mendatar di telapak tangan"}
+              className={`relative w-11 h-11 rounded-full border-2 shadow-2xl z-30 flex items-center justify-center transition-colors ${
+                isLevel
+                  ? 'border-emerald-400 bg-emerald-950/90 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
+                  : 'border-amber-400/80 bg-[#141f2b]/95 shadow-[0_0_10px_rgba(0,0,0,0.5)]'
+              }`}
+            >
+              {/* Crosshair guidelines */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-full h-[1px] bg-white/20" />
+                <div className="h-full w-[1px] bg-white/20 absolute" />
+              </div>
+
+              {/* Center Target Ring */}
+              <div className={`w-4 h-4 rounded-full border border-dashed transition-colors ${
+                isLevel ? 'border-emerald-400' : 'border-amber-400/50'
+              }`} />
+
+              {/* Floating Bubble Level */}
+              <div
+                className={`absolute w-3 h-3 rounded-full shadow transition-transform duration-100 ease-out ${
+                  isLevel ? 'bg-emerald-400 ring-2 ring-emerald-300 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 ring-1 ring-amber-200'
+                }`}
+                style={{
+                  transform: `translate(${bubbleX}px, ${bubbleY}px)`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Kartu Derajat & Status Sensor (Sama seperti MyQuran) */}
+          <div className="grid grid-cols-3 gap-2 w-full max-w-lg text-center pt-1">
+            <div className="p-2.5 rounded-2xl bg-[#0b141d] border border-amber-900/30 space-y-0.5">
+              <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Arah Kiblat</span>
+              <span className="text-base font-black text-amber-400 font-mono">
+                {Math.round(targetQibla)}°
+              </span>
+              <span className="text-[9px] text-slate-400 block font-medium">Barat Laut (BBU)</span>
+            </div>
+
+            <div className="p-2.5 rounded-2xl bg-[#0b141d] border border-amber-900/30 space-y-0.5">
+              <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Arah Ponsel</span>
+              <span className="text-base font-black text-white font-mono">
+                {Math.round(currentHeading)}°
+              </span>
+              <span className="text-[9px] text-emerald-400 block font-medium">
+                {isSensorActive ? 'Sensitif Halus' : 'Manual'}
+              </span>
+            </div>
+
+            <div className={`p-2.5 rounded-2xl border space-y-0.5 transition-colors ${
+              isFacingQibla
+                ? 'bg-emerald-950/70 border-emerald-500/70 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                : 'bg-[#0b141d] border-amber-900/30 text-amber-300'
             }`}>
-              <div className="w-2.5 h-2.5 rounded-full bg-white" />
+              <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Selisih Sudut</span>
+              <span className="text-base font-black font-mono">
+                {Math.abs(Math.round(diffAngle))}°
+              </span>
+              <span className="text-[9px] block font-bold">
+                {isFacingQibla ? 'TEPAT KIBLAT' : diffAngle > 0 ? 'Putar Kanan' : 'Putar Kiri'}
+              </span>
             </div>
           </div>
 
@@ -696,6 +833,53 @@ export default function PrayerTimesView() {
           </div>
         </div>
       </div>
+
+      {/* Modal Panduan Kalibrasi Sensor Angka 8 (Standar MyQuran) */}
+      {showCalibrationModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#101b25] border-2 border-amber-500/50 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                <span>Kalibrasi Magnetometer</span>
+              </span>
+              <button
+                onClick={() => setShowCalibrationModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Infinity / Figure-8 Graphic */}
+            <div className="py-4 relative flex items-center justify-center">
+              <div className="w-32 h-16 rounded-full border-4 border-dashed border-amber-500/50 relative flex items-center justify-center bg-amber-950/20">
+                <span className="text-4xl text-amber-400 font-black animate-pulse">∞</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-left">
+              <h4 className="text-base font-bold text-white text-center">Ayunkan HP Membentuk Angka 8</h4>
+              <p className="text-xs text-slate-300 leading-relaxed text-center">
+                Pegang smartphone Anda lalu ayunkan perlahan di udara membentuk <strong>pola angka 8 (tak hingga / ∞)</strong> sebanyak 2–3 kali.
+              </p>
+              <div className="text-[11px] text-amber-300/90 bg-amber-950/40 p-3 rounded-2xl border border-amber-600/30 leading-relaxed">
+                <strong>Mengapa perlu kalibrasi?</strong> Sama seperti di aplikasi MyQuran, gerakan angka 8 ini mengembalikan kalibrasi chip kompas fisik dari gangguan medan magnet (misal casing magnet, barang elektronik, atau rangka besi di dalam ruangan).
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowCalibrationModal(false);
+                sounds.playIntroTone();
+              }}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-black text-xs shadow-lg transition active:scale-95 border border-amber-300/40"
+            >
+              Saya Sudah Mengayunkan HP (Selesai)
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
