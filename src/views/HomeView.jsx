@@ -81,8 +81,8 @@ export default function HomeView({
             <Icon3DSholat size={44} />
           </div>
           <div className="min-w-0">
-            <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">
-              Sholat Berikutnya (Tasikmalaya)
+            <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+              Sholat Berikutnya <span className="hidden sm:inline">(Tasikmalaya)</span>
             </span>
             <strong className="text-sm sm:text-base font-black text-amber-700 font-mono truncate block">
               {nextPrayer ? `${nextPrayer.name} : ${nextPrayer.time} WIB` : 'Subuh 04:30 WIB'}
@@ -92,7 +92,7 @@ export default function HomeView({
 
         <button
           onClick={() => onSelectTab('prayer')}
-          className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-[0_4px_14px_rgba(234,88,12,0.25)] transition active:scale-95 flex-shrink-0"
+          className="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-[0_4px_14px_rgba(234,88,12,0.25)] transition active:scale-95 flex-shrink-0"
         >
           <Compass className="w-4 h-4 text-amber-100" />
           <span>Arah Kiblat</span>
@@ -109,16 +109,16 @@ export default function HomeView({
           <span className="text-[10px] text-slate-500">Sentuh menu untuk membuka</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {/* 1. Doa Manasik */}
           <button
             onClick={() => onSelectTab('worship')}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DDoa size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DDoa size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Doa Manasik
             </span>
           </button>
@@ -126,12 +126,12 @@ export default function HomeView({
           {/* 2. Kompas Kiblat */}
           <button
             onClick={() => onSelectTab('prayer')}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DKiblat size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DKiblat size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Arah Kiblat
             </span>
           </button>
@@ -139,12 +139,12 @@ export default function HomeView({
           {/* 3. Hitung Tawaf */}
           <button
             onClick={onOpenCounter}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DTawaf size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DTawaf size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-sky-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Hitung Tawaf
             </span>
           </button>
@@ -152,12 +152,12 @@ export default function HomeView({
           {/* 4. Tasbih Digital */}
           <button
             onClick={onOpenTasbih}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-purple-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-purple-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DTasbih size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DTasbih size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Tasbih Digital
             </span>
           </button>
@@ -165,12 +165,12 @@ export default function HomeView({
           {/* 5. Paket Umrah */}
           <button
             onClick={() => onSelectTab('packages')}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-orange-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-orange-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DPaket size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DPaket size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Paket Umrah
             </span>
           </button>
@@ -178,12 +178,12 @@ export default function HomeView({
           {/* 6. Tabungan BSI */}
           <button
             onClick={onOpenSavings}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DTabungan size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DTabungan size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-teal-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-teal-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Tabungan BSI
             </span>
           </button>
@@ -191,12 +191,12 @@ export default function HomeView({
           {/* 7. Panduan Nusuk */}
           <button
             onClick={onOpenNusuk}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DNusuk size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DNusuk size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Izin Nusuk
             </span>
           </button>
@@ -204,12 +204,12 @@ export default function HomeView({
           {/* 8. Cek Status */}
           <button
             onClick={onOpenLookup}
-            className="p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center text-center gap-2 group active:scale-95 shadow-sm"
+            className="p-2 sm:p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-sm min-h-[92px] sm:min-h-[105px]"
           >
-            <div className="group-hover:scale-105 transition-transform duration-200">
-              <Icon3DStatus size={50} />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <Icon3DStatus size={40} />
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-blue-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
               Cek Status
             </span>
           </button>

@@ -526,43 +526,45 @@ export default function PrayerTimesView() {
             </div>
           ) : (
             <div className="space-y-3 py-1">
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center">
                 {diffAngle > 0 ? (
-                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-5 py-3.5 rounded-2xl shadow-sm w-full max-w-md">
-                    <span className="text-3xl sm:text-4xl animate-pulse">👉</span>
-                    <div className="text-left flex-1">
-                      <span className="text-xs uppercase font-extrabold text-amber-800 block tracking-wider">
+                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-4 py-3 rounded-2xl shadow-sm w-full max-w-md">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <ArrowRight className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <span className="text-[10px] uppercase font-extrabold text-amber-800 block tracking-wider">
                         Instruksi Putar Badan:
                       </span>
-                      <strong className="text-base sm:text-lg font-black text-slate-900 block">
+                      <strong className="text-sm sm:text-base font-black text-slate-900 block truncate">
                         PUTAR TUBUH KE ARAH KANAN
                       </strong>
-                      <span className="text-xs text-amber-700 font-mono font-bold">
+                      <span className="text-xs text-amber-700 font-mono font-bold block truncate">
                         Putar sekitar {Math.abs(Math.round(diffAngle))}° lagi
                       </span>
                     </div>
-                    <ArrowRight className="w-6 h-6 text-amber-600 animate-bounce ml-auto flex-shrink-0" />
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-5 py-3.5 rounded-2xl shadow-sm w-full max-w-md">
-                    <ArrowLeft className="w-6 h-6 text-amber-600 animate-bounce mr-auto flex-shrink-0" />
-                    <div className="text-right flex-1">
-                      <span className="text-xs uppercase font-extrabold text-amber-800 block tracking-wider">
+                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-4 py-3 rounded-2xl shadow-sm w-full max-w-md">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <ArrowLeft className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <span className="text-[10px] uppercase font-extrabold text-amber-800 block tracking-wider">
                         Instruksi Putar Badan:
                       </span>
-                      <strong className="text-base sm:text-lg font-black text-slate-900 block">
+                      <strong className="text-sm sm:text-base font-black text-slate-900 block truncate">
                         PUTAR TUBUH KE ARAH KIRI
                       </strong>
-                      <span className="text-xs text-amber-700 font-mono font-bold">
+                      <span className="text-xs text-amber-700 font-mono font-bold block truncate">
                         Putar sekitar {Math.abs(Math.round(diffAngle))}° lagi
                       </span>
                     </div>
-                    <span className="text-3xl sm:text-4xl animate-pulse">👈</span>
                   </div>
                 )}
               </div>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 text-center max-w-md mx-auto">
                 Pegang HP mendatar di telapak tangan, putar badan Anda perlahan hingga tanda panah di atas sejajar dengan Ka'bah dan layar menyala hijau.
               </p>
             </div>
@@ -616,15 +618,15 @@ export default function PrayerTimesView() {
                 style={{ transform: `rotate(${targetQibla}deg)` }}
               >
                 <div className="flex flex-col items-center -mt-2.5">
-                  <span className="text-lg select-none">🕋</span>
-                  <span className="text-[8px] font-black uppercase text-amber-300 bg-black/90 px-1.5 py-0.5 rounded shadow border border-amber-500/50">
+                  <span className="text-xl select-none leading-none">🕋</span>
+                  <span className="text-[8px] font-black uppercase text-amber-300 bg-black/90 px-1.5 py-0.5 rounded shadow border border-amber-500/50 mt-0.5 tracking-wider">
                     KIBLAT
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Pointer Needle to Ka'bah */}
+            {/* Pointer Needle to Ka'bah (Sleek Pointer Arrow without redundant text box) */}
             <div
               className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none z-20"
               style={{
@@ -632,22 +634,19 @@ export default function PrayerTimesView() {
                 willChange: 'transform'
               }}
             >
-              {/* Pointer Tip */}
-              <div className="flex flex-col items-center -mt-3.5">
-                <div className={`w-5 h-7 transition-colors duration-200 ${
-                  isFacingQibla ? 'text-emerald-400 drop-shadow-[0_0_12px_#34d399]' : 'text-amber-400 drop-shadow-md'
+              {/* Sleek Pointer Tip */}
+              <div className="flex flex-col items-center -mt-3">
+                <div className={`transition-all duration-200 ${
+                  isFacingQibla
+                    ? 'text-emerald-400 drop-shadow-[0_0_12px_#34d399] scale-110'
+                    : 'text-amber-400 drop-shadow-md'
                 }`}>
-                  <Navigation className="w-6 h-6 fill-current transform rotate-0" />
+                  <Navigation className="w-7 h-7 fill-current transform rotate-0" />
                 </div>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded font-mono shadow ${
-                  isFacingQibla ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
-                }`}>
-                  Ka'bah
-                </span>
               </div>
 
               {/* Counterweight Tail */}
-              <div className="w-3 h-3 rounded-full bg-slate-500 -mb-1 opacity-70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-slate-500/70 -mb-0.5" />
             </div>
 
             {/* Center Pivot with Integrated MyQuran-style Waterpass */}
@@ -683,35 +682,35 @@ export default function PrayerTimesView() {
           </div>
 
           {/* Kartu Derajat & Status Sensor */}
-          <div className="grid grid-cols-3 gap-2 w-full max-w-lg text-center pt-1">
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
-              <span className="text-[9px] uppercase font-bold text-slate-500 block tracking-wider">Arah Kiblat</span>
-              <span className="text-base font-black text-amber-700 font-mono">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full max-w-lg text-center pt-1">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
+              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Kiblat</span>
+              <span className="text-sm sm:text-base font-black text-amber-700 font-mono block">
                 {Math.round(targetQibla)}°
               </span>
-              <span className="text-[9px] text-slate-500 block font-medium">Barat Laut (BBU)</span>
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">Barat Laut (BBU)</span>
             </div>
 
-            <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
-              <span className="text-[9px] uppercase font-bold text-slate-500 block tracking-wider">Arah Ponsel</span>
-              <span className="text-base font-black text-slate-900 font-mono">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
+              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Ponsel</span>
+              <span className="text-sm sm:text-base font-black text-slate-900 font-mono block">
                 {Math.round(currentHeading)}°
               </span>
-              <span className="text-[9px] text-emerald-600 block font-medium">
+              <span className="text-[8px] sm:text-[9px] text-emerald-600 block font-medium truncate">
                 {isSensorActive ? 'Sensitif Halus' : 'Manual'}
               </span>
             </div>
 
-            <div className={`p-2.5 rounded-2xl border space-y-0.5 transition-colors ${
+            <div className={`p-2 sm:p-2.5 rounded-2xl border space-y-0.5 transition-colors min-w-0 ${
               isFacingQibla
                 ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm'
                 : 'bg-slate-50 border-slate-200 text-amber-700'
             }`}>
-              <span className="text-[9px] uppercase font-bold text-slate-500 block tracking-wider">Selisih Sudut</span>
-              <span className="text-base font-black font-mono">
+              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Selisih Sudut</span>
+              <span className="text-sm sm:text-base font-black font-mono block">
                 {Math.abs(Math.round(diffAngle))}°
               </span>
-              <span className="text-[9px] block font-bold">
+              <span className="text-[8px] sm:text-[9px] block font-bold truncate">
                 {isFacingQibla ? 'TEPAT KIBLAT' : diffAngle > 0 ? 'Putar Kanan' : 'Putar Kiri'}
               </span>
             </div>

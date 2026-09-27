@@ -15,23 +15,24 @@ export default function Header({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm transition-all">
       {/* 1. Baris Legalitas Resmi (Navy Kontras & Berwibawa) */}
-      <div className="bg-[#0f172a] text-[10px] sm:text-xs py-1.5 px-3 sm:px-6 flex items-center justify-between text-slate-300">
-        <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-          <span className="flex items-center gap-1.5 text-amber-400 font-bold">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            <span>Kemenag RI: PPIU U.310 • PIHK 9120313132406</span>
+      <div className="bg-[#0f172a] text-[10px] sm:text-xs py-1.5 px-3 sm:px-6 flex items-center justify-between text-slate-300 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+          <ShieldCheck className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+          <span className="text-amber-400 font-bold truncate">
+            Kemenag RI: PPIU U.310
           </span>
+          <span className="text-slate-500 hidden md:inline">• PIHK 9120313132406</span>
           <span className="text-slate-600 hidden sm:inline">•</span>
           <span className="text-emerald-400 hidden sm:inline font-bold">Akreditasi A</span>
         </div>
 
-        <div className="flex items-center gap-3 text-[10px] text-slate-300">
-          <span className="hidden sm:inline text-slate-400">Cabang Tasikmalaya</span>
+        <div className="flex items-center gap-2 text-[10px] text-slate-300 flex-shrink-0">
+          <span className="hidden sm:inline text-slate-400">Tasikmalaya</span>
           <a
             href="https://wa.me/628112113363"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition font-bold"
+            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition font-bold whitespace-nowrap"
           >
             <Phone className="w-3 h-3 text-emerald-400" />
             <span>0811-2113-363</span>

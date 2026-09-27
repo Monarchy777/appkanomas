@@ -81,7 +81,7 @@ export default function JamaahStatusLookupModal({ onClose }) {
             </div>
 
             {/* Quick Sample Click Chips */}
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-1">
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 pt-1">
               <span>Coba data demo:</span>
               <button
                 type="button"

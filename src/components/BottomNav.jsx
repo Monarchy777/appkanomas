@@ -35,13 +35,13 @@ export default function BottomNav({ activeTab, onSelectTab, role }) {
             >
               {/* Active Golden Accent Bar on top */}
               {isActive && (
-                <span className="absolute -top-1 w-7 h-1 rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 shadow-sm" />
+                <span className="absolute top-0 w-8 h-1 rounded-b-full bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 shadow-xs" />
               )}
 
               <div
-                className={`p-1.5 rounded-xl transition-all duration-200 ${
+                className={`p-1.5 rounded-xl transition-colors duration-200 ${
                   isActive
-                    ? `${tab.activeBg} shadow-sm scale-110`
+                    ? `${tab.activeBg} shadow-xs`
                     : 'text-slate-400 hover:text-slate-600'
                 }`}
               >
@@ -49,7 +49,7 @@ export default function BottomNav({ activeTab, onSelectTab, role }) {
               </div>
 
               <span className={`text-[10px] leading-tight tracking-tight mt-0.5 truncate max-w-full ${
-                isActive ? 'font-bold text-slate-900' : 'text-slate-500'
+                isActive ? 'font-bold text-slate-900' : 'text-slate-500 font-medium'
               }`}>
                 {tab.label}
               </span>

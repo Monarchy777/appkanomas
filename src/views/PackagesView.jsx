@@ -199,16 +199,16 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
                 {/* Footer Action Card */}
                 <div className="p-5 pt-0">
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase block font-medium">
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-slate-500 uppercase block font-medium truncate">
                         {isTabungan ? 'Setoran Awal Ringan' : 'Harga Quad Mulai'}
                       </span>
-                      <span className="text-base sm:text-lg font-black text-amber-700 font-mono">
+                      <span className="text-base sm:text-lg font-black text-amber-700 font-mono block truncate">
                         Rp {priceQuad.toLocaleString('id-ID')}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
                         onClick={() => onOpenPackageDetail(pkg)}
                         className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition border border-slate-200"

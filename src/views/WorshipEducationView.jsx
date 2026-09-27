@@ -441,14 +441,14 @@ export default function WorshipEducationView() {
               <div className="space-y-4">
                 {/* Visual Lingkaran Putaran */}
                 <div className="flex flex-col items-center justify-center py-2 space-y-2">
-                  <div className="relative w-36 h-36 rounded-full border-4 border-amber-400/40 flex items-center justify-center bg-slate-50 shadow-inner">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 absolute top-4">
+                  <div className="w-36 h-36 rounded-full border-4 border-amber-400/40 flex flex-col items-center justify-center bg-slate-50 shadow-inner">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                       {counterMode === 'thawaf' ? 'Putaran Ke' : 'Lintasan Ke'}
                     </span>
-                    <span className="text-6xl font-black text-amber-600 font-mono pt-2">
+                    <span className="text-5xl font-black text-amber-600 font-mono leading-none my-1">
                       {round}
                     </span>
-                    <span className="text-xs font-bold text-slate-400 absolute bottom-4 font-mono">
+                    <span className="text-xs font-bold text-slate-400 font-mono">
                       dari 7
                     </span>
                   </div>
@@ -552,14 +552,14 @@ export default function WorshipEducationView() {
                 onClick={handleTapTasbih}
                 className="w-44 h-44 rounded-full bg-gradient-to-br from-purple-500 via-indigo-600 to-purple-800 border-4 border-purple-300 shadow-[0_10px_25px_rgba(147,51,234,0.35)] active:scale-95 transition flex flex-col items-center justify-center group"
               >
-                <span className="text-xs font-bold uppercase text-purple-200 tracking-wider">
+                <span className="text-[11px] font-bold uppercase text-purple-200 tracking-wider">
                   Hitungan
                 </span>
-                <span className="text-6xl font-black text-white font-mono group-hover:scale-105 transition">
+                <span className="text-5xl sm:text-6xl font-black text-white font-mono leading-none my-1 group-hover:scale-105 transition-transform">
                   {tasbihCount}
                 </span>
                 <span className="text-[10px] text-purple-200 font-mono">
-                  Target: {selectedZikir.target}
+                  Target: {selectedZikir.target}x
                 </span>
               </button>
               <span className="text-xs text-slate-500">
