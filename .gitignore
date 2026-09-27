@@ -53,3 +53,8 @@ ios/App/Pods/
 ios/App/App/public/
 ios/DerivedData/
 ios/xcuserdata/
+
+# WhatsApp Bridge Auth & Temp QR
+services/wa-commander/auth_info/
+services/wa-commander/qr-code.png
+services/wa-commander/status.json
