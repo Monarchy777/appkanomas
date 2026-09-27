@@ -28,6 +28,8 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
+const net = require('net');
 
 const BASE_DIR = path.resolve(__dirname, '../../');
 const AUTH_DIR = path.resolve(__dirname, 'auth_info');
@@ -53,6 +55,71 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const commandQueue = [];
 let isBusyExecuting = false;
 let executionTimeoutTimer = null;
+
+// Dev Server Manager
+let devServerProcess = null;
+const devServerPort = 3000;
+let isDevServerStarting = false;
+
+function isPortActive(port) {
+  return new Promise((resolve) => {
+    const s = new net.Socket();
+    s.setTimeout(1200);
+    s.once('connect', () => {
+      s.destroy();
+      resolve(true);
+    });
+    s.once('error', () => {
+      s.destroy();
+      resolve(false);
+    });
+    s.once('timeout', () => {
+      s.destroy();
+      resolve(false);
+    });
+    s.connect(port, '127.0.0.1');
+  });
+}
+
+async function ensureDevServerRunning(forceRestart = false) {
+  if (forceRestart && devServerProcess) {
+    try {
+      console.log('[DEV-SERVER] Mematikan proses dev server lama...');
+      devServerProcess.kill();
+    } catch (e) {}
+    devServerProcess = null;
+  }
+
+  const active = await isPortActive(devServerPort);
+  if (active && !forceRestart) {
+    return true;
+  }
+
+  if (isDevServerStarting) return;
+  isDevServerStarting = true;
+
+  console.log(`[DEV-SERVER] Menjalankan Vite dev server pada port ${devServerPort}...`);
+  try {
+    devServerProcess = spawn('cmd.exe', ['/c', 'npm run dev'], {
+      cwd: BASE_DIR,
+      stdio: 'ignore',
+      detached: false
+    });
+
+    devServerProcess.on('exit', (code) => {
+      console.log(`[DEV-SERVER] Dev server berhenti dengan status: ${code}`);
+      devServerProcess = null;
+      isDevServerStarting = false;
+    });
+
+    setTimeout(() => {
+      isDevServerStarting = false;
+    }, 4000);
+  } catch (err) {
+    console.error('[DEV-SERVER-ERR]', err.message);
+    isDevServerStarting = false;
+  }
+}
 
 function updateStatus(statusObj) {
   let current = {};
@@ -161,10 +228,17 @@ async function processNextInQueue() {
 
   // Set timeout batas waktu eksekusi 4 menit agar antrian tidak macet jika terjadi crash
   if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
-  executionTimeoutTimer = setTimeout(() => {
+  executionTimeoutTimer = setTimeout(async () => {
     console.warn('[QUEUE] Batas waktu eksekusi terlampaui (timeout 4 menit). Melepaskan antrian...');
+    const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+    await sendWhatsAppMessage(
+      targetJid,
+      `⚠️ *Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit):*\nPerintah sebelumnya dihentikan demi stabilitas.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan.\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
+    );
     isBusyExecuting = false;
-    processNextInQueue();
+    commandQueue.length = 0;
+    updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+    ensureDevServerRunning(true);
   }, 240000);
 
   try {
@@ -172,7 +246,9 @@ async function processNextInQueue() {
   } catch (err) {
     console.error('[QUEUE-ERR]', err.message);
     isBusyExecuting = false;
-    processNextInQueue();
+    commandQueue.length = 0;
+    updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+    ensureDevServerRunning(true);
   }
 }
 
@@ -224,7 +300,20 @@ function checkTranscriptUpdates() {
         if (entry.step_index <= lastProcessedStepIndex) continue;
         lastProcessedStepIndex = entry.step_index;
 
-        if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
+        if (entry.status === 'ERROR' || (entry.source === 'MODEL' && entry.status === 'ERROR')) {
+          console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index}! Mereset antrian dan restart server...`);
+          const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+          sendWhatsAppMessage(
+            targetJid,
+            `⚠️ *Pemberitahuan Kendala Eksekusi AI:*\nPerintah tidak dapat diselesaikan atau terjadi kesalahan internal.\n\n🔄 *Tindakan Otomatis:* \n• Antrian perintah dihentikan/direset.\n• Vite Dev Server (Port 3000) dipastikan aktif.\n• WhatsApp Bridge tetap online & siap menerima perintah baru.`
+          );
+
+          if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
+          isBusyExecuting = false;
+          commandQueue.length = 0;
+          updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+          ensureDevServerRunning(true);
+        } else if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
           const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
           if (entry.content && !hasToolCalls) {
             console.log(`[TRANSCRIPT] Terdeteksi jawaban final AI (step ${entry.step_index})! Mengirim ke WhatsApp...`);
@@ -238,6 +327,7 @@ function checkTranscriptUpdates() {
             if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
             isBusyExecuting = false;
             updateStatus({ isBusyExecuting: false, currentCommand: null });
+            ensureDevServerRunning(false);
 
             // Jalankan antrian berikutnya jika ada
             if (commandQueue.length > 0) {
@@ -430,6 +520,17 @@ async function startWhatsAppBridge() {
         return;
       }
 
+      // Quick command: RESTART
+      if (text.toLowerCase() === 'restart') {
+        if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
+        isBusyExecuting = false;
+        commandQueue.length = 0;
+        updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+        await ensureDevServerRunning(true);
+        await sendWhatsAppMessage(remoteJid, `🔄 *Restart Berhasil!*\n━━━━━━━━━━━━━━━━━━━━━━━━\n• Semua perintah direset (antrian: 0).\n• Vite Dev Server (Port 3000) dimulai ulang.\n• WhatsApp Bridge tetap online & siap menerima instruksi.`, msg);
+        return;
+      }
+
       // Quick command: STATUS
       if (text.toLowerCase() === 'status') {
         const queueInfo = commandQueue.length > 0 
@@ -438,8 +539,10 @@ async function startWhatsAppBridge() {
         const execInfo = isBusyExecuting 
           ? '⚙️ Status AI: Sedang aktif memproses tugas.' 
           : '💤 Status AI: Siap menerima instruksi baru.';
+        const devActive = await isPortActive(devServerPort);
+        const devInfo = devActive ? '🟢 Aktif (Port 3000)' : '🔴 Tidak Aktif';
         
-        await sendWhatsAppMessage(remoteJid, `📊 *STATUS WHATSAPP COMMANDER*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${execInfo}\n${queueInfo}\n🌐 Server: Online (Port ${BRIDGE_HTTP_PORT})\n🕒 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
+        await sendWhatsAppMessage(remoteJid, `📊 *STATUS WHATSAPP COMMANDER*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${execInfo}\n${queueInfo}\n💻 Dev Server: ${devInfo}\n🌐 WA Bridge: Online (Port ${BRIDGE_HTTP_PORT})\n🕒 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
         return;
       }
 
@@ -453,7 +556,8 @@ async function startWhatsAppBridge() {
 • Pesan ke orang lain atau grup otomatis diabaikan aman.
 
 *Perintah Khusus:*
-• *status* : Cek status AI dan antrian saat ini
+• *status* : Cek status AI, Dev Server, dan antrian
+• *restart* : Hentikan semua proses macet, restart Dev Server & Bridge
 • *ping* : Cek koneksi bot`;
         await sendWhatsAppMessage(remoteJid, helpText, msg);
         return;
@@ -477,10 +581,17 @@ async function startWhatsAppBridge() {
       await sendWhatsAppMessage(remoteJid, `⏳ *Instruksi Diterima & Sedang Diproses:*\n"${text}"\n\n🤖 Sedang diproses langsung oleh AI Antigravity... Mohon tunggu sebentar.`, msg);
 
       if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
-      executionTimeoutTimer = setTimeout(() => {
+      executionTimeoutTimer = setTimeout(async () => {
         console.warn('[QUEUE] Timeout 4 menit terlampaui. Melepaskan status busy...');
+        const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+        await sendWhatsAppMessage(
+          targetJid,
+          `⚠️ *Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit):*\nPerintah dihentikan demi stabilitas.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan.\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
+        );
         isBusyExecuting = false;
-        processNextInQueue();
+        commandQueue.length = 0;
+        updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+        ensureDevServerRunning(true);
       }, 240000);
 
       await forwardToAntigravity(text);
@@ -502,3 +613,7 @@ process.on('unhandledRejection', (reason) => {
 
 startHttpServer();
 startWhatsAppBridge();
+ensureDevServerRunning();
+setInterval(() => {
+  ensureDevServerRunning();
+}, 45000);

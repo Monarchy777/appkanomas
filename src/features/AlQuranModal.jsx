@@ -36,6 +36,9 @@ import {
   Download
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { Capacitor } from '@capacitor/core';
+import { Share as CapShare } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 
 // DAFTAR 114 SURAH LENGKAP DENGAN METADATA RESMI (WAHYU, JUZ, HALAMAN)
@@ -269,10 +272,10 @@ export const TAJWEED_THEME_RULES = {
     ghunnah: '#e11d48',
     qalqalah: '#0284c7',
     iqlab: '#7c3aed',
-    ikhfa: '#065f46',
+    ikhfa: '#059669',
     madd: '#b45309',
     maddLazim: '#dc2626',
-    idghamBila: '#dc2626',
+    idghamBila: '#ea580c',
     base: '#064e3b'
   },
   light: {
@@ -282,7 +285,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#059669',
     madd: '#d97706',
     maddLazim: '#dc2626',
-    idghamBila: '#dc2626',
+    idghamBila: '#ea580c',
     base: '#000000'
   },
   dark: {
@@ -292,7 +295,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#34d399',
     madd: '#fbbf24',
     maddLazim: '#f87171',
-    idghamBila: '#f87171',
+    idghamBila: '#fb923c',
     base: '#ffffff'
   },
   sepia: {
@@ -302,7 +305,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#15803d',
     madd: '#b45309',
     maddLazim: '#b91c1c',
-    idghamBila: '#b91c1c',
+    idghamBila: '#c2410c',
     base: '#1c1917'
   },
   navy: {
@@ -312,7 +315,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#34d399',
     madd: '#fbbf24',
     maddLazim: '#f87171',
-    idghamBila: '#f87171',
+    idghamBila: '#fb923c',
     base: '#ffffff'
   },
   cream: {
@@ -322,7 +325,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#047857',
     madd: '#b45309',
     maddLazim: '#dc2626',
-    idghamBila: '#dc2626',
+    idghamBila: '#c2410c',
     base: '#18181b'
   },
   kabah: {
@@ -332,7 +335,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#34d399',
     madd: '#fbbf24',
     maddLazim: '#f87171',
-    idghamBila: '#f87171',
+    idghamBila: '#fb923c',
     base: '#ffffff'
   },
   nature: {
@@ -342,7 +345,7 @@ export const TAJWEED_THEME_RULES = {
     ikhfa: '#34d399',
     madd: '#fbbf24',
     maddLazim: '#f87171',
-    idghamBila: '#f87171',
+    idghamBila: '#fb923c',
     base: '#ffffff'
   }
 };
@@ -372,72 +375,165 @@ export function applyKashidaToArabic(text) {
   );
 }
 
-// RENDER TAJWID AMAN DENGAN RTL MURNI (GRAPHEME-AWARE TANPA MEMUTUS LIGATUR KATA)
+// RENDER TAJWID AMAN DENGAN RTL MURNI DAN KAIDAH ILMU TAJWID LENGKAP & AKURAT
 function renderSafeTajweed(text, themeMode = 'mushaf') {
   if (!text) return null;
   const palette = TAJWEED_THEME_RULES[themeMode] || TAJWEED_THEME_RULES.mushaf;
 
-  const words = text.split(' ');
-  return words.map((word, wordIdx) => {
-    // Regex grapheme cluster: konsonan dasar (selain \u0640) beserta SEMUA tanda harakat/waqaf/kashida yang menempel
-    // Memasukkan \u0640 (tatweel) ke dalam marks agar ligatur kaligrafi tidak terpotong ke span terpisah!
-    const GRAPHEME_REGEX = /([\u0621-\u063F\u0641-\u064A\u0671-\u06D3])([\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
+  // 1. Ekstrak seluruh grapheme cluster dari teks ayat lengkap
+  // Konsonan dasar (selain \u0640) beserta SEMUA tanda harakat/waqaf/kashida/tatweel yang menempel
+  const GRAPHEME_REGEX = /([\u0621-\u063F\u0641-\u064A\u0671-\u06D3])([\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
+  const graphemes = [];
+  let match;
 
-    while ((match = GRAPHEME_REGEX.exec(word)) !== null) {
-      const base = match[1];
-      const marks = match[2] || '';
-      const fullGrapheme = match[0];
+  while ((match = GRAPHEME_REGEX.exec(text)) !== null) {
+    graphemes.push({
+      base: match[1],
+      marks: match[2] || '',
+      full: match[0],
+      start: match.index,
+      end: GRAPHEME_REGEX.lastIndex
+    });
+  }
 
-      let color = null;
-      let title = '';
+  // 2. Petakan aturan tajwid ke setiap grapheme dengan analisis lookahead konsonan berikutnya
+  const annotations = new Map();
 
-      if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
+  for (let i = 0; i < graphemes.length; i++) {
+    const g = graphemes[i];
+    const base = g.base;
+    const marks = g.marks;
+
+    // Cari konsonan berikutnya (skip alif madd/maqsurah/washl tanpa harakat)
+    let nextGrapheme = null;
+    for (let j = i + 1; j < graphemes.length; j++) {
+      const nb = graphemes[j].base;
+      // Skip alif (ا) atau alif maqsurah (ى) atau alif washl (ٱ) yang tidak berharakat
+      if ((nb === 'ا' || nb === 'ى' || nb === 'ٱ') && !/[\u064B-\u0652]/.test(graphemes[j].marks)) {
+        continue;
+      }
+      nextGrapheme = graphemes[j];
+      break;
+    }
+
+    const nextBase = nextGrapheme ? nextGrapheme.base : null;
+    const nextMarks = nextGrapheme ? nextGrapheme.marks : '';
+
+    const isTanwin = marks.includes('\u064B') || marks.includes('\u064C') || marks.includes('\u064D');
+    const isNunSakinah = (base === 'ن') && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null));
+    const hasSmallMeem = marks.includes('\u06E2') || marks.includes('\u06ED');
+
+    let color = null;
+    let title = '';
+
+    // A. Hukum Nun Sakinah & Tanwin
+    if (isTanwin || isNunSakinah || hasSmallMeem) {
+      if (hasSmallMeem || nextBase === 'ب') {
+        color = palette.iqlab;
+        title = 'Iqlab (Nun/Tanwin menjadi Mim & Dengung)';
+      } else if (nextBase && 'ينمو'.includes(nextBase)) {
         color = palette.ghunnah;
-        title = 'Ghunnah / Idgham Bighunnah (Dengung 2 Harakat)';
-      } else if ('قطبجد'.includes(base) && marks.includes('\u0652')) {
-        color = palette.qalqalah;
-        title = 'Qalqalah (Memantul)';
-      } else if (marks.includes('\u0653')) {
+        title = 'Idgham Bighunnah (Melebur dengan Dengung 2 Harakat)';
+      } else if (nextBase && 'لر'.includes(nextBase)) {
+        color = palette.idghamBila;
+        title = 'Idgham Bilaghunnah (Melebur Tanpa Dengung)';
+      } else if (nextBase && 'ءأإهعحغخ'.includes(nextBase)) {
+        // Idzhar Halqi: Dibaca jelas, TIDAK diwarnai hijau ikhfa!
+        color = null;
+        title = 'Idzhar Halqi (Dibaca Jelas Tanpa Dengung)';
+      } else if (nextBase && 'تثجدذزسشصضطظفقك'.includes(nextBase)) {
+        color = palette.ikhfa;
+        title = 'Ikhfa Haqiqi (Samar-samar dengan Dengung)';
+      } else if (isTanwin && marks.includes('\u064B') && !nextBase) {
+        color = palette.madd;
+        title = "Madd 'Iwadh (Panjang 2 Harakat Saat Waqaf)";
+      }
+    }
+    // B. Ghunnah Musyaddadah (Nun bertasydid / Mim bertasydid)
+    else if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
+      color = palette.ghunnah;
+      title = 'Ghunnah Musyaddadah (Dengung 2 Harakat)';
+    }
+    // C. Hukum Mim Sakinah
+    else if (base === 'م' && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null))) {
+      if (nextBase === 'ب') {
+        color = palette.ikhfa;
+        title = 'Ikhfa Syafawi (Mim Sukun bertemu Ba, Samar dengan Dengung)';
+      } else if (nextBase === 'م') {
+        color = palette.ghunnah;
+        title = 'Idgham Mimi / Mutamatsilain (Dengung 2 Harakat)';
+      }
+    }
+    // D. Qalqalah (Baju Di Thoko: ب ج د ط ق)
+    else if ('قطبجد'.includes(base) && (marks.includes('\u0652') || marks.includes('\u06E1') || (!nextBase && !/[\u064E\u064F\u0650\u0651]/.test(marks)))) {
+      color = palette.qalqalah;
+      title = 'Qalqalah (Memantul)';
+    }
+    // E. Madd Wajib / Jaiz / Lazim (Tanda Layar ~ / \u0653)
+    else if (marks.includes('\u0653') || marks.includes('~')) {
+      if (nextMarks.includes('\u0651')) {
         color = palette.maddLazim;
-        title = 'Madd 6 Harakat';
-      } else if (marks.includes('\u0670') || marks.includes('~')) {
+        title = 'Madd Lazim (Panjang 6 Harakat)';
+      } else if (nextBase && 'ءأإ'.includes(nextBase)) {
+        color = palette.madd;
+        title = 'Madd Wajib / Jaiz (Panjang 4-5 Harakat)';
+      } else {
         color = palette.madd;
         title = 'Madd (Panjang Harakat)';
-      } else if (
-        marks.includes('\u064B') ||
-        marks.includes('\u064C') ||
-        marks.includes('\u064D') ||
-        (base === 'ن' && marks.includes('\u0652'))
-      ) {
-        color = palette.ikhfa;
-        title = 'Ikhfa / Tanwin';
       }
+    }
+    // F. Madd Asli / Thabi'i (Alif Khanjariyah \u0670)
+    else if (marks.includes('\u0670')) {
+      color = palette.madd;
+      title = "Madd Asli / Thabi'i (Panjang 2 Harakat)";
+    }
 
-      if (color) {
+    if (color) {
+      annotations.set(g.start, { color, title, full: g.full, end: g.end });
+    }
+  }
+
+  // 3. Render per kata agar tetap inline RTL murni tanpa memutus ligatur kaligrafi
+  const cleanText = text.trim();
+  const words = cleanText.split(/\s+/);
+  let charCursor = text.indexOf(cleanText);
+
+  return words.map((word, wordIdx) => {
+    const wordStart = text.indexOf(word, charCursor);
+    const wordEnd = wordStart + word.length;
+    charCursor = wordEnd;
+
+    const parts = [];
+    let localIndex = 0;
+
+    for (let c = 0; c < word.length; ) {
+      const globalPos = wordStart + c;
+      if (annotations.has(globalPos)) {
+        const item = annotations.get(globalPos);
+        if (c > localIndex) {
+          parts.push(word.substring(localIndex, c));
+        }
         parts.push(
           <span
-            key={`g-${match.index}`}
-            style={{ color, display: 'inline', fontWeight: 400 }}
+            key={`g-${globalPos}`}
+            style={{ color: item.color, display: 'inline', fontWeight: 500 }}
             className="font-normal select-text transition-colors duration-150"
-            title={title}
+            title={item.title}
           >
-            {fullGrapheme}
+            {item.full}
           </span>
         );
+        c += item.full.length;
+        localIndex = c;
       } else {
-        parts.push(fullGrapheme);
+        c++;
       }
-      lastIndex = GRAPHEME_REGEX.lastIndex;
     }
 
-    if (lastIndex < word.length) {
-      parts.push(word.substring(lastIndex));
+    if (localIndex < word.length) {
+      parts.push(word.substring(localIndex));
     }
 
-    // Aliran teks kata murni inline RTL, elastis mengikuti ukuran font tanpa tumpang tindih
     return (
       <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate' }}>
         {parts}
@@ -541,6 +637,7 @@ export default function AlQuranModal({ onClose }) {
   const shareCardRef = useRef(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [shareFeedback, setShareFeedback] = useState('');
+  const [previewCardData, setPreviewCardData] = useState(null);
 
   const [showNoteModal, setShowNoteModal] = useState(null); // Ayat object for Note
   const [noteInput, setNoteInput] = useState('');
@@ -974,9 +1071,12 @@ export default function AlQuranModal({ onClose }) {
       const canvas = await html2canvas(shareCardRef.current, {
         scale: 2, // High resolution (Retina / HD)
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: null,
-        logging: false
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        imageTimeout: 8000
       });
       return canvas;
     } catch (err) {
@@ -990,53 +1090,73 @@ export default function AlQuranModal({ onClose }) {
   // 2. Bagikan Gambar Kartu Ayat Langsung ke WhatsApp / Sosmed
   const handleShareCardImage = async (ayat) => {
     if (!ayat) return;
-    const canvas = await generateCardCanvas();
     const arabText = (mushafType === 'madinah' && ayat.teksArabMadinah) ? ayat.teksArabMadinah : ayat.teksArab;
     const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
 
-    if (canvas) {
+    const canvas = await generateCardCanvas();
+    if (!canvas) {
+      handleQuickShareWA(ayat);
+      return;
+    }
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const fileName = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
+
+    // A. Native Platform (Capacitor Android / iOS APK)
+    if (Capacitor.isNativePlatform()) {
       try {
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-        if (blob) {
-          const file = new File([blob], `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`, { type: 'image/png' });
+        setShareFeedback('📱 Menyiapkan gambar kartu ayat untuk dibagikan...');
+        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+        const savedFile = await Filesystem.writeFile({
+          path: `card-${selectedSurah.nomor}-${ayat.nomorAyat}-${Date.now()}.png`,
+          data: base64Data,
+          directory: Directory.Cache
+        });
 
-          // Coba Web Share API dengan file gambar (Android / iOS / Modern WebView)
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
-              text: captionText
-            });
-            setShareFeedback('✅ Gambar kartu ayat berhasil dibagikan!');
-            setTimeout(() => setShareFeedback(''), 3000);
-            return;
-          }
-
-          // Fallback: Jika browser/perangkat tidak mendukung share file gambar via API, otomatis download gambarnya
-          const downloadUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
-          link.click();
-          URL.revokeObjectURL(downloadUrl);
-
-          setShareFeedback('📸 Gambar HD berhasil diunduh ke galeri! Membuka WhatsApp...');
-          setTimeout(() => {
-            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(captionText)}`;
-            window.open(waUrl, '_blank');
-          }, 800);
-          setTimeout(() => setShareFeedback(''), 4500);
-          return;
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('Error sharing image:', err);
-        }
+        await CapShare.share({
+          title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
+          text: captionText,
+          url: savedFile.uri,
+          dialogTitle: 'Bagikan Kartu Ayat Al-Qur\'an'
+        });
+        setShareFeedback('✅ Membuka lembar berbagi...');
+        setTimeout(() => setShareFeedback(''), 3000);
+        return;
+      } catch (nativeErr) {
+        console.error('Error sharing native file:', nativeErr);
       }
     }
 
-    // Fallback teks jika canvas gagal
-    handleQuickShareWA(ayat);
+    // B. Web Platform (Browser)
+    try {
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      if (blob && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
+            text: captionText
+          });
+          setShareFeedback('✅ Gambar kartu ayat berhasil dibagikan!');
+          setTimeout(() => setShareFeedback(''), 3000);
+          return;
+        }
+      }
+    } catch (shareErr) {
+      if (shareErr.name === 'AbortError') return;
+      console.warn('Web share file failed:', shareErr);
+    }
+
+    // C. Fallback: Buka Pratinjau Gambar Siap Unduh & Share WhatsApp
+    try {
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      setPreviewCardData({ dataUrl, blob, captionText, ayat, fileName });
+      setShareFeedback('📸 Gambar HD siap disimpan / dibagikan!');
+      setTimeout(() => setShareFeedback(''), 3000);
+    } catch (e) {
+      handleQuickShareWA(ayat);
+    }
   };
 
   // 3. Unduh File Gambar Kartu Ayat (HD PNG)
@@ -1047,12 +1167,59 @@ export default function AlQuranModal({ onClose }) {
       alert('Gagal membuat gambar kartu ayat.');
       return;
     }
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
-    a.click();
-    setShareFeedback('✅ Gambar kartu ayat berhasil disimpan ke perangkat!');
-    setTimeout(() => setShareFeedback(''), 3000);
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const fileName = `kanomas-ayat-${selectedSurah.nomor}-${ayat.nomorAyat}.png`;
+
+    // A. Native Platform (Capacitor Android / iOS APK)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        setShareFeedback('💾 Menyimpan gambar kartu ayat ke perangkat...');
+        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents
+        });
+
+        // Buka share sheet untuk kemudahan simpan ke Galeri / Photos / Drive
+        await CapShare.share({
+          title: `Simpan Kartu Ayat Q.S. ${selectedSurah.namaLatin}:${ayat.nomorAyat}`,
+          url: savedFile.uri,
+          dialogTitle: 'Simpan ke Galeri / Bagikan Gambar'
+        });
+
+        setShareFeedback('✅ Gambar tersimpan di perangkat!');
+        setTimeout(() => setShareFeedback(''), 3500);
+        return;
+      } catch (nativeSaveErr) {
+        console.error('Error saving native file:', nativeSaveErr);
+      }
+    }
+
+    // B. Web Platform (Browser)
+    try {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      setPreviewCardData({
+        dataUrl,
+        blob,
+        captionText: `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*`,
+        ayat,
+        fileName
+      });
+      setShareFeedback('✅ Gambar berhasil diunduh / siap disimpan!');
+      setTimeout(() => setShareFeedback(''), 3000);
+    } catch (err) {
+      console.error('Download error:', err);
+      alert('Gagal mengunduh gambar. Silakan gunakan pratinjau untuk menyimpan gambar.');
+    }
   };
 
   const handleQuickShareWA = (ayat) => {
@@ -2536,7 +2703,7 @@ export default function AlQuranModal({ onClose }) {
                       isShareDark ? 'border-white/20' : 'border-amber-900/20'
                     }`}>
                       <div className="flex items-center gap-2">
-                        <img src="/assets/logo-kanomas-3d.png" alt="Kanomas" crossOrigin="anonymous" className="w-6 h-6 rounded-lg object-cover" />
+                        <img src="/assets/logo-kanomas-3d-192.png" alt="Kanomas" crossOrigin="anonymous" className="w-6 h-6 rounded-lg object-cover" />
                         <div className="text-left">
                           <span className={`text-xs font-black block leading-tight ${
                             isShareDark ? 'text-amber-200' : 'text-amber-950'
@@ -2688,6 +2855,88 @@ export default function AlQuranModal({ onClose }) {
             </div>
           );
         })()}
+
+        {/* ======================================================== */}
+        {/* MODAL PRATINJAU GAMBAR KARTU AYAT (UNDUH & SIMPAN AMAN)  */}
+        {/* ======================================================== */}
+        {previewCardData && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="w-full max-w-md max-h-[92vh] rounded-3xl bg-slate-900 text-white border border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className="p-3.5 bg-slate-800/90 flex items-center justify-between border-b border-slate-700 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-black">Gambar Kartu Ayat Siap Diunduh</h3>
+                </div>
+                <button
+                  onClick={() => setPreviewCardData(null)}
+                  className="w-7 h-7 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Body: Gambar Kartu HD & Tombol Aksi */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="rounded-2xl overflow-hidden border-2 border-amber-400/40 shadow-xl bg-black">
+                  <img
+                    src={previewCardData.dataUrl}
+                    alt="Kartu Ayat Kanomas"
+                    className="w-full h-auto object-contain select-none"
+                  />
+                </div>
+
+                {/* Petunjuk khusus pengguna Mobile / HP */}
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-400/30 text-amber-200 text-xs leading-relaxed">
+                  <p className="font-bold flex items-center gap-1.5 mb-1 text-amber-300">
+                    <span>💡 Petunjuk Simpan ke Galeri HP:</span>
+                  </p>
+                  <p>
+                    Sentuh dan <b>tahan gambar di atas selama 1 detik</b>, lalu pilih <b>"Simpan Gambar"</b> atau <b>"Download Gambar"</b> untuk menyimpannya langsung ke galeri foto HP Anda.
+                  </p>
+                </div>
+
+                {/* Tombol Aksi */}
+                <div className="space-y-2">
+                  <a
+                    href={previewCardData.dataUrl}
+                    download={previewCardData.fileName}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0a7c29] via-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm tracking-wider uppercase shadow-lg active:scale-95 transition flex items-center justify-center gap-2 text-center"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>UNDUH FILE GAMBAR (PNG HD)</span>
+                  </a>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(previewCardData.captionText)}`;
+                        window.open(waUrl, '_blank');
+                      }}
+                      className="py-2.5 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-emerald-300 font-bold text-xs border border-emerald-500/40 flex items-center justify-center gap-2 transition active:scale-95"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-400" />
+                      <span>Buka WhatsApp</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const newWin = window.open();
+                        if (newWin) {
+                          newWin.document.write(`<title>${previewCardData.fileName}</title><body style="margin:0;background:#09111c;display:flex;align-items:center;justify-center;height:100vh;"><img src="${previewCardData.dataUrl}" style="max-width:100%;max-height:100%;object-fit:contain;"/></body>`);
+                        }
+                      }}
+                      className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
+                    >
+                      <ExternalLink className="w-4 h-4 text-sky-400" />
+                      <span>Buka Tab Baru</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ======================================================== */}
         {/* MODAL 5: LONCAT KE AYAT TERTENTU (DENGAN BATAS MAKS AYAT) */}
