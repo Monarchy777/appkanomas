@@ -42,15 +42,12 @@ export default function Header({
 
       {/* 2. Bar Utama Aplikasi (Background Putih Bersih) */}
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3">
-        {/* Logo 3D & Identitas Kanomas */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Logo & Identitas Kanomas */}
+        <div className="flex items-center gap-2.5 min-w-0">
           <img
-            src="/assets/logo-kanomas-3d.png"
-            alt="Logo Kanomas 3D"
-            className="w-11 h-11 sm:w-12 sm:h-12 object-contain flex-shrink-0 drop-shadow-md hover:scale-105 transition-transform"
-            onError={(e) => {
-              e.target.src = '/assets/logo-kanomas.png';
-            }}
+            src="/assets/logo-kanomas.png"
+            alt="Logo Kanomas"
+            className="w-10 h-10 sm:w-11 sm:h-11 object-contain flex-shrink-0 drop-shadow-sm"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-2">

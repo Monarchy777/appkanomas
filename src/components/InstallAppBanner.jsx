@@ -48,9 +48,11 @@ export default function InstallAppBanner({ onClose }) {
   return (
     <div className="p-3.5 mx-3 sm:mx-6 rounded-2xl bg-gradient-to-r from-emerald-950 via-[#132c22] to-[#0f241a] border border-emerald-500/40 shadow-lg flex items-center justify-between gap-3 text-white animate-in slide-in-from-top-2 duration-300">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
-          <Smartphone className="w-5 h-5" />
-        </div>
+        <img
+          src="/assets/logo-kanomas-3d-192.png"
+          alt="Icon Kanomas 3D"
+          className="w-11 h-11 rounded-2xl shadow-md object-cover flex-shrink-0 border border-emerald-400/40"
+        />
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-xs font-bold text-white">Pasang Aplikasi Kanomas di HP</h4>
