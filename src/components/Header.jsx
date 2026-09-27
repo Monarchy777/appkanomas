@@ -61,7 +61,7 @@ export default function Header({
                 TASIKMALAYA
               </span>
             </div>
-            <p className="text-[10px] text-amber-800 font-serif italic truncate">
+            <p className="text-[10px] text-amber-800 font-sans italic truncate">
               Sahabat Ibadah & Ziarah Anda
             </p>
           </div>

@@ -46,7 +46,7 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
           </span>
         </div>
 
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-serif leading-snug">
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-sans leading-snug">
           Pilihan Paket Umrah & Haji Khusus Kanomas
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">

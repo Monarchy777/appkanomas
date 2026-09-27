@@ -189,7 +189,7 @@ export default function WorshipEducationView() {
         <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 inline-block">
           Panduan Ibadah Syar'i
         </span>
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-serif leading-snug">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-sans leading-snug">
           Bimbingan Manasik Umrah & Haji Sunnah
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
@@ -353,7 +353,7 @@ export default function WorshipEducationView() {
 
                   {/* Teks Arab (Besar, Jelas di Background Cream Lembut) */}
                   <div className="py-3 px-4 rounded-2xl bg-amber-50/50 border border-amber-200/60">
-                    <p className="text-right text-xl sm:text-2xl leading-loose font-serif text-slate-900 select-all" dir="rtl">
+                    <p className="text-right text-xl sm:text-2xl leading-loose font-arabic text-slate-900 select-all" dir="rtl">
                       {doa.arabic}
                     </p>
                   </div>
@@ -422,7 +422,7 @@ export default function WorshipEducationView() {
                 <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-300 shadow-md">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 font-serif">
+                <h3 className="text-xl font-black text-slate-900 font-sans">
                   Alhamdulillah! 7 Putaran Telah Selesai
                 </h3>
                 <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
@@ -472,7 +472,7 @@ export default function WorshipEducationView() {
                       <span>Putar Audio</span>
                     </button>
                   </div>
-                  <p className="text-right text-lg sm:text-xl font-serif text-slate-900 leading-loose" dir="rtl">
+                  <p className="text-right text-lg sm:text-xl font-arabic text-slate-900 leading-loose" dir="rtl">
                     {currentActiveRoundData.arabic}
                   </p>
                   <p className="text-xs text-amber-800 italic">
@@ -541,7 +541,7 @@ export default function WorshipEducationView() {
 
             {/* Teks Arab Zikir Terpilih */}
             <div className="py-3 px-4 rounded-2xl bg-purple-50/50 border border-purple-200">
-              <span className="text-2xl sm:text-3xl font-serif text-slate-900 block" dir="rtl">
+              <span className="text-2xl sm:text-3xl font-arabic text-slate-900 block" dir="rtl">
                 {selectedZikir.arabic}
               </span>
             </div>
@@ -624,7 +624,7 @@ export default function WorshipEducationView() {
                       <span>Putar Audio</span>
                     </button>
                   </div>
-                  <p className="text-right text-base font-serif text-slate-900" dir="rtl">
+                  <p className="text-right text-base font-arabic text-slate-900" dir="rtl">
                     {s.arabic}
                   </p>
                   <p className="text-[11px] text-amber-800 italic">

@@ -335,7 +335,7 @@ export default function InteractiveMapModal({ onClose }) {
               <Compass className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-bold text-base sm:text-lg text-white font-serif">
+              <h3 className="font-bold text-base sm:text-lg text-white font-sans">
                 Denah & Peta Titik Ibadah Lengkap
               </h3>
               <p className="text-[11px] text-slate-400">
@@ -384,7 +384,7 @@ export default function InteractiveMapModal({ onClose }) {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                     Schematic Mataf Masjidil Haram
                   </span>
-                  <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+                  <h4 className="text-base sm:text-lg font-bold text-white font-sans">
                     Denah Arsitektur Ka'bah & Jalur Thawaf
                   </h4>
                 </div>
@@ -568,7 +568,7 @@ export default function InteractiveMapModal({ onClose }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Jalur Mas'a Sepanjang ± 450 Meter
                 </span>
-                <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+                <h4 className="text-base sm:text-lg font-bold text-white font-sans">
                   Denah Lintasan Sa'i Antara Bukit Safa & Marwah
                 </h4>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
@@ -653,7 +653,7 @@ export default function InteractiveMapModal({ onClose }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Madinah Al-Munawwarah
                 </span>
-                <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+                <h4 className="text-base sm:text-lg font-bold text-white font-sans">
                   Denah Raudhah Asy-Syarifah & Makam Rasulullah ﷺ
                 </h4>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
@@ -726,7 +726,7 @@ export default function InteractiveMapModal({ onClose }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Alur Kronologis Manasik Haji
                 </span>
-                <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+                <h4 className="text-base sm:text-lg font-bold text-white font-sans">
                   Peta Rute Ibadah Armuzna (Arafah - Muzdalifah - Mina)
                 </h4>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
@@ -782,7 +782,7 @@ export default function InteractiveMapModal({ onClose }) {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Batas Garis Ihram (Mawaqit Makaniyyah)
                 </span>
-                <h4 className="text-base sm:text-lg font-bold text-white font-serif">
+                <h4 className="text-base sm:text-lg font-bold text-white font-sans">
                   Peta 5 Titik Miqat Dunia Mengelilingi Makkah
                 </h4>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">

@@ -78,7 +78,7 @@ export default function TalbiyahAudioPlayer({ onClose }) {
               <Volume2 className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-bold text-base text-slate-900 font-serif">Audio Doa & Nada Talbiyah</h3>
+              <h3 className="font-bold text-base text-slate-900 font-sans">Audio Doa & Nada Talbiyah</h3>
               <p className="text-[11px] text-slate-500">Panduan lafaz doa manasik Umrah & Haji Kanomas</p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function TalbiyahAudioPlayer({ onClose }) {
           </div>
 
           <div className="space-y-3">
-            <p className="text-right text-xl sm:text-2xl font-serif text-slate-900 leading-loose" dir="rtl">
+            <p className="text-right text-xl sm:text-2xl font-arabic text-slate-900 leading-loose" dir="rtl">
               لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيْكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ لَا شَرِيْكَ لَكَ
             </p>
 
@@ -177,7 +177,7 @@ export default function TalbiyahAudioPlayer({ onClose }) {
                   </button>
                 </div>
 
-                <p className="text-right text-base sm:text-lg font-serif text-slate-900 leading-relaxed" dir="rtl">
+                <p className="text-right text-base sm:text-lg font-arabic text-slate-900 leading-relaxed" dir="rtl">
                   {doa.arabic}
                 </p>
 

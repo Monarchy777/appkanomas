@@ -55,7 +55,7 @@ export default function HomeView({
 
         <div className="relative z-10 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-bold text-amber-700 font-serif italic tracking-wide">
+            <span className="text-sm font-bold text-amber-700 font-arabic tracking-wide" dir="rtl">
               بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
             </span>
             <span className="px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
@@ -64,7 +64,7 @@ export default function HomeView({
           </div>
 
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-serif leading-snug">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-sans leading-snug">
               Assalamu'alaikum Warahmatullahi Wabarakatuh
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">

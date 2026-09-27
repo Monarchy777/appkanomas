@@ -250,7 +250,7 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
                         </div>
                       </div>
                       {/* Stylized signature line */}
-                      <span className="text-xl font-serif italic text-blue-900 font-bold transform -rotate-6 z-10">
+                      <span className="text-xl font-sans italic text-blue-900 font-bold transform -rotate-6 z-10">
                         Asep Mulyana
                       </span>
                     </div>
@@ -337,7 +337,7 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
                           <span>TASIKMALAYA</span>
                         </div>
                       </div>
-                      <span className="text-lg font-serif italic text-blue-900 font-bold transform -rotate-6 z-10">
+                      <span className="text-lg font-sans italic text-blue-900 font-bold transform -rotate-6 z-10">
                         Admin Kasir
                       </span>
                     </div>

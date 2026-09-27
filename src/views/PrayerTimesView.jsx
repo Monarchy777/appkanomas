@@ -48,14 +48,48 @@ export default function PrayerTimesView() {
   const lastVibratedRef = useRef(false);
   const autoScanTimerRef = useRef(null);
 
+  const isSaudi = prayerData.isSaudi || selectedCityId === 'makkah' || selectedCityId === 'madinah';
+  const timeZoneCode = isSaudi ? 'WAS' : (prayerData.timeZoneCode || 'WIB');
+
+  // Format digital clock with WAS / WIB
+  const formatDigitalClock = (date, saudi) => {
+    try {
+      const timeStr = date.toLocaleTimeString('id-ID', {
+        timeZone: saudi ? 'Asia/Riyadh' : undefined,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).replace(/\./g, ':');
+      return `${timeStr} ${saudi ? 'WAS' : 'WIB'}`;
+    } catch (e) {
+      const hours = (date.getUTCHours() + (saudi ? 3 : 7) + 24) % 24;
+      const mins = String(date.getUTCMinutes()).padStart(2, '0');
+      const secs = String(date.getUTCSeconds()).padStart(2, '0');
+      return `${String(hours).padStart(2, '0')}:${mins}:${secs} ${saudi ? 'WAS' : 'WIB'}`;
+    }
+  };
+
   // Clock & Prayer calculation ticker
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date());
-      setPrayerData(calculatePrayerTimes(selectedCityId, new Date()));
+      const now = new Date();
+      setCurrentTime(now);
+      if (selectedCityId === 'gps' && userLocation) {
+        setPrayerData(calculatePrayerTimes({
+          id: 'gps',
+          name: 'Lokasi Anda (GPS)',
+          country: 'Indonesia',
+          lat: userLocation.lat,
+          lng: userLocation.lng,
+          qibla: customQibla
+        }, now));
+      } else {
+        setPrayerData(calculatePrayerTimes(selectedCityId, now));
+      }
     }, 1000);
     return () => clearInterval(timer);
-  }, [selectedCityId]);
+  }, [selectedCityId, userLocation, customQibla]);
 
   // 1. Otomatis Minta GPS di Latar Belakang (Auto Location)
   useEffect(() => {
@@ -78,13 +112,14 @@ export default function PrayerTimesView() {
 
   const handleCityChange = (cityId) => {
     setSelectedCityId(cityId);
-    setPrayerData(calculatePrayerTimes(cityId, new Date()));
     setCustomQibla(null); // Reset to city standard
+    setPrayerData(calculatePrayerTimes(cityId, new Date()));
+    sounds.playIntroTone();
   };
 
   const city = prayerData.city;
   const nextPrayer = prayerData.nextPrayer;
-  const targetQibla = customQibla !== null ? customQibla : (city.qibla || 295.2);
+  const targetQibla = customQibla !== null ? customQibla : (city.qibla !== undefined ? city.qibla : 295.2);
 
   // Helper: Shortest angular difference between two angles (-180 to 180)
   const getShortestAngleDelta = (target, current) => {
@@ -251,7 +286,10 @@ export default function PrayerTimesView() {
 
   // Request GPS Location Manually
   const handleDetectGPS = () => {
-    if (!('geolocation' in navigator)) return;
+    if (!('geolocation' in navigator)) {
+      alert('Fitur GPS tidak didukung di browser ini.');
+      return;
+    }
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -261,6 +299,15 @@ export default function PrayerTimesView() {
         const qibla = calculateQiblaDirection(lat, lng);
         setUserLocation({ lat, lng });
         setCustomQibla(qibla);
+        setSelectedCityId('gps');
+        setPrayerData(calculatePrayerTimes({
+          id: 'gps',
+          name: 'Lokasi Anda (GPS)',
+          country: 'Indonesia',
+          lat,
+          lng,
+          qibla
+        }, new Date()));
         sounds.playIntroTone();
       },
       (err) => {
@@ -308,108 +355,165 @@ export default function PrayerTimesView() {
               <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block">
                 Waktu Sholat & Arah Kiblat Otomatis
               </span>
-              {customQibla !== null && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                  📍 Lokasi GPS
+              {customQibla !== null ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white flex items-center gap-1">
+                  <LocateFixed className="w-3 h-3" /> Lokasi GPS Saya
                 </span>
-              )}
+              ) : isSaudi ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white flex items-center gap-1">
+                  🕋 Waktu Arab Saudi (WAS)
+                </span>
+              ) : null}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-serif">
-              Jadwal Sholat {customQibla !== null ? 'Lokasi Anda (GPS)' : city.name}
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-sans">
+              Jadwal Sholat {customQibla !== null ? 'Lokasi GPS Anda' : city.name}
             </h2>
             <p className="text-xs text-slate-500">
               {prayerData.dateStr}
             </p>
           </div>
 
-          {/* City switcher + GPS button */}
+          {/* Location switcher: GPS, Makkah, Madinah, Tasikmalaya, etc. */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            {/* 1. Tombol Deteksi GPS */}
             <button
               onClick={handleDetectGPS}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border ${
-                customQibla !== null
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
-                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+                selectedCityId === 'gps' || customQibla !== null
+                  ? 'bg-emerald-600 text-white border-emerald-500 ring-2 ring-emerald-300'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
               }`}
             >
               <LocateFixed className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
               <span>{isLocating ? 'Mencari...' : 'Deteksi GPS Saya'}</span>
             </button>
 
-            {CITIES.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => handleCityChange(c.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                  selectedCityId === c.id && customQibla === null
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
-                }`}
-              >
-                {c.name}
-              </button>
-            ))}
+            {/* 2. Tombol Makkah */}
+            <button
+              onClick={() => handleCityChange('makkah')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+                selectedCityId === 'makkah' && customQibla === null
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-500 ring-2 ring-amber-300'
+                  : 'bg-amber-50/80 text-amber-900 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              <span>🕋 Makkah</span>
+            </button>
+
+            {/* 3. Tombol Madinah */}
+            <button
+              onClick={() => handleCityChange('madinah')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border shadow-xs ${
+                selectedCityId === 'madinah' && customQibla === null
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-500 ring-2 ring-emerald-300'
+                  : 'bg-emerald-50/80 text-emerald-900 border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <span>🕌 Madinah</span>
+            </button>
+
+            {/* 4. Tombol Tasikmalaya */}
+            <button
+              onClick={() => handleCityChange('tasikmalaya')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border shadow-xs ${
+                selectedCityId === 'tasikmalaya' && customQibla === null
+                  ? 'bg-slate-800 text-white border-slate-700 ring-2 ring-slate-400'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              Tasikmalaya
+            </button>
+
+            {/* Kota Tambahan (Jakarta, Bandung) */}
+            {['jakarta', 'bandung'].map((cid) => {
+              const c = CITIES.find((item) => item.id === cid);
+              if (!c) return null;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => handleCityChange(c.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border ${
+                    selectedCityId === c.id && customQibla === null
+                      ? 'bg-slate-800 text-white border-slate-700'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Next Prayer Highlight Banner */}
-        <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Next Prayer Highlight Banner with WAS/WIB Clock */}
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
-              <Clock className="w-6 h-6 animate-pulse" />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
             </div>
             <div>
               <span className="text-[10px] text-amber-800 uppercase font-bold tracking-wider">
-                Waktu Sholat Berikutnya
+                Waktu Sholat Berikutnya ({timeZoneCode})
               </span>
-              <h3 className="text-xl font-black text-amber-700 font-mono">
-                {nextPrayer?.name} : {nextPrayer?.time} WIB
+              <h3 className="text-lg sm:text-xl font-black text-amber-700 font-mono leading-tight">
+                {nextPrayer?.name} : {nextPrayer?.time} {timeZoneCode}
               </h3>
-              <span className="text-[11px] text-slate-500 font-medium">
-                Jadwal resmi Kementerian Agama Republik Indonesia
+              <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                {isSaudi ? 'Waktu lokal Tanah Suci (Arab Saudi / UTC+3)' : 'Jadwal resmi Kementerian Agama Republik Indonesia'}
               </span>
             </div>
           </div>
 
           <div className="text-center sm:text-right w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-amber-200/60">
-            <span className="text-[10px] text-slate-500 block uppercase font-bold">Jam Digital Saat Ini</span>
-            <span className="text-2xl font-black text-slate-900 font-mono">
-              {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            <span className="text-[10px] text-slate-500 block uppercase font-bold">
+              {isSaudi ? 'Jam Sekarang di Madinah & Makkah' : 'Jam Digital Saat Ini'}
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono tracking-tight">
+              {formatDigitalClock(currentTime, isSaudi)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* 2. Grid of 6 Prayer Times (Putih Bersih) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-        {prayerData.prayers.map((prayer) => {
-          const isNext = nextPrayer?.name === prayer.name;
+      {/* 2. Jadwal Sholat dalam 1 Baris Kompak (Menghemat Waktu & Ruang Layar) */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-1.5 sm:p-2.5">
+        <div className="grid grid-cols-6 divide-x divide-slate-100 sm:divide-slate-200">
+          {prayerData.prayers.map((prayer) => {
+            const isNext = nextPrayer?.name === prayer.name;
 
-          return (
-            <div
-              key={prayer.name}
-              className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-center space-y-1 ${
-                isNext
-                  ? 'bg-amber-50 border-amber-400 shadow-md ring-1 ring-amber-400 scale-[1.02]'
-                  : 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
-              }`}
-            >
-              <span className={`text-xs font-bold uppercase tracking-wider block ${isNext ? 'text-amber-800' : 'text-slate-500'}`}>
-                {prayer.name}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono block">
-                {prayer.time}
-              </span>
-              {isNext ? (
-                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white inline-block shadow-xs">
-                  Akan Tiba
-                </span>
-              ) : (
-                <span className="text-[9px] text-slate-400 font-mono">WIB</span>
-              )}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={prayer.name}
+                className={`py-2 px-0.5 sm:px-3 text-center transition-all rounded-xl ${
+                  isNext
+                    ? 'bg-amber-50/90 text-amber-900 font-bold ring-1 ring-amber-300 shadow-xs'
+                    : 'hover:bg-slate-50/80 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate ${
+                    isNext ? 'text-amber-800' : 'text-slate-500'
+                  }`}>
+                    {prayer.name}
+                  </span>
+                  {isNext && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping inline-block" />
+                  )}
+                </div>
+                <div className={`text-xs sm:text-base font-black font-mono mt-0.5 ${
+                  isNext ? 'text-amber-700' : 'text-slate-900'
+                }`}>
+                  {prayer.time}
+                </div>
+                <div className={`text-[8px] sm:text-[9px] font-mono mt-0.5 ${
+                  isNext ? 'text-amber-600 font-bold' : 'text-slate-400'
+                }`}>
+                  {timeZoneCode}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* 3. KOMPAS KIBLAT: PENANDA BULATAN, ARAH ANGIN & GAMBAR KA'BAH */}
@@ -421,7 +525,7 @@ export default function PrayerTimesView() {
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
                 Kompas Kiblat
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-serif flex items-center gap-2 mt-1">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-sans flex items-center gap-2 mt-1">
                 <Compass className="w-5 h-5 text-amber-500" />
                 <span>Arah Kiblat Baitullah Makkah</span>
               </h3>
@@ -628,9 +732,15 @@ export default function PrayerTimesView() {
             <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
               <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Kiblat</span>
               <span className="text-sm sm:text-base font-black text-amber-700 font-mono block">
-                {Math.round(targetQibla)}°
+                {selectedCityId === 'makkah' && customQibla === null ? 'Pusat' : `${Math.round(targetQibla)}°`}
               </span>
-              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">Barat Laut (BL)</span>
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">
+                {selectedCityId === 'makkah' && customQibla === null
+                  ? 'Baitullah Makkah'
+                  : selectedCityId === 'madinah' && customQibla === null
+                  ? 'Selatan (S)'
+                  : 'Barat Laut (BL)'}
+              </span>
             </div>
 
             <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
@@ -650,10 +760,14 @@ export default function PrayerTimesView() {
             }`}>
               <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Selisih Sudut</span>
               <span className="text-sm sm:text-base font-black font-mono block">
-                {Math.abs(Math.round(diffAngle))}°
+                {selectedCityId === 'makkah' && customQibla === null ? '0°' : `${Math.abs(Math.round(diffAngle))}°`}
               </span>
               <span className="text-[8px] sm:text-[9px] block font-bold truncate">
-                {isFacingQibla ? 'TEPAT KIBLAT' : `${Math.abs(Math.round(diffAngle))}° ke Ka'bah`}
+                {selectedCityId === 'makkah' && customQibla === null
+                  ? 'Di Tanah Suci'
+                  : isFacingQibla
+                  ? 'TEPAT KIBLAT'
+                  : `${Math.abs(Math.round(diffAngle))}° ke Ka'bah`}
               </span>
             </div>
           </div>

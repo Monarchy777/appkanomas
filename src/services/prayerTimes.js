@@ -1,8 +1,8 @@
 // Calculation of Islamic Prayer Times and Qibla Direction
 export const CITIES = [
   { id: 'tasikmalaya', name: 'Tasikmalaya', country: 'Indonesia', lat: -7.3274, lng: 108.2207, timezone: 7, qibla: 295.2 },
-  { id: 'makkah', name: 'Makkah Al-Mukarramah', country: 'Arab Saudi', lat: 21.4225, lng: 39.8262, timezone: 3, qibla: 0 },
-  { id: 'madinah', name: 'Madinah Al-Munawwarah', country: 'Arab Saudi', lat: 24.4672, lng: 39.6111, timezone: 3, qibla: 175.0 },
+  { id: 'makkah', name: 'Makkah', fullName: 'Makkah Al-Mukarramah', country: 'Arab Saudi', lat: 21.4225, lng: 39.8262, timezone: 3, qibla: 0 },
+  { id: 'madinah', name: 'Madinah', fullName: 'Madinah Al-Munawwarah', country: 'Arab Saudi', lat: 24.4672, lng: 39.6111, timezone: 3, qibla: 175.0 },
   { id: 'jakarta', name: 'Jakarta', country: 'Indonesia', lat: -6.2088, lng: 106.8456, timezone: 7, qibla: 295.1 },
   { id: 'bandung', name: 'Bandung', country: 'Indonesia', lat: -6.9175, lng: 107.6191, timezone: 7, qibla: 295.3 }
 ];
@@ -16,9 +16,25 @@ function formatTime(h) {
 }
 
 // Astronomical calculation for solar position & prayer times
-export function calculatePrayerTimes(cityId = 'tasikmalaya', date = new Date()) {
-  const city = CITIES.find(c => c.id === cityId) || CITIES[0];
-  const { lat, lng, timezone } = city;
+export function calculatePrayerTimes(cityOrId = 'tasikmalaya', date = new Date()) {
+  let city;
+  if (typeof cityOrId === 'object' && cityOrId !== null) {
+    city = cityOrId;
+  } else {
+    city = CITIES.find(c => c.id === cityOrId) || CITIES[0];
+  }
+
+  const { lat, lng } = city;
+  let timezone = city.timezone;
+  if (typeof timezone !== 'number') {
+    if (lng >= 95 && lng < 110) timezone = 7;
+    else if (lng >= 110 && lng < 125) timezone = 8;
+    else if (lng >= 125 && lng <= 141) timezone = 9;
+    else timezone = -Math.round(date.getTimezoneOffset() / 60);
+  }
+
+  const isSaudi = timezone === 3 || city.id === 'makkah' || city.id === 'madinah';
+  const timeZoneCode = isSaudi ? 'WAS' : (timezone === 8 ? 'WITA' : (timezone === 9 ? 'WIT' : 'WIB'));
 
   // Day of year calculation
   const startOfYear = new Date(date.getFullYear(), 0, 0);
@@ -77,9 +93,9 @@ export function calculatePrayerTimes(cityId = 'tasikmalaya', date = new Date()) 
     { name: 'Isya', time: formatTime(isya), raw: isya }
   ];
 
-  // Determine current and next prayer
-  const now = new Date();
-  const currentHour = now.getHours() + (now.getMinutes() / 60) + (now.getSeconds() / 3600);
+  // Determine current and next prayer based on target city's timezone
+  const utcHour = date.getUTCHours() + (date.getUTCMinutes() / 60) + (date.getUTCSeconds() / 3600);
+  const currentHour = (utcHour + timezone + 24) % 24;
 
   let nextIndex = list.findIndex(p => p.raw > currentHour);
   if (nextIndex === -1) {
@@ -87,9 +103,19 @@ export function calculatePrayerTimes(cityId = 'tasikmalaya', date = new Date()) 
   }
   const nextPrayer = list[nextIndex];
 
+  const dateStr = date.toLocaleDateString('id-ID', {
+    timeZone: isSaudi ? 'Asia/Riyadh' : undefined,
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return {
     city,
-    dateStr: date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+    isSaudi,
+    timeZoneCode,
+    dateStr,
     prayers: list,
     nextPrayer,
     qiblaDegree: city.qibla
