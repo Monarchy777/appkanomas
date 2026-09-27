@@ -1,18 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  ShieldCheck,
   Compass,
-  Calendar,
   Clock,
   Sparkles,
-  Plane,
-  Hotel,
+  ChevronLeft,
   ChevronRight,
-  Users,
-  MessageSquare,
-  Search,
-  CheckCircle2,
-  Phone
+  MessageSquare
 } from 'lucide-react';
 import {
   Icon3DDoa,
@@ -22,13 +15,51 @@ import {
   Icon3DPaket,
   Icon3DTabungan,
   Icon3DNusuk,
-  Icon3DStatus,
-  Icon3DSholat
+  Icon3DStatus
 } from '../components/Icons3D';
 
+// 5 Banner Promo & Kekuatan Kanomas
+const PROMO_BANNERS = [
+  {
+    id: 1,
+    image: '/assets/banners/banner-1-kemenag.jpg',
+    tag: 'Akreditasi A Resmi',
+    title: 'Izin Resmi Kemenag RI (PPIU U.310)',
+    subtitle: 'Garansi 100% kepastian berangkat dengan perlindungan penuh'
+  },
+  {
+    id: 2,
+    image: '/assets/banners/banner-2-hotel.jpg',
+    tag: 'Hotel Bintang 5',
+    title: 'Pelataran Ka’bah 0 Meter',
+    subtitle: 'Akses langsung jalan kaki ke pelataran Masjidil Haram'
+  },
+  {
+    id: 3,
+    image: '/assets/banners/banner-3-promo.jpg',
+    tag: 'Promo Umrah 1447H',
+    title: 'Penerbangan Langsung Direct Flight',
+    subtitle: 'Garuda Indonesia & Saudia Airlines rute Jakarta ke Madinah'
+  },
+  {
+    id: 4,
+    image: '/assets/banners/banner-4-bimbingan.jpg',
+    tag: 'Bimbingan Sunnah',
+    title: 'Manasik Intensif Sesuai Sunnah',
+    subtitle: 'Didampingi pembimbing bersertifikat resmi Kemenag RI'
+  },
+  {
+    id: 5,
+    image: '/assets/banners/banner-5-haji.jpg',
+    tag: 'Haji Khusus VIP',
+    title: 'Tenda Maktab VIP Armuzna',
+    subtitle: 'Kenyamanan ibadah haji khusus dengan fasilitas terbaik'
+  }
+];
+
 export default function HomeView({
-  packages,
-  mentors,
+  packages = [],
+  mentors = [],
   nextPrayer,
   onSelectTab,
   onOpenPackageDetail,
@@ -43,56 +74,119 @@ export default function HomeView({
   onOpenLookup,
   onBookPackage
 }) {
-  const featuredPackage = packages[0] || null;
-  const popularPackages = packages.slice(1, 3);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-advance banner setiap 3 detik (3000ms)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % PROMO_BANNERS.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % PROMO_BANNERS.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
+  };
 
   return (
-    <div className="space-y-6 sm:space-y-7 pb-28 mx-3 sm:mx-6 mt-4 max-w-4xl mx-auto">
-      {/* 1. KARTU SALAM & IDENTITAS RESMI (Putih Bersih & Aksen Amber Kanomas) */}
-      <section className="relative rounded-3xl overflow-hidden bg-white border border-slate-200/80 shadow-sm p-5 sm:p-7 text-slate-800">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
+    <div className="space-y-5 sm:space-y-6 pb-28 mx-3 sm:mx-6 mt-4 max-w-4xl mx-auto">
+      {/* 1. CAROUSEL PROMO & KEKUATAN KANOMAS (OTOMATIS BERGANTI SETIAP 3 DETIK) */}
+      <section className="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md group select-none">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9]">
+          {PROMO_BANNERS.map((banner, index) => {
+            const isActive = index === currentSlide;
+            return (
+              <div
+                key={banner.id}
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                  isActive ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
+                }`}
+              >
+                <img
+                  src={banner.image}
+                  alt={banner.title}
+                  className="w-full h-full object-cover"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                />
 
-        <div className="relative z-10 space-y-3.5">
-          <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <span className="text-sm sm:text-base font-bold text-amber-700 font-arabic tracking-wide" dir="rtl">
-              بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
-            </span>
-            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
-              Resmi Kemenag RI (PPIU U.310)
-            </span>
-          </div>
+                {/* Gradient Shadow untuk Keterbacaan Tulisan */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
-          <div className="space-y-2">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-sans tracking-tight leading-snug">
-              Assalamu'alaikum Warahmatullahi Wabarakatuh
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Selamat datang di aplikasi resmi <strong className="text-slate-900">Kanomas Tour & Travel Cabang Tasikmalaya</strong>. Sahabat setia bimbingan ibadah Umrah & Haji Khusus Anda sesuai tuntunan Sunnah Rasulullah ﷺ.
-            </p>
-          </div>
+                {/* Content Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white space-y-1 sm:space-y-1.5 z-20">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 shadow-xs">
+                      {banner.tag}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-sm">
+                    {banner.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-200 line-clamp-1 drop-shadow-sm font-medium">
+                    {banner.subtitle}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Tombol Navigasi Slide Sebelumnya */}
+        <button
+          onClick={prevSlide}
+          aria-label="Slide sebelumnya"
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-white flex items-center justify-center transition opacity-70 hover:opacity-100 active:scale-95"
+        >
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+
+        {/* Tombol Navigasi Slide Berikutnya */}
+        <button
+          onClick={nextSlide}
+          aria-label="Slide berikutnya"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-white flex items-center justify-center transition opacity-70 hover:opacity-100 active:scale-95"
+        >
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+
+        {/* Indikator Titik / Dots (5 Image) */}
+        <div className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+          {PROMO_BANNERS.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              aria-label={`Ke slide ${idx + 1}`}
+              className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                currentSlide === idx
+                  ? 'w-5 sm:w-6 bg-amber-400'
+                  : 'w-1.5 sm:w-2 bg-white/50 hover:bg-white/80'
+              }`}
+            />
+          ))}
         </div>
       </section>
 
-      {/* 2. WIDGET WAKTU SHOLAT & AKSES CEPAT KIBLAT (Card Putih Bersih) */}
-      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="flex-shrink-0">
-            <Icon3DSholat size={44} />
+      {/* 2. WAKTU SHOLAT BERIKUTNYA (CUKUP 1 BARIS SAJA DENGAN TOMBOL ARAH KIBLAT) */}
+      <section className="px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="min-w-0 space-y-0.5">
-            <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
-              Sholat Berikutnya <span className="hidden sm:inline">(Tasikmalaya)</span>
+          <div className="flex items-center gap-1.5 min-w-0 text-xs sm:text-sm font-semibold text-slate-700 truncate">
+            <span className="text-slate-500 whitespace-nowrap">Sholat Berikutnya:</span>
+            <span className="font-extrabold text-amber-700 font-mono whitespace-nowrap">
+              {nextPrayer ? `${nextPrayer.name} ${nextPrayer.time} WIB` : 'Subuh 04:30 WIB'}
             </span>
-            <strong className="text-sm sm:text-base font-black text-amber-700 font-mono truncate block">
-              {nextPrayer ? `${nextPrayer.name} : ${nextPrayer.time} WIB` : 'Subuh 04:30 WIB'}
-            </strong>
           </div>
         </div>
 
         <button
           onClick={() => onSelectTab('prayer')}
-          className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-[0_4px_14px_rgba(234,88,12,0.25)] transition active:scale-95 flex-shrink-0"
+          className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 flex-shrink-0 whitespace-nowrap"
         >
           <Compass className="w-4 h-4 text-amber-100" />
           <span>Arah Kiblat</span>
@@ -216,138 +310,14 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* 4. PAKET UNGGULAN TERPOPULER (CARD PUTIH ELEGAN DENGAN AKSEN GOLDEN) */}
-      {featuredPackage && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm sm:text-base font-black text-slate-900">
-                Paket Paling Diminati Jamaah
-              </h2>
-              <p className="text-[11px] text-slate-500">Garansi kepastian hotel dekat pelataran Ka'bah</p>
-            </div>
-            <button
-              onClick={() => onSelectTab('packages')}
-              className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 transition"
-            >
-              <span>Lihat Semua</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-md space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs">
-                {featuredPackage.status || 'Pilihan Terbaik'}
-              </span>
-              <span className="text-xs text-amber-700 font-mono font-bold bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
-                {featuredPackage.duration}
-              </span>
-            </div>
-
-            <h3
-              onClick={() => onOpenPackageDetail(featuredPackage)}
-              className="text-base sm:text-lg font-black text-slate-900 hover:text-amber-600 cursor-pointer transition leading-snug"
-            >
-              {featuredPackage.title}
-            </h3>
-
-            {/* Fasilitas Pokok */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-700 pt-1">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200">
-                <Plane className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                <span className="truncate font-medium">{featuredPackage.airline}</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200">
-                <Hotel className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <span className="truncate font-medium">{featuredPackage.hotelMakkah}</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 col-span-2 sm:col-span-1">
-                <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                <span className="truncate font-medium">{featuredPackage.departureDate}</span>
-              </div>
-            </div>
-
-            {/* Harga & Tombol Aksi */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-500 block">Biaya All-in Mulai</span>
-                <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono">
-                  Rp {(Number(featuredPackage.priceQuad || featuredPackage.base_price || 0) / 1000000).toFixed(1)} Jt
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onOpenPackageDetail(featuredPackage)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
-                >
-                  Detail
-                </button>
-                <button
-                  onClick={() => onBookPackage(featuredPackage)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition active:scale-95"
-                >
-                  Daftar
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 5. DEWAN PEMBIMBING IBADAH (MEMBANGUN KEPERCAYAAN JAMAAH) */}
-      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 space-y-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Users className="w-4 h-4 text-amber-500" />
-            <span>Dewan Pembimbing Manasik Kanomas</span>
-          </h2>
-          <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-            Kemenag RI Certified
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {mentors.slice(0, 4).map((m) => (
-            <div
-              key={m.id}
-              className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-2 flex flex-col items-center justify-between hover:bg-amber-50/50 hover:border-amber-300 transition"
-            >
-              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-500 bg-white shadow-sm">
-                <img
-                  src={m.photo}
-                  alt={m.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    if (m.fallbackPhoto && e.target.src !== m.fallbackPhoto) {
-                      e.target.src = m.fallbackPhoto;
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="space-y-0.5">
-                <strong className="text-xs font-bold text-slate-900 block leading-snug line-clamp-1">
-                  {m.name}
-                </strong>
-                <span className="text-[9px] text-amber-700 block truncate font-medium">
-                  {m.role}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. LAYANAN BANTUAN & LOKASI KANTOR TASIKMALAYA */}
-      <section className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
+      {/* 4. LAYANAN BANTUAN & LOKASI KANTOR TASIKMALAYA */}
+      <section className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
         <div>
-          <strong className="text-slate-900 text-xs block font-bold">
+          <strong className="text-slate-900 text-xs sm:text-sm block font-bold">
             Kantor Cabang Tasikmalaya
           </strong>
-          <p className="text-[11px] text-slate-600">
-            Buka Senin – Sabtu (08.30 – 17.00 WIB) • Siap melayani pendaftaran & bimbingan manasik
+          <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
+            Buka Senin – Sabtu (08.30 – 17.00 WIB) • Siap melayani konsultasi, pendaftaran & bimbingan manasik
           </p>
         </div>
 
@@ -355,7 +325,7 @@ export default function HomeView({
           href="https://wa.me/628112113363"
           target="_blank"
           rel="noreferrer"
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md flex-shrink-0"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-sm flex-shrink-0"
         >
           <MessageSquare className="w-4 h-4 text-emerald-100" />
           <span>Hubungi CS: 0811-2113-363</span>
