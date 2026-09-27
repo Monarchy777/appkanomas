@@ -10,6 +10,7 @@ import AccountView from './views/AccountView';
 import MitraDashboardView from './views/MitraDashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
 import GoogleSignInModal from './components/GoogleSignInModal';
+import UpdateModal, { APP_BUILD_VERSION } from './components/UpdateModal';
 
 // Code-splitting via React.lazy for instant launch & lightweight bundle
 const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
@@ -65,6 +66,23 @@ export default function App() {
   const [showDzikir, setShowDzikir] = useState(false);
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [showDaftarMitraModal, setShowDaftarMitraModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  // Auto-check version from server on launch
+  useEffect(() => {
+    fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.version && data.version !== APP_BUILD_VERSION) {
+          const dismissed = sessionStorage.getItem('kanomas_dismissed_update');
+          if (dismissed !== data.version) {
+            setShowUpdateModal(true);
+            sessionStorage.setItem('kanomas_dismissed_update', data.version);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Subscribe to database changes
   useEffect(() => {
@@ -157,6 +175,7 @@ export default function App() {
         onOpenLookup={() => setShowLookup(true)}
         onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
         onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
+        onOpenUpdateModal={() => setShowUpdateModal(true)}
       />
 
       {/* Main View Area */}
@@ -382,6 +401,11 @@ export default function App() {
             }}
           />
         )}
+
+        <UpdateModal
+          isOpen={showUpdateModal}
+          onClose={() => setShowUpdateModal(false)}
+        />
       </Suspense>
     </div>
   );

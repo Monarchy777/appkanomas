@@ -27,7 +27,8 @@ export default function Header({
   nextPrayer,
   onOpenLookup,
   onOpenWhatsAppCenter,
-  onOpenDocumentPrint
+  onOpenDocumentPrint,
+  onOpenUpdateModal
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [adminNotice, setAdminNotice] = useState('');
@@ -367,9 +368,22 @@ export default function Header({
           {/* SECTION 4: UNDUH APLIKASI ANDROID (UPDATE 2026)         */}
           {/* ======================================================== */}
           <div className="space-y-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
-              4. File Aplikasi Resmi (Rilis 2026)
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                4. File Aplikasi Resmi (Rilis 2026)
+              </span>
+              {onOpenUpdateModal && (
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onOpenUpdateModal();
+                  }}
+                  className="text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-full transition"
+                >
+                  🔄 Cek Update
+                </button>
+              )}
+            </div>
 
             <a
               href="/kanomas.apk"
@@ -385,11 +399,11 @@ export default function Header({
                   <strong className="text-slate-900 block text-xs sm:text-sm font-bold flex items-center gap-2 flex-wrap">
                     Download File APK Android
                     <span className="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase">
-                      Update 2026 • 18 MB
+                      Update 2026 • 19.3 MB
                     </span>
                   </strong>
                   <span className="text-xs text-slate-600 block mt-0.5">
-                    Bisa disimpan di HP & dibagikan via WhatsApp tanpa browser
+                    Versi 2026.1.2 • Ikon & Dzikir Baru • Bisa dibagikan via WA
                   </span>
                 </div>
               </div>
