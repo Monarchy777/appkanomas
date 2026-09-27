@@ -6,10 +6,10 @@ export default function NusukGuideModal({ onClose }) {
   const nusukData = EXTERNAL_SERVICES.find(s => s.id === 'nusuk') || EXTERNAL_SERVICES[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#14222e] text-white rounded-3xl border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl bg-white text-slate-800 rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-5 py-4 bg-[#064e3b] border-b border-emerald-500/30 flex items-center justify-between">
+        <div className="px-5 py-4 bg-emerald-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-xl bg-white/20 text-white">
               <ShieldCheck className="w-5 h-5" />
@@ -26,7 +26,7 @@ export default function NusukGuideModal({ onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition"
           >
             <X className="w-4 h-4" />
           </button>
@@ -35,10 +35,10 @@ export default function NusukGuideModal({ onClose }) {
         {/* Content */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {/* Quick Notice */}
-          <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-200 space-y-1">
-              <strong className="block text-amber-300 font-bold">Aturan Resmi Pemerintah Arab Saudi:</strong>
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900 space-y-1">
+              <strong className="block text-amber-900 font-bold">Aturan Resmi Pemerintah Arab Saudi:</strong>
               <p className="text-[11px] leading-relaxed">
                 Setiap jamaah <strong>wajib</strong> memiliki izin (tasreh) aktif di aplikasi Nusuk untuk masuk ke dalam <strong>Raudhah Syarifah</strong> di Masjid Nabawi Madinah. Tim Mutawwif Kanomas siap mendampingi proses reservasi slot jamaah.
               </p>
@@ -47,7 +47,7 @@ export default function NusukGuideModal({ onClose }) {
 
           {/* Quick Launcher Buttons */}
           <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               1. Buka atau Download Aplikasi Nusuk
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -55,40 +55,40 @@ export default function NusukGuideModal({ onClose }) {
                 href={nusukData.androidUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-[#0f241a] hover:bg-[#153426] border border-emerald-600/40 text-center transition flex flex-col items-center justify-center gap-1 text-emerald-300 group shadow-sm"
+                className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-center transition flex flex-col items-center justify-center gap-1 text-slate-800 group shadow-xs"
               >
-                <Download className="w-5 h-5 group-hover:scale-110 transition" />
+                <Download className="w-5 h-5 text-emerald-600 group-hover:scale-110 transition" />
                 <span className="text-xs font-bold">Android (PlayStore)</span>
-                <span className="text-[9px] text-slate-400">Google Play</span>
+                <span className="text-[9px] text-slate-500">Google Play</span>
               </a>
 
               <a
                 href={nusukData.iosUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-[#0f241a] hover:bg-[#153426] border border-emerald-600/40 text-center transition flex flex-col items-center justify-center gap-1 text-emerald-300 group shadow-sm"
+                className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-center transition flex flex-col items-center justify-center gap-1 text-slate-800 group shadow-xs"
               >
-                <Download className="w-5 h-5 group-hover:scale-110 transition" />
+                <Download className="w-5 h-5 text-emerald-600 group-hover:scale-110 transition" />
                 <span className="text-xs font-bold">iOS (App Store)</span>
-                <span className="text-[9px] text-slate-400">Apple iPhone</span>
+                <span className="text-[9px] text-slate-500">Apple iPhone</span>
               </a>
 
               <a
                 href={nusukData.webUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-[#0f241a] hover:bg-[#153426] border border-emerald-600/40 text-center transition flex flex-col items-center justify-center gap-1 text-emerald-300 group shadow-sm"
+                className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-center transition flex flex-col items-center justify-center gap-1 text-slate-800 group shadow-xs"
               >
-                <ExternalLink className="w-5 h-5 group-hover:scale-110 transition" />
+                <ExternalLink className="w-5 h-5 text-emerald-600 group-hover:scale-110 transition" />
                 <span className="text-xs font-bold">Web Nusuk.sa</span>
-                <span className="text-[9px] text-slate-400">Browser Resmi</span>
+                <span className="text-[9px] text-slate-500">Browser Resmi</span>
               </a>
             </div>
           </div>
 
           {/* Step-by-Step Instructions */}
           <div className="space-y-3">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               2. Langkah Pemesanan Izin Raudhah & Umrah
             </span>
             <div className="space-y-2.5">
@@ -119,13 +119,13 @@ export default function NusukGuideModal({ onClose }) {
                   desc: 'QR Code izin akan muncul. Simpan screenshot layar ini. Tunjukkan ke petugas Askar di pelataran pintu masuk Raudhah 15 menit sebelum waktu mulai.'
                 }
               ].map((item) => (
-                <div key={item.step} className="p-3 bg-[#111e29] border border-white/5 rounded-2xl flex items-start gap-3">
-                  <span className="w-7 h-7 rounded-xl bg-emerald-600/30 text-emerald-400 font-mono font-black text-xs flex items-center justify-center flex-shrink-0 border border-emerald-500/40">
+                <div key={item.step} className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3 shadow-xs">
+                  <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 font-mono font-black text-xs flex items-center justify-center flex-shrink-0 border border-emerald-300">
                     {item.step}
                   </span>
                   <div className="space-y-0.5">
-                    <h5 className="text-xs font-bold text-white">{item.title}</h5>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">{item.desc}</p>
+                    <h5 className="text-xs font-bold text-slate-900">{item.title}</h5>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -133,10 +133,10 @@ export default function NusukGuideModal({ onClose }) {
           </div>
 
           {/* Assistance from Kanomas */}
-          <div className="p-4 rounded-2xl bg-orange-950/40 border border-orange-500/30 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3 shadow-xs">
             <div className="space-y-0.5">
-              <span className="text-xs font-bold text-orange-400 block">Perlu Bantuan Booking Nusuk?</span>
-              <p className="text-[11px] text-slate-300">
+              <span className="text-xs font-bold text-amber-800 block">Perlu Bantuan Booking Nusuk?</span>
+              <p className="text-[11px] text-slate-600">
                 Tim Kanomas Tasikmalaya membantu proses registrasi visa & reservasi akun Nusuk untuk seluruh jamaah.
               </p>
             </div>
@@ -144,7 +144,7 @@ export default function NusukGuideModal({ onClose }) {
               href="https://wa.me/628112113363?text=Bismillah,%20saya%20membutuhkan%20bantuan%20panduan%20aplikasi%20Nusuk%20Kanomas"
               target="_blank"
               rel="noreferrer"
-              className="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs whitespace-nowrap shadow transition"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs whitespace-nowrap shadow-xs transition"
             >
               Hubungi CS
             </a>
@@ -152,11 +152,11 @@ export default function NusukGuideModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#0d1720] border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <span>Terintegrasi Sistem Resmi Kemenag KSA</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold"
+            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold"
           >
             Tutup Panduan
           </button>

@@ -46,22 +46,22 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#14222e] text-white rounded-3xl border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white text-slate-800 rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-5 py-4 bg-[#0d1720] border-b border-white/10 flex items-center justify-between">
+        <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-orange-600/30 text-orange-400 border border-orange-500/30">
+            <span className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
               <User className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-extrabold text-base text-white">Form Booking & Konsultasi</h3>
-              <p className="text-[11px] text-slate-400">Pendaftaran calon jamaah resmi PT Kanomas Tasikmalaya</p>
+              <h3 className="font-extrabold text-base text-slate-900">Form Booking & Konsultasi</h3>
+              <p className="text-[11px] text-slate-500">Pendaftaran calon jamaah resmi PT Kanomas Tasikmalaya</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 hover:text-white transition"
+            className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 hover:text-slate-900 transition"
           >
             <X className="w-4 h-4" />
           </button>
@@ -71,12 +71,12 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
         <div className="p-5 overflow-y-auto space-y-4 flex-1">
           {submitted ? (
             <div className="py-8 text-center space-y-4 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-300">
                 <CheckCircle className="w-10 h-10" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-xl font-bold text-white">Data Berhasil Tersimpan!</h4>
-                <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
+                <h4 className="text-xl font-bold text-slate-900">Data Berhasil Tersimpan!</h4>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
                   Data Anda telah masuk ke sistem database Kanomas Tasikmalaya. Silakan lanjutkan kirim rincian booking Anda langsung ke WhatsApp Admin resmi.
                 </p>
               </div>
@@ -86,14 +86,14 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
                   href={getWaUrl()}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2"
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Kirim Rincian ke WhatsApp CS</span>
                 </a>
                 <button
                   onClick={onClose}
-                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs"
+                  className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                 >
                   Tutup
                 </button>
@@ -102,63 +102,63 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
               {/* Selected package badge */}
-              <div className="p-3 rounded-2xl bg-orange-950/40 border border-orange-500/30 flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Paket yang Dipilih</span>
-                  <h5 className="text-xs sm:text-sm font-bold text-amber-300">{packageName}</h5>
+                  <span className="text-[10px] text-amber-800 uppercase font-semibold">Paket yang Dipilih</span>
+                  <h5 className="text-xs sm:text-sm font-bold text-slate-900">{packageName}</h5>
                 </div>
                 {pkg && (
-                  <span className="text-xs font-mono font-bold text-white">
+                  <span className="text-xs font-mono font-bold text-amber-700">
                     Rp {Number(pkg.priceQuad || 0).toLocaleString('id-ID')}
                   </span>
                 )}
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Lengkap Anda</label>
+                <label className="block text-slate-700 font-semibold mb-1">Nama Lengkap Anda</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: H. Agus Supriatna"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-amber-500 shadow-xs"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">No. WhatsApp Aktif</label>
+                  <label className="block text-slate-700 font-semibold mb-1">No. WhatsApp Aktif</label>
                   <input
                     type="tel"
                     required
                     placeholder="Contoh: 081234567890"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-amber-500 shadow-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Kota / Domisili</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Kota / Domisili</label>
                   <input
                     type="text"
                     required
                     placeholder="Contoh: Tasikmalaya / Ciamis"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-amber-500 shadow-xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Jumlah Rencana Jamaah</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Jumlah Rencana Jamaah</label>
                   <select
                     value={paxCount}
                     onChange={(e) => setPaxCount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-amber-500 shadow-xs"
                   >
                     <option value={1}>1 Orang (Sendiri)</option>
                     <option value={2}>2 Orang (Pasangan / Sekamar)</option>
@@ -169,25 +169,25 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Kode Referral Mitra (Opsional)</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Kode Referral Mitra (Opsional)</label>
                   <input
                     type="text"
                     placeholder="Contoh: KANOMAS-SYIAR-01"
                     value={mitraCode}
                     onChange={(e) => setMitraCode(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono uppercase focus:outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono uppercase focus:outline-none focus:border-amber-500 shadow-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Catatan Tambahan (Kebutuhan Khusus)</label>
+                <label className="block text-slate-700 font-semibold mb-1">Catatan Tambahan (Kebutuhan Khusus)</label>
                 <textarea
                   rows="2"
                   placeholder="Misal: Perlu kursi roda untuk orang tua, kamar dekat lift, dll..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white resize-none focus:outline-none focus:border-orange-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 resize-none focus:outline-none focus:border-amber-500 shadow-xs"
                 />
               </div>
 
@@ -195,13 +195,13 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2.5 text-xs text-slate-400 hover:text-white"
+                  className="px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center gap-1.5"
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Kirim Pendaftaran</span>
@@ -212,9 +212,9 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-[#0d1720] border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
           <span>Data terdaftar resmi di Siskopatuh Kemenag</span>
-          <span className="text-emerald-400 font-semibold">100% Aman & Terpercaya</span>
+          <span className="text-emerald-700 font-semibold">100% Aman & Terpercaya</span>
         </div>
       </div>
     </div>

@@ -48,26 +48,26 @@ export default function SavingsCalculatorModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#14222e] text-white rounded-3xl border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl bg-white text-slate-800 rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-5 py-4 bg-[#0d1720] border-b border-white/10 flex items-center justify-between">
+        <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-emerald-600/30 text-emerald-400 border border-emerald-500/30">
+            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
               <Calculator className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-extrabold text-base text-white">
+              <h3 className="font-extrabold text-base text-slate-900">
                 Simulasi Tabungan Umroh BSI
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 PT Kanomas Artha Wisata bekerjasama dengan Bank Syariah Indonesia
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 hover:text-white transition"
+            className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 hover:text-slate-900 transition"
           >
             <X className="w-4 h-4" />
           </button>
@@ -77,11 +77,11 @@ export default function SavingsCalculatorModal({ onClose }) {
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {submitted ? (
             <div className="py-8 text-center space-y-4 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-300">
                 <CheckCircle className="w-10 h-10" />
               </div>
-              <h4 className="text-xl font-bold text-white">Pendaftaran Tabungan Berhasil!</h4>
-              <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+              <h4 className="text-xl font-bold text-slate-900">Pendaftaran Tabungan Berhasil!</h4>
+              <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
                 Jazakallahu khair, data Anda telah tersimpan di Database Kanomas. Customer service kami dan pihak BSI Tasikmalaya akan segera menghubungi nomor WhatsApp <strong>{phone}</strong> untuk panduan pembukaan rekening syariah.
               </p>
               <div className="pt-3 flex justify-center gap-3">
@@ -89,14 +89,14 @@ export default function SavingsCalculatorModal({ onClose }) {
                   href={`https://wa.me/628112113363?text=Bismillah,%20saya%20sudah%20mengisi%20pembukaan%20Tabungan%20Umroh%20BSI%20atas%20nama%20${encodeURIComponent(name)}%20dengan%20rencana%20menabung%20Rp%20${monthlyDeposit.toLocaleString('id-ID')}/bulan.`}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2"
                 >
                   <Phone className="w-4 h-4" />
                   <span>Konfirmasi via WhatsApp</span>
                 </a>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                 >
                   Selesai
                 </button>
@@ -106,7 +106,7 @@ export default function SavingsCalculatorModal({ onClose }) {
             <>
               {/* Option 1: Pilih Paket Umrah Target */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 block">
+                <label className="text-xs font-bold text-slate-700 block">
                   1. Pilih Estimasi Paket Umrah yang Diinginkan
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -120,12 +120,12 @@ export default function SavingsCalculatorModal({ onClose }) {
                       onClick={() => setBaseCost(p.price)}
                       className={`p-3 rounded-2xl border text-left transition ${
                         baseCost === p.price
-                          ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300 shadow-md'
-                          : 'bg-[#101b25] border-white/10 text-slate-400 hover:text-white'
+                          ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                       }`}
                     >
                       <span className="text-[11px] font-bold block">{p.label}</span>
-                      <span className="text-xs font-mono font-black text-amber-300">
+                      <span className="text-xs font-mono font-black text-amber-700">
                         Rp {p.price.toLocaleString('id-ID')}
                       </span>
                     </button>
@@ -136,9 +136,9 @@ export default function SavingsCalculatorModal({ onClose }) {
               {/* Option 2: Jumlah Jamaah & Waktu */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-orange-400" />
-                    <span>2. Jumlah Jamaah: <strong className="text-white font-mono">{people} Orang</strong></span>
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-orange-500" />
+                    <span>2. Jumlah Jamaah: <strong className="text-slate-900 font-mono">{people} Orang</strong></span>
                   </label>
                   <input
                     type="range"
@@ -148,7 +148,7 @@ export default function SavingsCalculatorModal({ onClose }) {
                     onChange={(e) => setPeople(Number(e.target.value))}
                     className="w-full accent-orange-500"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                  <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                     <span>1 Jamaah</span>
                     <span>2 Jamaah</span>
                     <span>3 Jamaah</span>
@@ -158,9 +158,9 @@ export default function SavingsCalculatorModal({ onClose }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-emerald-400" />
-                    <span>3. Target Menabung: <strong className="text-white font-mono">{months} Bulan</strong></span>
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-emerald-600" />
+                    <span>3. Target Menabung: <strong className="text-slate-900 font-mono">{months} Bulan</strong></span>
                   </label>
                   <div className="flex gap-1.5">
                     {[6, 12, 18, 24, 36].map((m) => (
@@ -169,8 +169,8 @@ export default function SavingsCalculatorModal({ onClose }) {
                         onClick={() => setMonths(m)}
                         className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition font-mono ${
                           months === m
-                            ? 'bg-emerald-600 text-white shadow'
-                            : 'bg-[#101b25] text-slate-400 hover:text-white border border-white/5'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
                         }`}
                       >
                         {m} Bln
@@ -181,38 +181,38 @@ export default function SavingsCalculatorModal({ onClose }) {
               </div>
 
               {/* Calculation Result Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#102419] to-[#0c1912] border border-emerald-500/40 space-y-3">
+              <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-300 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
                     <Building2 className="w-4 h-4" />
                     <span>Rekomendasi Setoran via BSI</span>
                   </span>
-                  <span className="text-[10px] text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-600/40">
+                  <span className="text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-300 font-bold">
                     Bebas Biaya Admin
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-emerald-500/20">
+                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-emerald-200">
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase block font-semibold">
+                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">
                       Setoran Per Bulan (Total)
                     </span>
-                    <span className="text-xl sm:text-2xl font-black text-amber-300 font-mono">
+                    <span className="text-xl sm:text-2xl font-black text-amber-700 font-mono">
                       Rp {monthlyDeposit.toLocaleString('id-ID')}
                     </span>
-                    <span className="text-[10px] text-emerald-300 block mt-0.5">
+                    <span className="text-[10px] text-emerald-700 block mt-0.5 font-medium">
                       (Rp {monthlyPerPerson.toLocaleString('id-ID')} / org)
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-slate-400 uppercase block font-semibold">
+                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">
                       Total Target Tabungan
                     </span>
-                    <span className="text-xl sm:text-2xl font-black text-white font-mono">
+                    <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono">
                       Rp {totalTarget.toLocaleString('id-ID')}
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
                       Untuk {people} Pax ({months} Bulan)
                     </span>
                   </div>
@@ -223,47 +223,47 @@ export default function SavingsCalculatorModal({ onClose }) {
               {!showRegisterForm ? (
                 <button
                   onClick={() => setShowRegisterForm(true)}
-                  className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2"
                 >
                   <span>Daftar / Buka Tabungan Umrah BSI Sekarang</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
-                <form onSubmit={handleSubmit} className="p-4 bg-[#101b25] rounded-2xl border border-white/10 space-y-3 animate-in fade-in duration-200">
-                  <h4 className="text-xs font-bold text-emerald-400 uppercase">
+                <form onSubmit={handleSubmit} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-bold text-emerald-700 uppercase">
                     Form Pendaftaran Tabungan Umrah
                   </h4>
                   <div className="space-y-2 text-xs">
                     <div>
-                      <label className="block text-slate-300 mb-1">Nama Lengkap (Sesuai KTP)</label>
+                      <label className="block text-slate-700 mb-1 font-medium">Nama Lengkap (Sesuai KTP)</label>
                       <input
                         type="text"
                         required
                         placeholder="Contoh: Hj. Siti Fatimah"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900"
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-300 mb-1">Nomor WhatsApp Aktif</label>
+                      <label className="block text-slate-700 mb-1 font-medium">Nomor WhatsApp Aktif</label>
                       <input
                         type="tel"
                         required
                         placeholder="Contoh: 081234567890"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900"
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-300 mb-1">Nomor Induk Kependudukan (NIK - Opsional)</label>
+                      <label className="block text-slate-700 mb-1 font-medium">Nomor Induk Kependudukan (NIK - Opsional)</label>
                       <input
                         type="text"
                         placeholder="16 Digit NIK KTP"
                         value={nik}
                         onChange={(e) => setNik(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900"
                       />
                     </div>
                   </div>
@@ -271,13 +271,13 @@ export default function SavingsCalculatorModal({ onClose }) {
                     <button
                       type="button"
                       onClick={() => setShowRegisterForm(false)}
-                      className="px-3 py-2 text-xs text-slate-400 hover:text-white"
+                      className="px-3 py-2 text-xs text-slate-500 hover:text-slate-800"
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow"
+                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
                     >
                       Kirim & Simpan ke Rekening BSI
                     </button>
@@ -289,11 +289,11 @@ export default function SavingsCalculatorModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#0d1720] border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <span>Setoran awal ringan mulai Rp 500.000</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold"
+            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold"
           >
             Tutup
           </button>

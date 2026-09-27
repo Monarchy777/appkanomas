@@ -5,8 +5,6 @@ import {
   Sparkle,
   Sparkles,
   MapPin,
-  Volume2,
-  VolumeX,
   Play,
   Square,
   Search,
@@ -14,8 +12,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ShieldCheck,
-  Check,
-  Smartphone
+  Check
 } from 'lucide-react';
 import { INITIAL_DOA_MANASIK } from '../services/initialSeed';
 import { sounds } from '../services/soundEffects';
@@ -187,21 +184,21 @@ export default function WorshipEducationView() {
 
   return (
     <div className="space-y-5 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
-      {/* 1. HEADER PANDUAN IBADAH */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#122332] via-[#0d1a24] to-[#070f16] border border-amber-900/40 shadow-xl space-y-2 text-white">
-        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-950/80 text-amber-400 border border-amber-600/30 inline-block">
+      {/* 1. HEADER PANDUAN IBADAH (Card Putih Bersih) */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-2">
+        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 inline-block">
           Panduan Ibadah Syar'i
         </span>
-        <h1 className="text-xl sm:text-2xl font-black text-white font-serif leading-snug">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-serif leading-snug">
           Bimbingan Manasik Umrah & Haji Sunnah
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
           Lengkap dengan audio bacaan doa berbahasa Arab qori asli, counter putaran Tawaf & Sa'i, tasbih zikir digital, serta urutan rukun ibadah resmi Kanomas.
         </p>
       </div>
 
       {/* 2. TAB NAVIGASI UTAMA IBADAH (4 SEGMEN SANGAT JELAS) */}
-      <div className="grid grid-cols-4 gap-1.5 p-1.5 bg-[#0b141d] rounded-2xl border border-white/5 shadow-inner">
+      <div className="grid grid-cols-4 gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner">
         <button
           onClick={() => {
             sounds.playClick();
@@ -209,8 +206,8 @@ export default function WorshipEducationView() {
           }}
           className={`py-2.5 px-1 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 ${
             activeSubTab === 'doa'
-              ? 'bg-[#b45309] text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <BookOpen className="w-4 h-4 flex-shrink-0" />
@@ -224,8 +221,8 @@ export default function WorshipEducationView() {
           }}
           className={`py-2.5 px-1 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 ${
             activeSubTab === 'counter'
-              ? 'bg-[#b45309] text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Repeat className="w-4 h-4 flex-shrink-0" />
@@ -239,8 +236,8 @@ export default function WorshipEducationView() {
           }}
           className={`py-2.5 px-1 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 ${
             activeSubTab === 'tasbih'
-              ? 'bg-[#b45309] text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Sparkle className="w-4 h-4 flex-shrink-0" />
@@ -254,8 +251,8 @@ export default function WorshipEducationView() {
           }}
           className={`py-2.5 px-1 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1.5 ${
             activeSubTab === 'steps'
-              ? 'bg-[#b45309] text-white shadow-md'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <ShieldCheck className="w-4 h-4 flex-shrink-0" />
@@ -276,7 +273,7 @@ export default function WorshipEducationView() {
                 placeholder="Cari judul doa, lafaz Arab, arti..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#0f1922] border border-white/10 text-white text-xs placeholder-slate-400 focus:outline-none focus:border-amber-500 shadow-inner"
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-amber-500 shadow-sm"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             </div>
@@ -296,8 +293,8 @@ export default function WorshipEducationView() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition ${
                     selectedCategory === cat.id
-                      ? 'bg-amber-600 text-white shadow'
-                      : 'bg-[#0f1922] text-slate-400 hover:text-white border border-white/5'
+                      ? 'bg-amber-500 text-white shadow'
+                      : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                   }`}
                 >
                   {cat.label}
@@ -306,7 +303,7 @@ export default function WorshipEducationView() {
             </div>
           </div>
 
-          {/* List Kartu Doa */}
+          {/* List Kartu Doa (Putih Bersih & Kaligrafi Jelas) */}
           <div className="space-y-3">
             {filteredDoa.map((doa) => {
               const isPlaying = playingDoaId === doa.id;
@@ -314,19 +311,19 @@ export default function WorshipEducationView() {
               return (
                 <div
                   key={doa.id}
-                  className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 space-y-3 ${
+                  className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 space-y-3 bg-white ${
                     isPlaying
-                      ? 'bg-[#102419] border-emerald-500/70 shadow-[0_0_25px_rgba(16,185,129,0.3)]'
-                      : 'bg-[#0f1922] border-amber-900/30 shadow-md hover:border-amber-500/40'
+                      ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/50'
+                      : 'border-slate-200 shadow-sm hover:border-amber-400 hover:shadow-md'
                   }`}
                 >
                   {/* Header Doa: Badge & Judul */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded bg-black/40 text-amber-300 font-mono">
+                      <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono">
                         {doa.category}
                       </span>
-                      <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
                         {doa.title}
                       </h3>
                     </div>
@@ -334,10 +331,10 @@ export default function WorshipEducationView() {
                     {/* Tombol Putar Audio Arab */}
                     <button
                       onClick={() => handleTogglePlayAudio(doa.id, doa.arabic)}
-                      className={`px-3.5 py-2 rounded-2xl font-bold text-xs flex items-center gap-2 transition active:scale-95 shadow-md flex-shrink-0 ${
+                      className={`px-3.5 py-2 rounded-2xl font-bold text-xs flex items-center gap-2 transition active:scale-95 shadow-sm flex-shrink-0 ${
                         isPlaying
                           ? 'bg-emerald-600 text-white ring-2 ring-emerald-400 animate-pulse'
-                          : 'bg-[#b45309] hover:bg-[#c2410c] text-white'
+                          : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300'
                       }`}
                     >
                       {isPlaying ? (
@@ -354,20 +351,20 @@ export default function WorshipEducationView() {
                     </button>
                   </div>
 
-                  {/* Teks Arab (Besar, Jelas & Berjarak Syar'i) */}
-                  <div className="py-2 px-3 sm:px-4 rounded-2xl bg-black/40 border border-white/5">
-                    <p className="text-right text-xl sm:text-2xl leading-loose font-serif text-amber-200 select-all" dir="rtl">
+                  {/* Teks Arab (Besar, Jelas di Background Cream Lembut) */}
+                  <div className="py-3 px-4 rounded-2xl bg-amber-50/50 border border-amber-200/60">
+                    <p className="text-right text-xl sm:text-2xl leading-loose font-serif text-slate-900 select-all" dir="rtl">
                       {doa.arabic}
                     </p>
                   </div>
 
                   {/* Teks Latin & Terjemahan */}
                   <div className="space-y-1.5 text-xs">
-                    <p className="text-amber-300/90 italic font-sans leading-relaxed">
+                    <p className="text-amber-800 italic font-sans leading-relaxed">
                       "{doa.latin}"
                     </p>
-                    <p className="text-slate-300 leading-relaxed pt-1 border-t border-white/5">
-                      <strong className="text-white">Artinya: </strong>
+                    <p className="text-slate-600 leading-relaxed pt-1 border-t border-slate-100">
+                      <strong className="text-slate-800">Artinya: </strong>
                       {doa.meaning}
                     </p>
                   </div>
@@ -383,9 +380,9 @@ export default function WorshipEducationView() {
       {/* ========================================================================= */}
       {activeSubTab === 'counter' && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#0f1922] border border-amber-900/30 shadow-xl space-y-4">
+          <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
             {/* Mode Switcher: Tawaf vs Sa'i */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
               <button
                 onClick={() => {
                   sounds.playClick();
@@ -395,8 +392,8 @@ export default function WorshipEducationView() {
                 }}
                 className={`py-2 rounded-xl text-xs font-bold transition ${
                   counterMode === 'thawaf'
-                    ? 'bg-[#b45309] text-white shadow'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 🕋 Thawaf (7 Putaran Ka'bah)
@@ -411,8 +408,8 @@ export default function WorshipEducationView() {
                 }}
                 className={`py-2 rounded-xl text-xs font-bold transition ${
                   counterMode === 'sai'
-                    ? 'bg-[#b45309] text-white shadow'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 ⛰️ Sa'i (Safa - Marwah)
@@ -421,21 +418,21 @@ export default function WorshipEducationView() {
 
             {/* Status Selesai atau Indikator Putaran */}
             {counterFinished ? (
-              <div className="p-6 rounded-3xl bg-emerald-950/60 border-2 border-emerald-500/60 text-center space-y-3">
-                <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)]">
+              <div className="p-6 rounded-3xl bg-emerald-50 border-2 border-emerald-400 text-center space-y-3">
+                <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-300 shadow-md">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-black text-white font-serif">
+                <h3 className="text-xl font-black text-slate-900 font-serif">
                   Alhamdulillah! 7 Putaran Telah Selesai
                 </h3>
-                <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
                   {counterMode === 'thawaf'
                     ? "Sempurna sudah 7 putaran Thawaf Anda. Silakan menuju belakang Maqam Ibrahim untuk sholat sunnah thawaf 2 rakaat dan minum air Zamzam."
                     : "Sempurna sudah 7 lintasan Sa'i di bukit Marwah. Lanjutkan dengan Tahallul (mencukur/memotong rambut) untuk menyempurnakan Umrah Anda."}
                 </p>
                 <button
                   onClick={handleResetCounter}
-                  className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition"
+                  className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md transition"
                 >
                   Mulai Dari Awal
                 </button>
@@ -444,11 +441,11 @@ export default function WorshipEducationView() {
               <div className="space-y-4">
                 {/* Visual Lingkaran Putaran */}
                 <div className="flex flex-col items-center justify-center py-2 space-y-2">
-                  <div className="relative w-36 h-36 rounded-full border-4 border-amber-500/30 flex items-center justify-center bg-[#070e15] shadow-2xl">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 absolute top-4">
+                  <div className="relative w-36 h-36 rounded-full border-4 border-amber-400/40 flex items-center justify-center bg-slate-50 shadow-inner">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 absolute top-4">
                       {counterMode === 'thawaf' ? 'Putaran Ke' : 'Lintasan Ke'}
                     </span>
-                    <span className="text-6xl font-black text-amber-400 font-mono pt-2">
+                    <span className="text-6xl font-black text-amber-600 font-mono pt-2">
                       {round}
                     </span>
                     <span className="text-xs font-bold text-slate-400 absolute bottom-4 font-mono">
@@ -456,29 +453,29 @@ export default function WorshipEducationView() {
                     </span>
                   </div>
 
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-slate-800">
                     {currentActiveRoundData.title}
                   </span>
                 </div>
 
                 {/* Doa untuk Putaran Saat Ini */}
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 text-center">
-                  <div className="flex items-center justify-between pb-1 border-b border-white/5">
-                    <span className="text-[10px] uppercase font-bold text-amber-300">
+                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2 text-center">
+                  <div className="flex items-center justify-between pb-1 border-b border-amber-200">
+                    <span className="text-[10px] uppercase font-bold text-amber-800">
                       Doa Putaran ke-{round}
                     </span>
                     <button
                       onClick={() => handleTogglePlayAudio(currentActiveRoundData.doaId, currentActiveRoundData.arabic)}
-                      className="px-2.5 py-1 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold flex items-center gap-1 transition shadow"
+                      className="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold flex items-center gap-1 transition shadow-sm"
                     >
                       <Play className="w-3 h-3 fill-current" />
                       <span>Putar Audio</span>
                     </button>
                   </div>
-                  <p className="text-right text-lg sm:text-xl font-serif text-amber-200 leading-loose" dir="rtl">
+                  <p className="text-right text-lg sm:text-xl font-serif text-slate-900 leading-loose" dir="rtl">
                     {currentActiveRoundData.arabic}
                   </p>
-                  <p className="text-xs text-amber-300/90 italic">
+                  <p className="text-xs text-amber-800 italic">
                     "{currentActiveRoundData.latin}"
                   </p>
                 </div>
@@ -486,7 +483,7 @@ export default function WorshipEducationView() {
                 {/* Tombol Besar Sentuh Putaran Berikutnya */}
                 <button
                   onClick={handleNextRound}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-black text-sm sm:text-base shadow-xl transition active:scale-98 border border-amber-300/40 animate-pulse flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-black text-sm sm:text-base shadow-lg transition active:scale-98 flex items-center justify-center gap-2"
                 >
                   <Check className="w-5 h-5" />
                   <span>SELESAIKAN PUTARAN KE-{round} (TAP DI SINI)</span>
@@ -495,7 +492,7 @@ export default function WorshipEducationView() {
                 <div className="flex justify-end">
                   <button
                     onClick={handleResetCounter}
-                    className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition"
+                    className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 transition"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Reset Putaran</span>
@@ -512,10 +509,10 @@ export default function WorshipEducationView() {
       {/* ========================================================================= */}
       {activeSubTab === 'tasbih' && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#0f1922] border border-amber-900/30 shadow-xl space-y-4 text-center">
+          <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4 text-center">
             {/* Pilihan Zikir Preset */}
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block text-left">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block text-left">
                 Pilih Bacaan Zikir
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -529,12 +526,12 @@ export default function WorshipEducationView() {
                     }}
                     className={`p-2.5 rounded-2xl text-left border transition ${
                       selectedZikir.name === z.name
-                        ? 'bg-[#1b2b20] border-emerald-500 text-emerald-300 shadow-sm'
-                        : 'bg-[#070e15] border-white/5 text-slate-300 hover:text-white'
+                        ? 'bg-purple-50 border-purple-400 text-purple-800 shadow-sm font-bold'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
                     <strong className="text-xs block">{z.name}</strong>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
                       Target: {z.target}x
                     </span>
                   </button>
@@ -543,29 +540,29 @@ export default function WorshipEducationView() {
             </div>
 
             {/* Teks Arab Zikir Terpilih */}
-            <div className="py-3 px-4 rounded-2xl bg-black/40 border border-white/5">
-              <span className="text-2xl sm:text-3xl font-serif text-amber-200 block" dir="rtl">
+            <div className="py-3 px-4 rounded-2xl bg-purple-50/50 border border-purple-200">
+              <span className="text-2xl sm:text-3xl font-serif text-slate-900 block" dir="rtl">
                 {selectedZikir.arabic}
               </span>
             </div>
 
-            {/* Lingkaran Tombol Tap Tasbih Besar */}
+            {/* Lingkaran Tombol Tap Tasbih Besar (3D Embossed Style) */}
             <div className="py-4 flex flex-col items-center justify-center space-y-3">
               <button
                 onClick={handleTapTasbih}
-                className="w-44 h-44 rounded-full bg-gradient-to-br from-[#123324] via-[#0b1c14] to-[#06100b] border-4 border-emerald-500/60 shadow-[0_0_40px_rgba(16,185,129,0.3)] active:scale-95 transition flex flex-col items-center justify-center group"
+                className="w-44 h-44 rounded-full bg-gradient-to-br from-purple-500 via-indigo-600 to-purple-800 border-4 border-purple-300 shadow-[0_10px_25px_rgba(147,51,234,0.35)] active:scale-95 transition flex flex-col items-center justify-center group"
               >
-                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">
+                <span className="text-xs font-bold uppercase text-purple-200 tracking-wider">
                   Hitungan
                 </span>
                 <span className="text-6xl font-black text-white font-mono group-hover:scale-105 transition">
                   {tasbihCount}
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">
+                <span className="text-[10px] text-purple-200 font-mono">
                   Target: {selectedZikir.target}
                 </span>
               </button>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 Ketuk lingkaran di atas setiap membaca 1 kali zikir (dengan getaran)
               </span>
             </div>
@@ -574,7 +571,7 @@ export default function WorshipEducationView() {
             <div className="flex justify-center pt-1">
               <button
                 onClick={handleResetTasbih}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition"
+                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold flex items-center gap-1.5 transition"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset Hitungan (0)</span>
@@ -593,44 +590,44 @@ export default function WorshipEducationView() {
             {UMRAH_STEPS.map((s) => (
               <div
                 key={s.step}
-                className="p-4 sm:p-5 rounded-3xl bg-[#0f1922] border border-amber-900/30 shadow-md space-y-3"
+                className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#b45309] text-white">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs">
                     Langkah ke-{s.step}
                   </span>
-                  <span className="text-xs text-amber-300 font-medium flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-amber-500" />
                     <span>{s.place}</span>
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-white leading-snug">
+                <h3 className="text-base font-bold text-slate-900 leading-snug">
                   {s.title}
                 </h3>
 
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   {s.desc}
                 </p>
 
                 {/* Doa Terkait Langkah Ini */}
-                <div className="p-3 rounded-2xl bg-black/30 border border-white/5 space-y-1">
+                <div className="p-3 rounded-2xl bg-amber-50/50 border border-amber-200/70 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-amber-300 font-bold">
+                    <span className="text-[10px] text-amber-800 font-bold">
                       {s.doaTitle}
                     </span>
                     <button
                       onClick={() => handleTogglePlayAudio(s.doaId, s.arabic)}
-                      className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 font-bold"
+                      className="text-[10px] text-emerald-600 hover:text-emerald-700 flex items-center gap-1 font-bold"
                     >
                       <Play className="w-3 h-3 fill-current" />
                       <span>Putar Audio</span>
                     </button>
                   </div>
-                  <p className="text-right text-base font-serif text-amber-200" dir="rtl">
+                  <p className="text-right text-base font-serif text-slate-900" dir="rtl">
                     {s.arabic}
                   </p>
-                  <p className="text-[11px] text-slate-300 italic">
+                  <p className="text-[11px] text-amber-800 italic">
                     "{s.latin}"
                   </p>
                 </div>

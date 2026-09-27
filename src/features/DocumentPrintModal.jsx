@@ -61,31 +61,31 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-[#14222e] text-white rounded-3xl border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-white text-slate-800 rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Modal Controls Header (Hidden on Print) */}
-        <div className="px-5 py-4 bg-[#0d1720] border-b border-white/10 flex items-center justify-between no-print">
+        <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between no-print">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-orange-600/30 text-orange-400 border border-orange-500/30">
+            <span className="p-2 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
               <Printer className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="font-extrabold text-base text-white">Cetak Berkas Resmi & Kwitansi</h3>
-              <p className="text-[11px] text-slate-400">Format standar Kemenag RI siap cetak & simpan PDF (A4)</p>
+              <h3 className="font-extrabold text-base text-slate-900">Cetak Berkas Resmi & Kwitansi</h3>
+              <p className="text-[11px] text-slate-500">Format standar Kemenag RI siap cetak & simpan PDF (A4)</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak / Simpan PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 hover:text-white transition"
+              className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 flex items-center justify-center text-slate-600 hover:text-slate-900 transition"
             >
               <X className="w-4 h-4" />
             </button>
@@ -93,14 +93,14 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
         </div>
 
         {/* Sub-Header Document Type Tabs (Hidden on Print) */}
-        <div className="p-3 bg-[#111c26] border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+        <div className="p-3 bg-slate-100 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
           <div className="flex gap-2">
             <button
               onClick={() => setDocType('paspor')}
               className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
                 docType === 'paspor'
-                  ? 'bg-orange-600 text-white shadow'
-                  : 'bg-white/5 text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
               Surat Rekomendasi Paspor Kemenag
@@ -109,8 +109,8 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
               onClick={() => setDocType('kwitansi')}
               className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
                 docType === 'kwitansi'
-                  ? 'bg-orange-600 text-white shadow'
-                  : 'bg-white/5 text-slate-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
               Kwitansi Pembayaran / Tabungan BSI
@@ -119,13 +119,13 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
 
           {/* Quick Jamaah Selector */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400">Pilih Data Jamaah:</span>
+            <span className="text-slate-500 font-medium">Pilih Data Jamaah:</span>
             <select
               onChange={(e) => {
                 const found = jamaahList.find(j => j.id === e.target.value);
                 if (found) handleSelectJamaah(found);
               }}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+              className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-800 text-xs shadow-xs"
             >
               {jamaahList.map(j => (
                 <option key={j.id} value={j.id}>{j.name} ({j.packageName.slice(0, 20)}...)</option>
@@ -135,7 +135,7 @@ export default function DocumentPrintModal({ onClose, defaultDocType = 'paspor' 
         </div>
 
         {/* Scrollable Printable Document Sheet Container */}
-        <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-slate-900 flex justify-center">
+        <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-slate-200/70 flex justify-center">
           {/* Printable White Sheet (A4 Proportion) */}
           <div className="print-only-container w-full max-w-[210mm] min-h-[297mm] bg-white text-slate-900 p-8 sm:p-12 shadow-2xl rounded-xl border border-slate-200 font-sans flex flex-col justify-between">
             {/* DOCUMENT 1: SURAT REKOMENDASI PASPOR */}
