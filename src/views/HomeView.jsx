@@ -7,7 +7,9 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
-  Award
+  Award,
+  Sun,
+  Moon
 } from 'lucide-react';
 import {
   Icon3DAlQuran,
@@ -59,55 +61,37 @@ const PROMO_BANNERS = [
   }
 ];
 
-// Logo Resmi Kemitraan & Akreditasi Kanomas (Menggunakan file logo asli)
+// Logo Resmi Akreditasi & Regulator Pemerintah untuk Umrah & Haji Khusus
 const OFFICIAL_LOGOS = [
   {
-    id: 'kan',
-    name: 'KAN',
-    desc: 'Komite Akreditasi Nasional',
-    src: '/assets/logos/logo-kan.png'
-  },
-  {
-    id: 'siskopatuh',
-    name: 'SISKOPATUH',
-    desc: 'Kemenag Terintegrasi',
-    src: '/assets/logos/logo-siskopatuh.png'
-  },
-  {
     id: 'kemenag',
-    name: 'Kemenag RI',
-    desc: 'PPIU No. U.310',
+    name: 'Kementerian Agama RI',
     src: '/assets/logos/logo-kemenag.png'
   },
   {
+    id: 'siskopatuh',
+    name: 'SISKOPATUH Kemenag RI',
+    src: '/assets/logos/logo-siskopatuh.png'
+  },
+  {
+    id: 'kan',
+    name: 'KAN - Komite Akreditasi Nasional',
+    src: '/assets/logos/logo-kan.png'
+  },
+  {
     id: 'himpuh',
-    name: 'HIMPUH',
-    desc: 'Asosiasi Haji & Umrah',
+    name: 'HIMPUH - Asosiasi Haji & Umrah',
     src: '/assets/logos/logo-himpuh.png'
   },
   {
     id: 'iata',
-    name: 'IATA',
-    desc: 'Passenger Sales Agency',
+    name: 'IATA International',
     src: '/assets/logos/logo-iata.png'
   },
   {
     id: '5pasti',
-    name: '5 Pasti Umrah',
-    desc: 'Standar Resmi Kemenag',
+    name: '5 Pasti Umrah Kemenag RI',
     src: '/assets/logos/logo-5pasti.jpg'
-  },
-  {
-    id: 'bsi',
-    name: 'Bank BSI',
-    desc: 'Bank Syariah Indonesia',
-    src: '/assets/logos/logo-bsi.png'
-  },
-  {
-    id: 'kanomas',
-    name: 'Kanomas Travel',
-    desc: 'Penyelenggara Resmi',
-    src: '/assets/logo-kanomas.png'
   }
 ];
 
@@ -117,6 +101,7 @@ export default function HomeView({
   nextPrayer,
   onSelectTab,
   onOpenQuran,
+  onOpenDzikir,
   onOpenDailyPrayers,
   onOpenJamaahServices,
   onOpenPackageDetail,
@@ -133,7 +118,7 @@ export default function HomeView({
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Auto-advance banner setiap 3 detik (3000ms)
+  // Auto-play slider setiap 3 detik
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % PROMO_BANNERS.length);
@@ -149,11 +134,13 @@ export default function HomeView({
     setCurrentSlide((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
   };
 
+  const isMorning = new Date().getHours() < 15;
+
   return (
-    <div className="space-y-5 sm:space-y-6 pb-28 mx-3 sm:mx-6 mt-4 max-w-4xl mx-auto">
-      {/* 1. CAROUSEL PROMO & KEKUATAN KANOMAS (OTOMATIS BERGANTI SETIAP 3 DETIK) */}
-      <section className="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md group select-none">
-        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9]">
+    <div className="space-y-4 sm:space-y-6 pb-24 px-3 sm:px-6 pt-3">
+      {/* 1. SLIDER PROMO & KEKUATAN KANOMAS (BERGANTI SETIAP 3 DETIK) */}
+      <section className="relative w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900 group">
+        <div className="relative h-52 sm:h-72 md:h-80 w-full overflow-hidden">
           {PROMO_BANNERS.map((banner, index) => {
             const isActive = index === currentSlide;
             return (
@@ -176,11 +163,11 @@ export default function HomeView({
                 {/* Content Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white space-y-1 sm:space-y-1.5 z-20">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-xs">
                       {banner.tag}
                     </span>
                   </div>
-                  <h3 className="text-base sm:text-xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-sm">
+                  <h3 className="text-lg sm:text-2xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-sm">
                     {banner.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-200 line-clamp-1 drop-shadow-sm font-medium">
@@ -217,25 +204,25 @@ export default function HomeView({
               key={idx}
               onClick={() => setCurrentSlide(idx)}
               aria-label={`Ke slide ${idx + 1}`}
-              className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-all duration-300 ${
                 currentSlide === idx
-                  ? 'w-5 sm:w-6 bg-amber-400'
-                  : 'w-1.5 sm:w-2 bg-white/50 hover:bg-white/80'
+                  ? 'w-6 bg-amber-400'
+                  : 'w-2 bg-white/50 hover:bg-white/80'
               }`}
             />
           ))}
         </div>
       </section>
 
-      {/* 2. WAKTU SHOLAT BERIKUTNYA (CUKUP 1 BARIS SAJA DENGAN TOMBOL ARAH KIBLAT) */}
-      <section className="px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-4 h-4 text-amber-600" />
+      {/* 2. WAKTU SHOLAT BERIKUTNYA (CUKUP 1 BARIS DENGAN TOMBOL ARAH KIBLAT) */}
+      <section className="px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-5 h-5 text-amber-600" />
           </div>
-          <div className="flex items-center gap-1.5 min-w-0 text-xs sm:text-sm font-semibold text-slate-700 truncate">
-            <span className="text-slate-500 whitespace-nowrap">Sholat Berikutnya:</span>
-            <span className="font-extrabold text-amber-700 font-mono whitespace-nowrap">
+          <div className="flex items-center gap-2 min-w-0 text-sm sm:text-base font-bold text-slate-800 truncate">
+            <span className="text-slate-500 font-semibold whitespace-nowrap">Sholat Berikutnya:</span>
+            <span className="font-black text-amber-700 font-mono whitespace-nowrap">
               {nextPrayer ? `${nextPrayer.name} ${nextPrayer.time} WIB` : 'Subuh 04:30 WIB'}
             </span>
           </div>
@@ -243,35 +230,70 @@ export default function HomeView({
 
         <button
           onClick={() => onSelectTab('prayer')}
-          className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 flex-shrink-0 whitespace-nowrap"
+          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 flex-shrink-0 whitespace-nowrap"
         >
           <Compass className="w-4 h-4 text-amber-100" />
           <span>Arah Kiblat</span>
         </button>
       </section>
 
+      {/* 2B. BANNER DZIKIR PAGI & PETANG SESUAI SUNNAH */}
+      <section
+        onClick={onOpenDzikir}
+        className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white cursor-pointer hover:shadow-md transition-all flex items-center justify-between gap-3 active:scale-[0.99] shadow-xs"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 text-white shadow-xs">
+            {isMorning ? <Sun className="w-6 h-6 text-amber-100" /> : <Moon className="w-6 h-6 text-indigo-100" />}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-100">
+              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <span>Dzikir Harian Sesuai Sunnah</span>
+            </div>
+            <h3 className="text-sm sm:text-base font-black truncate">
+              {isMorning ? '🌅 Waktunya Dzikir Pagi Sesuai Sunnah' : '🌆 Waktunya Dzikir Petang Sesuai Sunnah'}
+            </h3>
+            <p className="text-xs text-amber-100/90 truncate font-medium">
+              Berdasarkan hadits shahih • Teks Arab jelas, arti & tasbih counter
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onOpenDzikir) onOpenDzikir();
+          }}
+          className="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-amber-50 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition active:scale-95 flex-shrink-0 whitespace-nowrap"
+        >
+          <span>Mulai</span>
+          <ChevronRight className="w-4 h-4 text-amber-600" />
+        </button>
+      </section>
+
       {/* 3. MENU UTAMA BERANDA: 2 BARIS X 4 KOLOM (IKON 3D BERWARNA & ELEGAN) */}
       <section className="space-y-3.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-500" />
             <span>Menu Layanan & Ibadah</span>
           </h2>
-          <span className="text-[10px] text-slate-400">Sentuh menu untuk membuka</span>
+          <span className="text-xs text-slate-500 font-medium">Ketuk menu untuk membuka</span>
         </div>
 
-        <div className="space-y-2.5 sm:space-y-3.5">
+        <div className="space-y-3">
           {/* BARIS 1: 1. Al Quran, 2. Jadwal Sholat & Arah Kiblat, 3. Ibadah Umrah, 4. Pelayanan Nusuk */}
           <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5">
             {/* 1. Al Quran */}
             <button
               onClick={onOpenQuran}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DAlQuran size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DAlQuran size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Al-Qur'an
               </span>
             </button>
@@ -279,12 +301,12 @@ export default function HomeView({
             {/* 2. Jadwal Sholat & Arah Kiblat */}
             <button
               onClick={() => onSelectTab('prayer')}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DSholatKiblat size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DSholatKiblat size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Sholat & Kiblat
               </span>
             </button>
@@ -292,12 +314,12 @@ export default function HomeView({
             {/* 3. Ibadah Umrah (Miqat, Thawaf, Sa'i, Tahallul, Doa Manasik) */}
             <button
               onClick={() => onSelectTab('worship')}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DTawaf size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DTawaf size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-sky-700 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Ibadah Umrah
               </span>
             </button>
@@ -305,12 +327,12 @@ export default function HomeView({
             {/* 4. Pelayanan Nusuk */}
             <button
               onClick={onOpenNusuk}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DNusuk size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DNusuk size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Layanan Nusuk
               </span>
             </button>
@@ -321,12 +343,12 @@ export default function HomeView({
             {/* 1. Paket Umrah */}
             <button
               onClick={() => onSelectTab('packages')}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-orange-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DPaket size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DPaket size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Paket Umrah
               </span>
             </button>
@@ -334,12 +356,12 @@ export default function HomeView({
             {/* 2. Tabungan Umrah */}
             <button
               onClick={onOpenSavings}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DTabungan size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DTabungan size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-teal-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-teal-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Tabungan Umrah
               </span>
             </button>
@@ -347,12 +369,12 @@ export default function HomeView({
             {/* 3. Doa Harian */}
             <button
               onClick={onOpenDailyPrayers}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DDoaHarian size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DDoaHarian size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-sky-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Doa Harian
               </span>
             </button>
@@ -360,12 +382,12 @@ export default function HomeView({
             {/* 4. Pelayanan Jamaah */}
             <button
               onClick={onOpenJamaahServices}
-              className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-purple-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-1.5 group active:scale-95 shadow-xs min-h-[98px] sm:min-h-[110px]"
+              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-purple-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <Icon3DPelayananJamaah size={40} />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Icon3DPelayananJamaah size={44} />
               </div>
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight line-clamp-2 min-h-[26px] flex items-center justify-center">
+              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
                 Pelayanan Jamaah
               </span>
             </button>
@@ -373,60 +395,51 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* 4. LEGALITAS, AKREDITASI RESMI & LOGO ASLI BERJALAN KANAN KE KIRI (INFINITE MARQUEE) */}
-      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-3.5 overflow-hidden">
+      {/* 4. LEGALITAS, AKREDITASI RESMI & LOGO ASLI BERJALAN KANAN KE KIRI (HANYA LOGO RESMI AGAK BESAR TANPA TULISAN) */}
+      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-3">
           <div>
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Legalitas & Akreditasi Resmi</span>
+            <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <span>Legalitas & Akreditasi Resmi Pemerintah</span>
             </h2>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               PT Kanomas Arasy Wisata terdaftar resmi & diawasi Kementerian Agama RI serta terafiliasi lembaga internasional
             </p>
           </div>
-          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 w-fit">
+          <span className="text-xs font-black text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 w-fit">
             Akreditasi A (Unggul)
           </span>
         </div>
 
-        {/* LOGO RESMI BERJALAN DARI KANAN KE KIRI (INFINITE RUNNING TICKER) */}
-        <div className="relative w-full overflow-hidden py-1">
+        {/* LOGO RESMI BERJALAN DARI KANAN KE KIRI (HANYA LOGO, TANPA TEKS KETERANGAN, AGAK BESAR) */}
+        <div className="relative w-full overflow-hidden py-2">
           {/* Fading gradient edges agar logo masuk dan keluar secara mulus */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-14 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-14 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
           {/* Jalur Marquee Berjalan */}
-          <div className="animate-marquee gap-3 flex items-center">
-            {/* Duplikasi array 2x agar animasi loop berjalan seamless tanpa terputus */}
-            {[...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS].map((logo, index) => (
+          <div className="animate-marquee gap-4 sm:gap-6 flex items-center">
+            {/* Duplikasi array 3x agar animasi infinite loop berjalan seamless tanpa jeda */}
+            {[...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS].map((logo, index) => (
               <div
                 key={`${logo.id}-${index}`}
-                className="flex-shrink-0 w-44 sm:w-48 p-2.5 rounded-2xl bg-slate-50/90 border border-slate-200/90 hover:border-amber-400 hover:bg-white hover:shadow-md transition-all flex items-center gap-3 select-none"
+                className="flex-shrink-0 w-36 sm:w-44 h-20 sm:h-24 p-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex items-center justify-center select-none"
+                title={logo.name}
               >
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center p-1.5 flex-shrink-0 shadow-2xs">
-                  <img
-                    src={logo.src}
-                    alt={logo.name}
-                    className="max-w-full max-h-full object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <strong className="text-xs font-black text-slate-800 block truncate leading-tight">
-                    {logo.name}
-                  </strong>
-                  <span className="text-[10px] text-slate-500 block truncate mt-0.5 leading-tight">
-                    {logo.desc}
-                  </span>
-                </div>
+                <img
+                  src={logo.src}
+                  alt={logo.name}
+                  className="max-h-12 sm:max-h-14 max-w-full object-contain filter drop-shadow-2xs"
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
         </div>
 
         {/* FOOTER TEXT LEGALITAS */}
-        <div className="pt-2 text-center text-[10px] sm:text-[11px] text-slate-500 leading-relaxed border-t border-slate-100">
+        <div className="pt-2 text-center text-xs text-slate-500 leading-relaxed border-t border-slate-100 font-medium">
           Izin Penyelenggara Perjalanan Ibadah Umrah (PPIU) No. U.310 Tahun 2020 • PIHK No. PHU/HK.5008/VIII/2019 • Terdaftar SISKOPATUH Kemenag RI
         </div>
       </section>

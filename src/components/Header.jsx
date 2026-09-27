@@ -41,27 +41,27 @@ export default function Header({
       </div>
 
       {/* 2. Bar Utama Aplikasi (Background Putih Bersih) */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
-        {/* Logo & Identitas Kanomas */}
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        {/* Logo 3D & Identitas Kanomas */}
+        <div className="flex items-center gap-3 min-w-0">
           <img
-            src="/assets/logo-kanomas.png"
-            alt="Logo Kanomas"
-            className="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 drop-shadow-sm"
+            src="/assets/logo-kanomas-3d.png"
+            alt="Logo Kanomas 3D"
+            className="w-11 h-11 sm:w-12 sm:h-12 object-contain flex-shrink-0 drop-shadow-md hover:scale-105 transition-transform"
             onError={(e) => {
-              e.target.style.display = 'none';
+              e.target.src = '/assets/logo-kanomas.png';
             }}
           />
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 font-sans">
+            <div className="flex items-center gap-2">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 font-sans">
                 KANOMAS
               </span>
-              <span className="bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+              <span className="bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
                 TASIKMALAYA
               </span>
             </div>
-            <p className="text-[10px] text-amber-800 font-sans italic truncate">
+            <p className="text-xs text-amber-900/90 font-medium tracking-wide truncate">
               Sahabat Ibadah & Ziarah Anda
             </p>
           </div>

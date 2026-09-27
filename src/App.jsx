@@ -27,6 +27,7 @@ import DocumentPrintModal from './features/DocumentPrintModal';
 import AlQuranModal from './features/AlQuranModal';
 import DailyPrayersModal from './features/DailyPrayersModal';
 import JamaahServicesModal from './features/JamaahServicesModal';
+import DzikirPagiPetangModal from './features/DzikirPagiPetangModal';
 
 import { db } from './services/db';
 import { calculatePrayerTimes } from './services/prayerTimes';
@@ -54,10 +55,11 @@ export default function App() {
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah
+  // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah, Dzikir Pagi Petang
   const [showQuran, setShowQuran] = useState(false);
   const [showDailyPrayers, setShowDailyPrayers] = useState(false);
   const [showJamaahServices, setShowJamaahServices] = useState(false);
+  const [showDzikir, setShowDzikir] = useState(false);
 
   // Subscribe to database changes
   useEffect(() => {
@@ -136,6 +138,7 @@ export default function App() {
             nextPrayer={prayerInfo.nextPrayer}
             onSelectTab={handleTabSelect}
             onOpenQuran={() => setShowQuran(true)}
+            onOpenDzikir={() => setShowDzikir(true)}
             onOpenDailyPrayers={() => setShowDailyPrayers(true)}
             onOpenJamaahServices={() => setShowJamaahServices(true)}
             onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
@@ -225,6 +228,10 @@ export default function App() {
 
       {showDailyPrayers && (
         <DailyPrayersModal onClose={() => setShowDailyPrayers(false)} />
+      )}
+
+      {showDzikir && (
+        <DzikirPagiPetangModal onClose={() => setShowDzikir(false)} />
       )}
 
       {showJamaahServices && (
