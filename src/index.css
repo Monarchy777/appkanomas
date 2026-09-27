@@ -31,7 +31,7 @@
   }
 
   [dir="rtl"], .font-arabic {
-    font-family: 'LPMQ Isep Misbah', 'Scheherazade New', 'Amiri', serif !important;
+    font-family: 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
   }
 }
 
@@ -40,12 +40,20 @@
   font-family: 'LPMQ Isep Misbah', 'Scheherazade New', 'Amiri', serif !important;
 }
 
-.font-quran-amiri {
-  font-family: 'Amiri', 'Traditional Arabic', serif !important;
+.font-quran-madinah {
+  font-family: 'Amiri Quran', 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', serif !important;
 }
 
 .font-quran-scheherazade {
   font-family: 'Scheherazade New', 'Amiri', serif !important;
+}
+
+.font-quran-amiri {
+  font-family: 'Amiri', 'Traditional Arabic', serif !important;
+}
+
+.font-quran-noto {
+  font-family: 'Noto Naskh Arabic', 'Amiri', serif !important;
 }
 
 /* Custom Luxury Scrollbars */
