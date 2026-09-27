@@ -572,6 +572,73 @@ export default function AlQuranModal({ onClose }) {
     };
   }, []);
 
+  // Pinch-to-zoom 2 jari: perbesar/perkecil huruf Arab atau Latin/Terjemah sesuai lokasi jari
+  const touchStartDistance = useRef(0);
+  const touchZoomTarget = useRef(null); // 'arabic' | 'latin'
+  const initialZoomSize = useRef(0);
+  const [zoomIndicator, setZoomIndicator] = useState({ show: false, label: '', size: 0 });
+  const zoomTimeoutRef = useRef(null);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      touchStartDistance.current = dist;
+
+      const midX = (t1.clientX + t2.clientX) / 2;
+      const midY = (t1.clientY + t2.clientY) / 2;
+      const elem = document.elementFromPoint(midX, midY);
+
+      const isArabic = elem?.closest('[data-zoom-zone="arabic"]') || elem?.closest('[dir="rtl"]');
+      const isLatin = elem?.closest('[data-zoom-zone="latin"]') || elem?.closest('[data-zoom-zone="translation"]');
+
+      if (isLatin) {
+        touchZoomTarget.current = 'latin';
+        initialZoomSize.current = latinFontSize;
+      } else {
+        touchZoomTarget.current = 'arabic';
+        initialZoomSize.current = arabicFontSize;
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && touchStartDistance.current > 0) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const ratio = dist / touchStartDistance.current;
+
+      if (touchZoomTarget.current === 'arabic') {
+        const newSize = Math.round(Math.max(18, Math.min(54, initialZoomSize.current * ratio)));
+        setArabicFontSize(newSize);
+        if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+        setZoomIndicator({ show: true, label: 'Huruf Arab', size: newSize });
+      } else if (touchZoomTarget.current === 'latin') {
+        const newSize = Math.round(Math.max(12, Math.min(32, initialZoomSize.current * ratio)));
+        setLatinFontSize(newSize);
+        if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+        setZoomIndicator({ show: true, label: 'Latin & Terjemah', size: newSize });
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length < 2 && touchStartDistance.current > 0) {
+      touchStartDistance.current = 0;
+      try {
+        localStorage.setItem('kanomas_arabic_size', String(arabicFontSize));
+        localStorage.setItem('kanomas_latin_size', String(latinFontSize));
+      } catch {}
+
+      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+      zoomTimeoutRef.current = setTimeout(() => {
+        setZoomIndicator((prev) => ({ ...prev, show: false }));
+      }, 1200);
+    }
+  };
+
   // Helper font family kaligrafi Arab aktif (prioritas pilihan gaya kaligrafi pengguna)
   const getActiveFontFamily = () => {
     switch (calligraphyStyle) {
@@ -1038,6 +1105,15 @@ export default function AlQuranModal({ onClose }) {
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[0.5px] pointer-events-none z-0" />
         )}
 
+        {/* Floating Zoom Indicator Toast (Pinch-to-zoom 2 jari) */}
+        {zoomIndicator.show && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900/95 text-white border-2 border-amber-400 shadow-2xl backdrop-blur-md flex items-center gap-2.5 text-xs font-black animate-in fade-in zoom-in-95 pointer-events-none tracking-wide">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <span>Ukuran {zoomIndicator.label}:</span>
+            <span className="text-amber-300 font-mono text-sm">{zoomIndicator.size}px</span>
+          </div>
+        )}
+
         {/* ======================================================== */}
         {/* 1. HEADER UTAMA (HIJAU TUA ISLAMI #0a7c29 PERSIS SCREENSHOT) */}
         {/* ======================================================== */}
@@ -1311,7 +1387,12 @@ export default function AlQuranModal({ onClose }) {
         {/* ======================================================== */}
         {/* 4. DAFTAR AYAT DENGAN KONTRAS TINGGI DI 3 MODE            */}
         {/* ======================================================== */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-8 select-text">
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-8 select-text touch-pan-y"
+        >
           {/* BISMILLAH BANNER ORNAMEN KALIGRAFI (Kecuali Surah 9 & Surah 1) */}
           {selectedSurah.nomor !== 9 && selectedSurah.nomor !== 1 && (
             <div className="relative mx-auto my-5 max-w-xl text-center px-2 z-10">
@@ -1429,7 +1510,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       {/* A. TEKS ARAB DENGAN TAJWID WARNA & NOMOR AYAT LONCAT */}
-                      <div className="text-right" dir="rtl">
+                      <div className="text-right" dir="rtl" data-zoom-zone="arabic">
                         <p
                           style={{
                             fontFamily: getActiveFontFamily(),
@@ -1461,7 +1542,7 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* B. TRANSLITERASI LATIN */}
                       {showLatin && ayat.teksLatin && (
-                        <div className="mt-3.5 sm:mt-4 pt-1">
+                        <div className="mt-3.5 sm:mt-4 pt-1" data-zoom-zone="latin">
                           <p
                             style={{
                               fontSize: `${latinFontSize}px`,
@@ -1477,7 +1558,7 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* C. TERJEMAHAN BAHASA INDONESIA */}
                       {showTranslation && ayat.teksIndonesia && (
-                        <div className="mt-2.5 sm:mt-3">
+                        <div className="mt-2.5 sm:mt-3" data-zoom-zone="translation">
                           <p
                             style={{
                               fontSize: `${latinFontSize}px`,

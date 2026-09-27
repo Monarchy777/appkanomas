@@ -114,7 +114,8 @@ export default function HomeView({
   onOpenChecklist,
   onOpenMap,
   onOpenLookup,
-  onBookPackage
+  onBookPackage,
+  onOpenDaftarMitra
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -269,6 +270,42 @@ export default function HomeView({
         >
           <span>Mulai</span>
           <ChevronRight className="w-4 h-4 text-amber-600" />
+        </button>
+      </section>
+
+      {/* 2C. BANNER DAFTAR MITRA SYIAR DENGAN ID KTP & NPWP */}
+      <section
+        onClick={onOpenDaftarMitra}
+        className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white cursor-pointer hover:shadow-lg transition-all flex items-center justify-between gap-3 active:scale-[0.99] shadow-sm border border-emerald-500/40 relative overflow-hidden group"
+      >
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-amber-400/10 to-transparent pointer-events-none" />
+        <div className="flex items-center gap-3 min-w-0 relative z-10">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-400/20 border border-amber-300/40 backdrop-blur-xs flex items-center justify-center flex-shrink-0 text-amber-300 shadow-xs group-hover:scale-105 transition-transform">
+            <Award className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-300">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Program Kemitraan Syiar Baitullah</span>
+            </div>
+            <h3 className="text-sm sm:text-base font-black truncate text-white">
+              Daftar Menjadi Mitra Syiar Kanomas
+            </h3>
+            <p className="text-xs text-emerald-100/90 truncate font-medium">
+              Foto KTP & NPWP data otomatis terisi • Ujrah berkah langsung ke rekening Anda
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onOpenDaftarMitra) onOpenDaftarMitra();
+          }}
+          className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition active:scale-95 flex-shrink-0 whitespace-nowrap border border-amber-300"
+        >
+          <span>Daftar Sekarang</span>
+          <ChevronRight className="w-4 h-4 text-slate-900" />
         </button>
       </section>
 

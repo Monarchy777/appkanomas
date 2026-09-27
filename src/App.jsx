@@ -9,6 +9,7 @@ import PrayerTimesView from './views/PrayerTimesView';
 import AccountView from './views/AccountView';
 import MitraDashboardView from './views/MitraDashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
+import GoogleSignInModal from './components/GoogleSignInModal';
 
 // Code-splitting via React.lazy for instant launch & lightweight bundle
 const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
@@ -28,12 +29,15 @@ const AlQuranModal = lazy(() => import('./features/AlQuranModal'));
 const DailyPrayersModal = lazy(() => import('./features/DailyPrayersModal'));
 const JamaahServicesModal = lazy(() => import('./features/JamaahServicesModal'));
 const DzikirPagiPetangModal = lazy(() => import('./features/DzikirPagiPetangModal'));
+const DaftarMitraModal = lazy(() => import('./features/DaftarMitraModal'));
 
 import { db } from './services/db';
 import { calculatePrayerTimes } from './services/prayerTimes';
+import { auth, ADMIN_EMAIL } from './services/auth';
 
 export default function App() {
-  const [role, setRole] = useState('jamaah'); // 'jamaah' | 'mitra' | 'admin'
+  const [currentUser, setCurrentUser] = useState(() => auth.getUser());
+  const [role, setRole] = useState(() => (auth.getUser() ? auth.getUser().role : 'jamaah')); // 'jamaah' | 'mitra' | 'admin'
   const [activeTab, setActiveTab] = useState('home');
   const [dbData, setDbData] = useState(() => db.getAll());
   const [prayerInfo, setPrayerInfo] = useState(() => calculatePrayerTimes('tasikmalaya'));
@@ -54,11 +58,13 @@ export default function App() {
   const [whatsAppRecipient, setWhatsAppRecipient] = useState(null);
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
 
-  // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah, Dzikir Pagi Petang
+  // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah, Dzikir Pagi Petang, Google Auth, Daftar Mitra
   const [showQuran, setShowQuran] = useState(false);
   const [showDailyPrayers, setShowDailyPrayers] = useState(false);
   const [showJamaahServices, setShowJamaahServices] = useState(false);
   const [showDzikir, setShowDzikir] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [showDaftarMitraModal, setShowDaftarMitraModal] = useState(false);
 
   // Subscribe to database changes
   useEffect(() => {
@@ -66,6 +72,25 @@ export default function App() {
       setDbData({ ...newData });
     });
     return () => unsubscribe();
+  }, []);
+
+  // Subscribe to auth changes
+  useEffect(() => {
+    const unsubAuth = auth.subscribe((user) => {
+      setCurrentUser(user);
+      if (user) {
+        if (user.role === 'admin') {
+          setRole('admin');
+        } else if (user.role === 'mitra') {
+          setRole('mitra');
+        } else {
+          setRole('jamaah');
+        }
+      } else {
+        setRole('jamaah');
+      }
+    });
+    return () => unsubAuth();
   }, []);
 
   // Update prayer time ticker
@@ -77,6 +102,12 @@ export default function App() {
   }, []);
 
   const handleRoleChange = (newRole) => {
+    if (newRole === 'admin') {
+      if (currentUser?.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        setShowGoogleModal(true);
+        return;
+      }
+    }
     setRole(newRole);
     if (newRole === 'mitra') {
       setActiveTab('mitra_hub');
@@ -113,7 +144,15 @@ export default function App() {
       {/* Top Header */}
       <Header
         role={role}
+        currentUser={currentUser}
         onRoleChange={handleRoleChange}
+        onOpenGoogleSignIn={() => setShowGoogleModal(true)}
+        onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
+        onLogout={() => {
+          auth.logout();
+          setRole('jamaah');
+          setActiveTab('home');
+        }}
         nextPrayer={prayerInfo.nextPrayer}
         onOpenLookup={() => setShowLookup(true)}
         onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
@@ -144,6 +183,7 @@ export default function App() {
             onOpenMap={() => setShowMap(true)}
             onOpenLookup={() => setShowLookup(true)}
             onBookPackage={(pkg) => setBookingPackage(pkg)}
+            onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
           />
         )}
 
@@ -183,6 +223,9 @@ export default function App() {
             onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
             onRoleChange={handleRoleChange}
             role={role}
+            currentUser={currentUser}
+            onOpenGoogleSignIn={() => setShowGoogleModal(true)}
+            onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
           />
         )}
 
@@ -310,6 +353,33 @@ export default function App() {
         {showDocumentPrint && (
           <DocumentPrintModal
             onClose={() => setShowDocumentPrint(false)}
+          />
+        )}
+
+        {showDaftarMitraModal && (
+          <DaftarMitraModal
+            onClose={() => setShowDaftarMitraModal(false)}
+            onSuccess={(newMitra) => {
+              setRole('mitra');
+              setActiveTab('mitra_hub');
+            }}
+          />
+        )}
+
+        {showGoogleModal && (
+          <GoogleSignInModal
+            onClose={() => setShowGoogleModal(false)}
+            onSuccess={(user) => {
+              if (user.role === 'admin') {
+                setRole('admin');
+                setActiveTab('admin_panel');
+              } else if (user.role === 'mitra') {
+                setRole('mitra');
+                setActiveTab('mitra_hub');
+              } else {
+                setRole('jamaah');
+              }
+            }}
           />
         )}
       </Suspense>

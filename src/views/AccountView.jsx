@@ -20,6 +20,7 @@ import {
   Icon3DWhatsApp
 } from '../components/Icons3D';
 import { COMPANY_PROFILE, EXTERNAL_SERVICES } from '../services/initialSeed';
+import { ADMIN_EMAIL } from '../services/auth';
 
 export default function AccountView({
   onOpenLookup,
@@ -28,7 +29,10 @@ export default function AccountView({
   onOpenDocumentPrint,
   onOpenWhatsAppCenter,
   onRoleChange,
-  role
+  role,
+  currentUser,
+  onOpenGoogleSignIn,
+  onOpenDaftarMitra
 }) {
   return (
     <div className="space-y-5 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
@@ -224,13 +228,61 @@ export default function AccountView({
       </div>
 
       {/* 4. AKSES KHUSUS MITRA & ADMIN PERUSAHAAN */}
-      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-          Pusat Akses Khusus
-        </span>
+      <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-3.5 text-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+            Status Akun & Akses Khusus
+          </span>
+          {currentUser ? (
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+              currentUser.role === 'admin'
+                ? 'bg-purple-100 text-purple-800'
+                : currentUser.role === 'mitra'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-emerald-100 text-emerald-800'
+            }`}>
+              {currentUser.role === 'admin' ? 'Super Admin' : currentUser.role === 'mitra' ? 'Mitra Syiar' : 'Aplikasi Umum'}
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full">
+              Aplikasi Umum
+            </span>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-slate-600 text-xs">Mode Saat Ini: <strong className="text-slate-900 capitalize">{role}</strong></span>
+        {currentUser ? (
+          <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={currentUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name || 'User')}&background=0a7c29&color=fff&bold=true`}
+                alt={currentUser.name}
+                className="w-10 h-10 rounded-2xl object-cover border border-emerald-500 shrink-0"
+              />
+              <div className="min-w-0">
+                <span className="font-black text-slate-900 block truncate">{currentUser.name}</span>
+                <span className="text-slate-500 text-[11px] block truncate">{currentUser.email}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 flex items-center justify-between gap-3">
+            <div>
+              <span className="font-bold text-slate-800 block text-xs">Masuk Akun Google</span>
+              <span className="text-slate-500 text-[11px] block">Gunakan Gmail yang terdaftar di HP untuk auto-login</span>
+            </div>
+            <button
+              onClick={onOpenGoogleSignIn}
+              className="px-3 py-1.5 rounded-xl bg-[#0a7c29] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition active:scale-95 shrink-0"
+            >
+              <span>Masuk Google</span>
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200/80">
+          <span className="text-slate-600 text-xs">
+            Mode Tampilan: <strong className="text-slate-900 capitalize">{role}</strong>
+          </span>
           <div className="flex gap-1.5">
             <button
               onClick={() => onRoleChange('jamaah')}
@@ -238,10 +290,16 @@ export default function AccountView({
                 role === 'jamaah' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
-              Jamaah
+              Aplikasi Umum
             </button>
             <button
-              onClick={() => onRoleChange('mitra')}
+              onClick={() => {
+                if (currentUser?.role === 'mitra' || currentUser?.role === 'admin') {
+                  onRoleChange('mitra');
+                } else {
+                  if (onOpenDaftarMitra) onOpenDaftarMitra();
+                }
+              }}
               className={`px-3 py-1.5 rounded-xl font-bold transition text-xs ${
                 role === 'mitra' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
@@ -249,7 +307,13 @@ export default function AccountView({
               Mitra Syiar
             </button>
             <button
-              onClick={() => onRoleChange('admin')}
+              onClick={() => {
+                if (currentUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                  onRoleChange('admin');
+                } else {
+                  if (onOpenGoogleSignIn) onOpenGoogleSignIn();
+                }
+              }}
               className={`px-3 py-1.5 rounded-xl font-bold transition text-xs ${
                 role === 'admin' ? 'bg-purple-600 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
