@@ -75,7 +75,7 @@ export default function PackageDetailModal({ pkg, onClose, onBookNow }) {
                   <Calendar className="w-3 h-3 text-emerald-600" />
                   <span>Keberangkatan</span>
                 </span>
-                <span className="text-xs font-bold text-slate-900 block truncate">{pkg.departureDate}</span>
+                <span className="text-xs font-bold text-slate-900 block break-words leading-snug">{pkg.departureDate}</span>
               </div>
 
               <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
@@ -83,7 +83,7 @@ export default function PackageDetailModal({ pkg, onClose, onBookNow }) {
                   <Plane className="w-3 h-3 text-blue-500" />
                   <span>Maskapai</span>
                 </span>
-                <span className="text-xs font-bold text-slate-900 block truncate">{pkg.airline}</span>
+                <span className="text-xs font-bold text-slate-900 block break-words leading-snug">{pkg.airline}</span>
               </div>
 
               <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">

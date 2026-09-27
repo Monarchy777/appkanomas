@@ -46,3 +46,10 @@ android/app/build/
 android/build/
 android/local.properties
 android/.idea/
+
+# iOS builds & caches
+ios/App/build/
+ios/App/Pods/
+ios/App/App/public/
+ios/DerivedData/
+ios/xcuserdata/

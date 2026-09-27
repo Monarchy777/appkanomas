@@ -401,7 +401,7 @@ export default function MitraDashboardView({ onOpenPackageDetail }) {
                   }}
                 />
               </div>
-              <h5 className="text-[11px] font-bold text-white line-clamp-2 px-1">
+              <h5 className="text-[11px] font-bold text-white leading-snug break-words px-1">
                 {pkg.title}
               </h5>
               <div className="px-1 flex justify-between items-center text-[10px] text-slate-400">

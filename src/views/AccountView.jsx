@@ -259,8 +259,8 @@ export default function AccountView({
                 className="w-10 h-10 rounded-2xl object-cover border border-emerald-500 shrink-0"
               />
               <div className="min-w-0">
-                <span className="font-black text-slate-900 block truncate">{currentUser.name}</span>
-                <span className="text-slate-500 text-[11px] block truncate">{currentUser.email}</span>
+                <span className="font-black text-slate-900 block break-words leading-tight">{currentUser.name}</span>
+                <span className="text-slate-500 text-[11px] block break-all">{currentUser.email}</span>
               </div>
             </div>
           </div>

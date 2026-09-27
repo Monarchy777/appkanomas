@@ -209,7 +209,7 @@ export default function WhatsAppCenterModal({ onClose, defaultRecipientPhone, de
                   }`}
                 >
                   <span className="text-[9px] font-bold uppercase text-emerald-700 block">{tmpl.category}</span>
-                  <span className="text-xs font-bold line-clamp-1 mt-0.5">{tmpl.title}</span>
+                  <span className="text-xs font-bold leading-tight mt-0.5">{tmpl.title}</span>
                 </button>
               ))}
             </div>

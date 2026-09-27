@@ -224,7 +224,7 @@ export default function WorshipEducationView({ onSelectTab, onBack }) {
           }`}
         >
           <BookOpen className="w-4 h-4 flex-shrink-0" />
-          <span className="text-[11px] truncate">Doa Manasik</span>
+          <span className="text-[11px] leading-tight text-center">Doa Manasik</span>
         </button>
 
         <button
@@ -239,7 +239,7 @@ export default function WorshipEducationView({ onSelectTab, onBack }) {
           }`}
         >
           <Repeat className="w-4 h-4 flex-shrink-0" />
-          <span className="text-[11px] truncate">Hitung Tawaf</span>
+          <span className="text-[11px] leading-tight text-center">Hitung Tawaf</span>
         </button>
 
         <button
@@ -254,7 +254,7 @@ export default function WorshipEducationView({ onSelectTab, onBack }) {
           }`}
         >
           <Sparkle className="w-4 h-4 flex-shrink-0" />
-          <span className="text-[11px] truncate">Tasbih Digital</span>
+          <span className="text-[11px] leading-tight text-center">Tasbih Digital</span>
         </button>
 
         <button
@@ -269,7 +269,7 @@ export default function WorshipEducationView({ onSelectTab, onBack }) {
           }`}
         >
           <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-          <span className="text-[11px] truncate">Alur Rukun</span>
+          <span className="text-[11px] leading-tight text-center">Alur Rukun</span>
         </button>
       </div>
 

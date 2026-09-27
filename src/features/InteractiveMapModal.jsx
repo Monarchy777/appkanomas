@@ -551,8 +551,8 @@ export default function InteractiveMapModal({ onClose }) {
                         : 'bg-[#0b141d] border-white/5 text-slate-300 hover:border-white/20'
                     }`}
                   >
-                    <span className="block truncate">{pt.name}</span>
-                    <span className="text-[10px] text-amber-300/80 font-arabic truncate block">
+                    <span className="block leading-tight font-semibold">{pt.name}</span>
+                    <span className="text-[10px] text-amber-300/80 font-arabic block leading-tight mt-0.5">
                       {pt.arabic}
                     </span>
                   </button>
@@ -839,9 +839,9 @@ export default function InteractiveMapModal({ onClose }) {
                     }`}
                   >
                     <div className="space-y-1 min-w-0">
-                      <span className="text-xs font-bold block truncate">{mq.name}</span>
-                      <span className="text-[10px] text-amber-300 font-mono block truncate">{mq.distance}</span>
-                      <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-white/5 text-slate-400 inline-block truncate max-w-full">
+                      <span className="text-xs font-bold block leading-tight">{mq.name}</span>
+                      <span className="text-[10px] text-amber-300 font-mono block leading-tight">{mq.distance}</span>
+                      <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-white/5 text-slate-400 inline-block max-w-full leading-tight">
                         {mq.route}
                       </span>
                     </div>

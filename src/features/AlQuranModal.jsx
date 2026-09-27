@@ -417,8 +417,8 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
         parts.push(
           <span
             key={`g-${match.index}`}
-            style={{ color, display: 'inline' }}
-            className="font-bold select-text transition-colors duration-150"
+            style={{ color, display: 'inline', fontWeight: 400 }}
+            className="font-normal select-text transition-colors duration-150"
             title={title}
           >
             {fullGrapheme}
@@ -563,12 +563,22 @@ export default function AlQuranModal({ onClose }) {
   const [showTajweedGuide, setShowTajweedGuide] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
 
-  // Lock body scroll when Quran modal is mounted
+  // Lock body scroll & prevent iOS Safari native page zoom interference
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    // Prevent iOS Safari page-level gesture zoom so Quran pinch-to-zoom is seamless
+    const preventGesture = (e) => {
+      e.preventDefault();
+    };
+    document.addEventListener('gesturestart', preventGesture, { passive: false });
+    document.addEventListener('gesturechange', preventGesture, { passive: false });
+
     return () => {
       document.body.style.overflow = originalOverflow;
+      document.removeEventListener('gesturestart', preventGesture);
+      document.removeEventListener('gesturechange', preventGesture);
     };
   }, []);
 
@@ -641,40 +651,45 @@ export default function AlQuranModal({ onClose }) {
 
   // Helper font family kaligrafi Arab aktif (prioritas pilihan gaya kaligrafi pengguna)
   const getActiveFontFamily = () => {
-    switch (calligraphyStyle) {
-      case 'scheherazade':
-        return "'Scheherazade New', serif";
-      case 'amiri':
-        return "'Amiri', 'Traditional Arabic', serif";
-      case 'noto':
-        return "'Noto Naskh Arabic', serif";
-      case 'madinah':
-        return "'Amiri Quran', 'Scheherazade New', serif";
-      case 'standar':
-        return "'LPMQ Isep Misbah', 'Scheherazade New', serif";
-      default:
-        return mushafType === 'madinah'
-          ? "'Amiri Quran', 'Scheherazade New', serif"
-          : "'LPMQ Isep Misbah', 'Scheherazade New', serif";
+    if (calligraphyStyle === 'lpmq') {
+      return "'LPMQ Isep Misbah', 'Scheherazade New', serif";
     }
+    if (calligraphyStyle === 'madinah') {
+      return "'Amiri Quran', 'Scheherazade New', serif";
+    }
+    if (calligraphyStyle === 'scheherazade') {
+      return "'Scheherazade New', 'Amiri', serif";
+    }
+    if (calligraphyStyle === 'amiri') {
+      return "'Amiri', 'Traditional Arabic', serif";
+    }
+    if (calligraphyStyle === 'noto') {
+      return "'Noto Naskh Arabic', serif";
+    }
+    // Standar / Otomatis: ikuti jenis mushaf yang sedang aktif
+    return mushafType === 'madinah'
+      ? "'Amiri Quran', 'Scheherazade New', serif"
+      : "'LPMQ Isep Misbah', 'Scheherazade New', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
   const getArabicFontClass = () => {
-    switch (calligraphyStyle) {
-      case 'scheherazade':
-        return 'font-quran-scheherazade';
-      case 'amiri':
-        return 'font-quran-amiri';
-      case 'noto':
-        return 'font-quran-noto';
-      case 'madinah':
-        return 'font-quran-madinah';
-      case 'standar':
-        return 'font-quran-lpmq';
-      default:
-        return mushafType === 'madinah' ? 'font-quran-madinah' : 'font-quran-lpmq';
+    if (calligraphyStyle === 'lpmq') {
+      return 'font-quran-lpmq';
     }
+    if (calligraphyStyle === 'madinah') {
+      return 'font-quran-madinah';
+    }
+    if (calligraphyStyle === 'scheherazade') {
+      return 'font-quran-scheherazade';
+    }
+    if (calligraphyStyle === 'amiri') {
+      return 'font-quran-amiri';
+    }
+    if (calligraphyStyle === 'noto') {
+      return 'font-quran-noto';
+    }
+    return mushafType === 'madinah' ? 'font-quran-madinah' : 'font-quran-lpmq';
   };
 
   // Save Preferences
@@ -1136,11 +1151,11 @@ export default function AlQuranModal({ onClose }) {
           {/* Quick Surah Picker Title */}
           <button
             onClick={() => setShowSurahPicker(!showSurahPicker)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-white/15 transition font-bold text-sm sm:text-base max-w-[210px] sm:max-w-none truncate"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl hover:bg-white/15 transition font-bold text-sm sm:text-base leading-tight"
           >
-            <span>{selectedSurah.nomor}. {selectedSurah.namaLatin}</span>
-            <span className="text-xs text-emerald-200 font-normal hidden sm:inline">({selectedSurah.jumlahAyat} ayat)</span>
-            <ChevronRight className={`w-4 h-4 transition-transform ${showSurahPicker ? 'rotate-90' : ''}`} />
+            <span className="whitespace-nowrap">{selectedSurah.nomor}. {selectedSurah.namaLatin}</span>
+            <span className="text-xs text-emerald-200 font-normal hidden sm:inline whitespace-nowrap">({selectedSurah.jumlahAyat} ayat)</span>
+            <ChevronRight className={`w-4 h-4 transition-transform shrink-0 ${showSurahPicker ? 'rotate-90' : ''}`} />
           </button>
 
           {/* Header Action Icons: Loncat, Pemilih Background / Suasana, Pengaturan, Audio */}
@@ -1241,11 +1256,11 @@ export default function AlQuranModal({ onClose }) {
                     >
                       {themeMode === item.id ? '✓' : ''}
                     </span>
-                    <div className="min-w-0">
-                      <span style={{ color: item.textColor }} className="text-xs font-black block truncate">
+                    <div className="min-w-0 text-left">
+                      <span style={{ color: item.textColor }} className="text-xs font-black block leading-tight">
                         {item.name}
                       </span>
-                      <span style={{ color: item.textColor }} className="text-[10px] opacity-75 block truncate">
+                      <span style={{ color: item.textColor }} className="text-[10px] opacity-75 block leading-tight">
                         {item.desc}
                       </span>
                     </div>
@@ -1366,11 +1381,11 @@ export default function AlQuranModal({ onClose }) {
                         : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-emerald-400'
                     }`}
                   >
-                    <div className="truncate">
-                      <span className="text-xs font-bold block truncate">
+                    <div>
+                      <span className="text-xs font-bold block leading-tight">
                         {surah.nomor}. {surah.namaLatin}
                       </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight">
                         {surah.jumlahAyat} ayat • Juz {surah.juz}
                       </span>
                     </div>
@@ -1517,7 +1532,11 @@ export default function AlQuranModal({ onClose }) {
                             fontSize: `${arabicFontSize}px`,
                             color: currentTheme.arabicColor,
                             lineHeight: dynamicArabicLineHeight,
-                            wordSpacing: isKashidaLong ? '0.24em' : '0.08em'
+                            wordSpacing: isKashidaLong ? '0.22em' : 'normal',
+                            fontWeight: 400,
+                            textRendering: 'optimizeLegibility',
+                            WebkitFontSmoothing: 'antialiased',
+                            MozOsxFontSmoothing: 'grayscale'
                           }}
                           className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
                         >
@@ -1967,8 +1986,8 @@ export default function AlQuranModal({ onClose }) {
                         mushafType === 'indonesia' ? 'border-amber-300 bg-amber-400' : 'border-slate-400'
                       }`} />
                       <div className="min-w-0">
-                        <span className="font-black text-xs block truncate">Mushaf Indonesia</span>
-                        <span className="text-[10px] opacity-80 block truncate">Kemenag RI (LPMQ)</span>
+                        <span className="font-black text-xs block leading-tight">Mushaf Indonesia</span>
+                        <span className="text-[10px] opacity-80 block leading-tight">Kemenag RI (LPMQ)</span>
                       </div>
                     </button>
 
@@ -1986,8 +2005,8 @@ export default function AlQuranModal({ onClose }) {
                         mushafType === 'madinah' ? 'border-amber-300 bg-amber-400' : 'border-slate-400'
                       }`} />
                       <div className="min-w-0">
-                        <span className="font-black text-xs block truncate">Mushaf Madinah</span>
-                        <span className="text-[10px] opacity-80 block truncate">Malik Fahd Utsmani</span>
+                        <span className="font-black text-xs block leading-tight">Mushaf Madinah</span>
+                        <span className="text-[10px] opacity-80 block leading-tight">Malik Fahd Utsmani</span>
                       </div>
                     </button>
                   </div>
@@ -2000,7 +2019,8 @@ export default function AlQuranModal({ onClose }) {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { id: 'standar', name: 'Standar Kemenag', desc: 'LPMQ Isep Misbah', font: "'LPMQ Isep Misbah', serif" },
+                      { id: 'standar', name: 'Sesuai Mushaf (Auto)', desc: mushafType === 'madinah' ? 'Amiri Quran (Madinah)' : 'LPMQ Misbah (Indonesia)', font: mushafType === 'madinah' ? "'Amiri Quran', serif" : "'LPMQ Isep Misbah', serif" },
+                      { id: 'lpmq', name: 'Standar Kemenag RI', desc: 'Font Resmi LPMQ', font: "'LPMQ Isep Misbah', serif" },
                       { id: 'madinah', name: 'Madinah Utsmani', desc: 'Amiri Quran', font: "'Amiri Quran', serif" },
                       { id: 'scheherazade', name: 'Naskh Klasik', desc: 'Scheherazade New', font: "'Scheherazade New', serif" },
                       { id: 'amiri', name: 'Kaligrafi Tradisional', desc: 'Amiri Classic Font', font: "'Amiri', serif" },
@@ -2484,7 +2504,7 @@ export default function AlQuranModal({ onClose }) {
                               : 'border-slate-700 opacity-80 hover:opacity-100'
                           }`}
                         >
-                          <span className="text-xs font-black text-white drop-shadow-md truncate">
+                          <span className="text-xs font-black text-white drop-shadow-md leading-tight">
                             {style.icon} {style.name}
                           </span>
                         </button>
@@ -2511,7 +2531,7 @@ export default function AlQuranModal({ onClose }) {
                           }`}
                         >
                           <span className="text-xs">{style.icon}</span>
-                          <span className={`text-[10px] font-black truncate w-full ${style.isDark ? 'text-white' : 'text-slate-900'}`}>
+                          <span className={`text-[10px] font-black leading-tight w-full ${style.isDark ? 'text-white' : 'text-slate-900'}`}>
                             {style.name}
                           </span>
                         </button>

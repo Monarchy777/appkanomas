@@ -746,13 +746,13 @@ export default function PrayerTimesView() {
           {/* Kartu Derajat Proporsional & Lega */}
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4 w-full max-w-lg text-center pt-2">
             <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5 min-w-0 shadow-xs">
-              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider leading-tight">
                 Arah Kiblat
               </span>
               <span className="text-base sm:text-lg font-black text-amber-700 font-mono block">
                 {selectedCityId === 'makkah' && customQibla === null ? 'Pusat' : `${Math.round(targetQibla)}°`}
               </span>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium truncate">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium leading-tight">
                 {selectedCityId === 'makkah' && customQibla === null
                   ? 'Baitullah Makkah'
                   : selectedCityId === 'madinah' && customQibla === null
@@ -762,13 +762,13 @@ export default function PrayerTimesView() {
             </div>
 
             <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5 min-w-0 shadow-xs">
-              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider leading-tight">
                 Arah Ponsel
               </span>
               <span className="text-base sm:text-lg font-black text-slate-900 font-mono block">
                 {Math.round(currentHeading)}°
               </span>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium truncate">
+              <span className="text-[10px] sm:text-[11px] text-slate-500 block font-medium leading-tight">
                 Derajat Hadap
               </span>
             </div>
@@ -778,13 +778,13 @@ export default function PrayerTimesView() {
                 ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
                 : 'bg-slate-50 border-slate-200/90 text-amber-700'
             }`}>
-              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider truncate">
+              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-500 block tracking-wider leading-tight">
                 Selisih Sudut
               </span>
               <span className="text-base sm:text-lg font-black font-mono block">
                 {selectedCityId === 'makkah' && customQibla === null ? '0°' : `${Math.abs(Math.round(diffAngle))}°`}
               </span>
-              <span className="text-[10px] sm:text-[11px] block font-bold truncate">
+              <span className="text-[10px] sm:text-[11px] block font-bold leading-tight">
                 {selectedCityId === 'makkah' && customQibla === null
                   ? 'Di Tanah Suci'
                   : isFacingQibla

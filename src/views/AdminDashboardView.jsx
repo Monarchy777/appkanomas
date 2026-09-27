@@ -256,7 +256,7 @@ export default function AdminDashboardView({ onOpenWhatsAppCenter, onOpenDocumen
 
           <div className="p-3.5 rounded-2xl bg-black/30 border border-white/5 space-y-1">
             <span className="text-[10px] text-slate-400 uppercase font-semibold">Tabungan BSI</span>
-            <span className="text-base sm:text-lg font-black text-white font-mono block truncate">
+            <span className="text-base sm:text-lg font-black text-white font-mono block break-words leading-tight">
               Rp {(totalTabunganSaldo / 1000000).toFixed(1)} Juta
             </span>
             <span className="text-[9px] text-emerald-400">{appData.tabungan?.length || 0} Rekening</span>
@@ -743,7 +743,7 @@ export default function AdminDashboardView({ onOpenWhatsAppCenter, onOpenDocumen
                       <span className="text-[10px] text-slate-500">{j.nik}</span>
                     </td>
                     <td className="p-3">
-                      <span className="text-white block line-clamp-1">{j.packageName}</span>
+                      <span className="text-white block leading-tight break-words">{j.packageName}</span>
                       <span className="text-[10px] text-slate-400">{j.departureDate}</span>
                     </td>
                     <td className="p-3">

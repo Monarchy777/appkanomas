@@ -157,7 +157,7 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
                   <div className="p-5 space-y-3.5">
                     <h3
                       onClick={() => onOpenPackageDetail(pkg)}
-                      className="text-sm sm:text-base font-bold text-slate-900 leading-snug line-clamp-2 hover:text-amber-600 cursor-pointer transition"
+                      className="text-sm sm:text-base font-bold text-slate-900 leading-snug hover:text-amber-600 cursor-pointer transition break-words"
                     >
                       {pkg.title}
                     </h3>
@@ -166,11 +166,11 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
                     <div className="space-y-1.5 text-xs text-slate-600">
                       <div className="flex items-center gap-2">
                         <Plane className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                        <span className="truncate font-medium">{pkg.airline}</span>
+                        <span className="font-medium break-words">{pkg.airline}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Hotel className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        <span className="truncate font-medium">{pkg.hotelMakkah}</span>
+                        <span className="font-medium break-words">{pkg.hotelMakkah}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
@@ -200,10 +200,10 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
                 <div className="p-5 pt-0">
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <span className="text-[10px] text-slate-500 uppercase block font-medium truncate">
+                      <span className="text-[10px] text-slate-500 uppercase block font-medium">
                         {isTabungan ? 'Setoran Awal Ringan' : 'Harga Quad Mulai'}
                       </span>
-                      <span className="text-base sm:text-lg font-black text-amber-700 font-mono block truncate">
+                      <span className="text-base sm:text-lg font-black text-amber-700 font-mono block whitespace-nowrap">
                         Rp {priceQuad.toLocaleString('id-ID')}
                       </span>
                     </div>

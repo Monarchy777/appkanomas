@@ -108,15 +108,15 @@ export default function GoogleSignInModal({ onClose, onSuccess }) {
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <strong className="text-xs font-black text-slate-900 truncate">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <strong className="text-xs font-black text-slate-900 break-words leading-tight">
                     Ramadhan Adiluhung
                   </strong>
                   <span className="bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase">
                     Admin Utama
                   </span>
                 </div>
-                <span className="text-[11px] text-purple-700 font-medium truncate block">
+                <span className="text-[11px] text-purple-700 font-medium break-all block leading-tight">
                   {ADMIN_EMAIL}
                 </span>
               </div>
@@ -139,15 +139,15 @@ export default function GoogleSignInModal({ onClose, onSuccess }) {
                       <Award className="w-4 h-4 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <strong className="text-xs font-bold text-slate-900 truncate">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <strong className="text-xs font-bold text-slate-900 break-words leading-tight">
                           {m.name}
                         </strong>
                         <span className="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded">
                           Mitra Syiar
                         </span>
                       </div>
-                      <span className="text-[10px] text-blue-700 font-mono truncate block">
+                      <span className="text-[10px] text-blue-700 font-mono break-all block leading-tight">
                         {m.email} ({m.code})
                       </span>
                     </div>

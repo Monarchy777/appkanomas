@@ -171,7 +171,7 @@ export default function HomeView({
                   <h3 className="text-lg sm:text-2xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-sm">
                     {banner.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-200 line-clamp-1 drop-shadow-sm font-medium">
+                  <p className="text-xs sm:text-sm text-slate-200 drop-shadow-sm font-medium leading-relaxed">
                     {banner.subtitle}
                   </p>
                 </div>
@@ -252,10 +252,10 @@ export default function HomeView({
               <Sparkles className="w-3.5 h-3.5 text-amber-200" />
               <span>Dzikir Harian Sesuai Sunnah</span>
             </div>
-            <h3 className="text-sm sm:text-base font-black truncate">
+            <h3 className="text-sm sm:text-base font-black leading-snug">
               {isMorning ? '🌅 Waktunya Dzikir Pagi Sesuai Sunnah' : '🌆 Waktunya Dzikir Petang Sesuai Sunnah'}
             </h3>
-            <p className="text-xs text-amber-100/90 truncate font-medium">
+            <p className="text-xs text-amber-100/90 font-medium leading-relaxed">
               Berdasarkan hadits shahih • Teks Arab jelas, arti & tasbih counter
             </p>
           </div>
@@ -288,10 +288,10 @@ export default function HomeView({
               <Sparkles className="w-3.5 h-3.5" />
               <span>Program Kemitraan Syiar Baitullah</span>
             </div>
-            <h3 className="text-sm sm:text-base font-black truncate text-white">
+            <h3 className="text-sm sm:text-base font-black text-white leading-snug">
               Daftar Menjadi Mitra Syiar Kanomas
             </h3>
-            <p className="text-xs text-emerald-100/90 truncate font-medium">
+            <p className="text-xs text-emerald-100/90 font-medium leading-relaxed">
               Foto KTP & NPWP data otomatis terisi • Ujrah berkah langsung ke rekening Anda
             </p>
           </div>
@@ -330,7 +330,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DAlQuran size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Al-Qur'an
               </span>
             </button>
@@ -343,7 +343,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DSholatKiblat size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Sholat & Kiblat
               </span>
             </button>
@@ -356,7 +356,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DTawaf size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-sky-700 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-sky-700 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Ibadah Umrah
               </span>
             </button>
@@ -369,7 +369,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DNusuk size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Layanan Nusuk
               </span>
             </button>
@@ -385,7 +385,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DPaket size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Paket Umrah
               </span>
             </button>
@@ -398,7 +398,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DTabungan size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-teal-600 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-teal-600 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Tabungan Umrah
               </span>
             </button>
@@ -411,7 +411,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DDoaHarian size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Doa Harian
               </span>
             </button>
@@ -424,7 +424,7 @@ export default function HomeView({
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DPelayananJamaah size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-snug tracking-tight text-center mt-auto line-clamp-2">
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight tracking-tight text-center mt-auto break-words">
                 Pelayanan Jamaah
               </span>
             </button>

@@ -329,10 +329,10 @@ export default function DzikirPagiPetangModal({ onClose }) {
               )}
             </div>
             <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white truncate">
+              <h2 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                 Dzikir Pagi & Petang Sesuai Sunnah
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
                 Berdasarkan Al-Qur'an dan As-Sunnah Ash-Shahihah • Dilengkapi Tasbih Digital
               </p>
             </div>
@@ -502,7 +502,7 @@ export default function DzikirPagiPetangModal({ onClose }) {
                     <span className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-black text-xs flex items-center justify-center font-mono flex-shrink-0">
                       {index + 1}
                     </span>
-                    <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate">
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-snug break-words">
                       {item.title}
                     </h3>
                   </div>
