@@ -4,22 +4,12 @@ import {
   MapPin,
   Compass,
   Sparkles,
-  Navigation,
   Globe,
   RotateCcw,
-  CheckCircle2,
-  AlertCircle,
   Smartphone,
-  Sliders,
-  ArrowLeft,
-  ArrowRight,
-  Sun,
-  Moon,
-  Volume2,
   LocateFixed,
   X,
-  HelpCircle,
-  RefreshCw
+  HelpCircle
 } from 'lucide-react';
 import { CITIES, calculatePrayerTimes, calculateQiblaDirection } from '../services/prayerTimes';
 import { sounds } from '../services/soundEffects';
@@ -422,135 +412,61 @@ export default function PrayerTimesView() {
         })}
       </div>
 
-      {/* 3. KOMPAS KIBLAT GYRO OTOMATIS: PANDUAN LANGSUNG UNTUK USER YANG TIDAK TAHU ARAH */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-5">
-        {/* Header Kompas */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
+      {/* 3. KOMPAS KIBLAT: PENANDA BULATAN, ARAH ANGIN & GAMBAR KA'BAH */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+        {/* Header Kompas & Keterangan Kalibrasi (tanpa logo) */}
+        <div className="space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-                Kompas Kiblat Baitullah
+                Kompas Kiblat
               </span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-serif flex items-center gap-2 mt-1">
+                <Compass className="w-5 h-5 text-amber-500" />
+                <span>Arah Kiblat Baitullah Makkah</span>
+              </h3>
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 font-serif flex items-center gap-2">
-              <Compass className="w-5 h-5 text-amber-500" />
-              <span>Arah Kiblat Baitullah Makkah</span>
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-2">
+            {/* Tombol Panduan Kalibrasi (tanpa logo) */}
             <button
               onClick={() => setShowCalibrationModal(true)}
-              className="px-3 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 border border-slate-200 transition active:scale-95 shadow-xs"
-              title="Panduan Kalibrasi Angka 8"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition active:scale-95 text-left sm:text-center shadow-xs self-start sm:self-center"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
-              <span className="hidden sm:inline">Kalibrasi Angka 8</span>
-            </button>
-            <button
-              onClick={handleAutoScanToQibla}
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs shadow-md flex items-center gap-2 transition active:scale-95"
-            >
-              <Sparkles className="w-4 h-4 text-amber-100 animate-spin" />
-              <span>Pindai Otomatis ke Kiblat</span>
+              Panduan Kalibrasi Angka 8
             </button>
           </div>
+
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Keterangan Kalibrasi: Ayunkan ponsel perlahan di udara membentuk pola angka 8 (∞) beberapa kali jika kompas belum presisi. Pegang ponsel mendatar dan putar badan hingga gambar Ka'bah berada di posisi atas (arah depan ponsel).
+          </p>
         </div>
 
-        {/* Tombol sinkronisasi jika browser memerlukan izin interaktif */}
+        {/* Tombol izin sensor jika diperlukan browser (iOS / Safari) */}
         {permissionState === 'prompt' && (
           <button
             onClick={requestCompassPermission}
             className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-98"
           >
             <Compass className="w-4 h-4 text-white" />
-            <span>Ketuk untuk Mengaktifkan Sensor Arah Kompas</span>
+            <span>Ketuk untuk Mengaktifkan Sensor Kompas HP</span>
           </button>
         )}
 
-        {/* 🌟 PANDUAN ARAH JELAS & BESAR */}
-        <div
-          className={`p-4 sm:p-5 rounded-3xl border transition-all duration-300 text-center space-y-2 ${
-            isFacingQibla
-              ? 'bg-emerald-50 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.25)]'
-              : 'bg-slate-50 border-slate-200'
-          }`}
-        >
-          {isFacingQibla ? (
-            <div className="space-y-1.5 py-2 animate-in zoom-in-95 duration-200">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 border border-emerald-300 flex items-center justify-center shadow-md">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-              <h4 className="text-lg sm:text-xl font-black text-emerald-800 tracking-wide font-serif">
-                STOP! ANDA TEPAT MENGHADAP KIBLAT!
-              </h4>
-              <p className="text-xs text-emerald-700 max-w-md mx-auto">
-                Posisi smartphone Anda saat ini tepat sejajar lurus menghadap Ka'bah Baitullah di Makkah Al-Mukarramah ({Math.round(targetQibla)}° Baratlaut).
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3 py-1">
-              <div className="flex items-center justify-center">
-                {diffAngle > 0 ? (
-                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-4 py-3 rounded-2xl shadow-sm w-full max-w-md">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <ArrowRight className="w-5 h-5 animate-pulse" />
-                    </div>
-                    <div className="text-left flex-1 min-w-0">
-                      <span className="text-[10px] uppercase font-extrabold text-amber-800 block tracking-wider">
-                        Instruksi Putar Badan:
-                      </span>
-                      <strong className="text-sm sm:text-base font-black text-slate-900 block truncate">
-                        PUTAR TUBUH KE ARAH KANAN
-                      </strong>
-                      <span className="text-xs text-amber-700 font-mono font-bold block truncate">
-                        Putar sekitar {Math.abs(Math.round(diffAngle))}° lagi
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-400 px-4 py-3 rounded-2xl shadow-sm w-full max-w-md">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <ArrowLeft className="w-5 h-5 animate-pulse" />
-                    </div>
-                    <div className="text-left flex-1 min-w-0">
-                      <span className="text-[10px] uppercase font-extrabold text-amber-800 block tracking-wider">
-                        Instruksi Putar Badan:
-                      </span>
-                      <strong className="text-sm sm:text-base font-black text-slate-900 block truncate">
-                        PUTAR TUBUH KE ARAH KIRI
-                      </strong>
-                      <span className="text-xs text-amber-700 font-mono font-bold block truncate">
-                        Putar sekitar {Math.abs(Math.round(diffAngle))}° lagi
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <p className="text-xs text-slate-500 text-center max-w-md mx-auto">
-                Pegang HP mendatar di telapak tangan, putar badan Anda perlahan hingga tanda panah di atas sejajar dengan Ka'bah dan layar menyala hijau.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* 4. VISUAL INSTRUMEN KOMPAS BERGERAK */}
-        <div className="flex flex-col items-center justify-center py-2 space-y-4">
-          {/* Top Direction Indicator of Phone */}
+        {/* Visual Kompas Bulatan & Arah Angin */}
+        <div className="flex flex-col items-center justify-center py-2 space-y-3">
+          {/* Penunjuk Depan Ponsel (12 o'clock cursor) */}
           <div className="flex flex-col items-center">
             <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-              Arah Depan Ponsel Anda
+              Arah Depan Ponsel
             </span>
-            <div className={`w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[14px] transition-colors ${
+            <div className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] transition-colors ${
               isFacingQibla ? 'border-b-emerald-500 animate-bounce' : 'border-b-amber-500'
             }`} />
           </div>
 
-          {/* Compass Dial Outer Container */}
+          {/* Bulatan Kompas Dial */}
           <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
-            {/* Outer Ring & Bezel with Dynamic Glow when locked */}
+            {/* Bezel Luar dengan Efek Cahaya Hijau saat Menghadap Kiblat */}
             <div
               className={`absolute inset-0 rounded-full border-4 transition-all duration-300 ${
                 isFacingQibla
@@ -559,7 +475,7 @@ export default function PrayerTimesView() {
               }`}
             />
 
-            {/* Rotating Dial */}
+            {/* Dial Kompas Berputar dengan Arah Angin */}
             <div
               className="absolute inset-2 rounded-full bg-[#0f172a] flex items-center justify-center pointer-events-none"
               style={{
@@ -567,74 +483,135 @@ export default function PrayerTimesView() {
                 willChange: 'transform'
               }}
             >
-              {/* Cardinal Markers */}
-              <span className="absolute top-2 text-xs font-black text-rose-400 font-mono">U (0°)</span>
-              <span className="absolute bottom-2 text-xs font-black text-slate-400 font-mono">S (180°)</span>
-              <span className="absolute right-2 text-xs font-black text-slate-400 font-mono">T (90°)</span>
-              <span className="absolute left-2 text-xs font-black text-slate-400 font-mono">B (270°)</span>
-
-              {/* Tick Rings */}
+              {/* Garis / Ticks Lingkaran Kompas */}
               <div className="absolute inset-6 rounded-full border border-dashed border-white/20" />
               <div className="absolute inset-12 rounded-full border border-white/10" />
 
-              {/* Fixed Ka'bah Marker on the Earth Dial */}
+              {/* Ticks Derajat (Setiap 15 Derajat) */}
+              {Array.from({ length: 24 }).map((_, i) => {
+                const deg = i * 15;
+                const isMajor = deg % 45 === 0;
+                return (
+                  <div
+                    key={i}
+                    className="absolute inset-0 flex items-start justify-center pointer-events-none"
+                    style={{ transform: `rotate(${deg}deg)` }}
+                  >
+                    <div
+                      className={`w-0.5 rounded-full ${
+                        isMajor ? 'h-3 bg-white/40' : 'h-1.5 bg-white/20'
+                      }`}
+                    />
+                  </div>
+                );
+              })}
+
+              {/* 8 Arah Mata Angin (U, TL, T, TG, S, BD, B, BL) */}
+              {[
+                { label: 'U', deg: 0, color: 'text-rose-500 font-black' },
+                { label: 'TL', deg: 45, color: 'text-slate-400 font-bold' },
+                { label: 'T', deg: 90, color: 'text-slate-300 font-black' },
+                { label: 'TG', deg: 135, color: 'text-slate-400 font-bold' },
+                { label: 'S', deg: 180, color: 'text-slate-300 font-black' },
+                { label: 'BD', deg: 225, color: 'text-slate-400 font-bold' },
+                { label: 'B', deg: 270, color: 'text-slate-300 font-black' },
+                { label: 'BL', deg: 315, color: 'text-slate-400 font-bold' }
+              ].map((pt) => (
+                <div
+                  key={pt.label}
+                  className="absolute inset-0 flex flex-col items-center justify-start pointer-events-none"
+                  style={{ transform: `rotate(${pt.deg}deg)` }}
+                >
+                  <div className="flex flex-col items-center pt-2">
+                    <span className={`text-[11px] font-mono leading-none ${pt.color}`}>
+                      {pt.label}
+                    </span>
+                    {pt.deg % 90 === 0 && (
+                      <span className="text-[8px] text-slate-500 font-mono scale-90">
+                        {pt.deg}°
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Penanda Gambar Ka'bah di Arah Kiblat */}
               <div
-                className="absolute inset-0 flex flex-col items-center justify-start pointer-events-none"
+                className="absolute inset-0 flex flex-col items-center justify-start pointer-events-none z-10"
                 style={{ transform: `rotate(${targetQibla}deg)` }}
               >
-                <div className="flex flex-col items-center -mt-2.5">
-                  <span className="text-xl select-none leading-none">🕋</span>
-                  <span className="text-[8px] font-black uppercase text-amber-300 bg-black/90 px-1.5 py-0.5 rounded shadow border border-amber-500/50 mt-0.5 tracking-wider">
-                    KIBLAT
+                <div className="flex flex-col items-center -mt-3.5 sm:-mt-4">
+                  {/* Ilustrasi 3D Ka'bah */}
+                  <div className={`transition-all duration-300 ${
+                    isFacingQibla ? 'scale-125 filter drop-shadow-[0_0_15px_#10b981]' : 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]'
+                  }`}>
+                    <svg width="34" height="34" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="kbRoof" x1="24" y1="4" x2="24" y2="18" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#475569" />
+                          <stop offset="100%" stopColor="#1e293b" />
+                        </linearGradient>
+                        <linearGradient id="kbLeft" x1="8" y1="14" x2="24" y2="38" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#1e293b" />
+                          <stop offset="100%" stopColor="#0f172a" />
+                        </linearGradient>
+                        <linearGradient id="kbRight" x1="24" y1="14" x2="40" y2="38" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#0f172a" />
+                          <stop offset="100%" stopColor="#020617" />
+                        </linearGradient>
+                        <linearGradient id="kbGold" x1="8" y1="18" x2="40" y2="18" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#fef08a" />
+                          <stop offset="50%" stopColor="#eab308" />
+                          <stop offset="100%" stopColor="#ca8a04" />
+                        </linearGradient>
+                      </defs>
+                      {/* Atap Ka'bah */}
+                      <polygon points="24,4 40,12 24,20 8,12" fill="url(#kbRoof)" stroke="#64748b" strokeWidth="0.8" />
+                      {/* Dinding Kiri */}
+                      <polygon points="8,12 24,20 24,40 8,32" fill="url(#kbLeft)" stroke="#334155" strokeWidth="0.5" />
+                      {/* Dinding Kanan */}
+                      <polygon points="40,12 24,20 24,40 40,32" fill="url(#kbRight)" stroke="#1e293b" strokeWidth="0.5" />
+                      {/* Sabuk Kiswah Emas */}
+                      <polygon points="8,16.5 24,24.5 24,27 8,19" fill="url(#kbGold)" />
+                      <polygon points="40,16.5 24,24.5 24,27 40,19" fill="url(#kbGold)" />
+                      {/* Pintu Ka'bah (Bab ar-Rahman) */}
+                      <polygon points="27,24.5 34,21 34,32 27,35.5" fill="url(#kbGold)" opacity="0.95" />
+                    </svg>
+                  </div>
+
+                  {/* Label Penanda Kiblat */}
+                  <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-md border tracking-wider -mt-0.5 transition-colors ${
+                    isFacingQibla
+                      ? 'bg-emerald-500 text-white border-emerald-300 shadow-[0_0_12px_#10b981]'
+                      : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-300'
+                  }`}>
+                    KIBLAT {Math.round(targetQibla)}°
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Pointer Needle to Ka'bah (Sleek Pointer Arrow without redundant text box) */}
+            {/* Titik Poros Tengah dengan Waterpass */}
             <div
-              className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none z-20"
-              style={{
-                transform: `rotate(${targetQibla - continuousHeading}deg)`,
-                willChange: 'transform'
-              }}
-            >
-              {/* Sleek Pointer Tip */}
-              <div className="flex flex-col items-center -mt-3">
-                <div className={`transition-all duration-200 ${
-                  isFacingQibla
-                    ? 'text-emerald-400 drop-shadow-[0_0_12px_#34d399] scale-110'
-                    : 'text-amber-400 drop-shadow-md'
-                }`}>
-                  <Navigation className="w-7 h-7 fill-current transform rotate-0" />
-                </div>
-              </div>
-
-              {/* Counterweight Tail */}
-              <div className="w-2.5 h-2.5 rounded-full bg-slate-500/70 -mb-0.5" />
-            </div>
-
-            {/* Center Pivot with Integrated MyQuran-style Waterpass */}
-            <div
-              title={isLevel ? "Posisi HP Mendatar Sempurna" : "Miring: Luruskan HP mendatar di telapak tangan"}
+              title={isLevel ? "Posisi HP Mendatar" : "Miring: Letakkan HP mendatar di telapak tangan"}
               className={`relative w-11 h-11 rounded-full border-2 shadow-xl z-30 flex items-center justify-center transition-colors ${
                 isLevel
                   ? 'border-emerald-400 bg-emerald-950/90 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
                   : 'border-amber-400/80 bg-[#141f2b]/95 shadow-[0_0_10px_rgba(0,0,0,0.5)]'
               }`}
             >
-              {/* Crosshair guidelines */}
+              {/* Garis Bidik */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="w-full h-[1px] bg-white/20" />
                 <div className="h-full w-[1px] bg-white/20 absolute" />
               </div>
 
-              {/* Center Target Ring */}
+              {/* Lingkaran Target Tengah */}
               <div className={`w-4 h-4 rounded-full border border-dashed transition-colors ${
                 isLevel ? 'border-emerald-400' : 'border-amber-400/50'
               }`} />
 
-              {/* Floating Bubble Level */}
+              {/* Gelembung Waterpass */}
               <div
                 className={`absolute w-3 h-3 rounded-full shadow transition-transform duration-100 ease-out ${
                   isLevel ? 'bg-emerald-400 ring-2 ring-emerald-300 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 ring-1 ring-amber-200'
@@ -646,14 +623,14 @@ export default function PrayerTimesView() {
             </div>
           </div>
 
-          {/* Kartu Derajat & Status Sensor */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full max-w-lg text-center pt-1">
+          {/* Kartu Derajat */}
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full max-w-lg text-center pt-2">
             <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
               <span className="text-[8px] sm:text-[9px] uppercase font-bold text-slate-500 block tracking-wider truncate">Arah Kiblat</span>
               <span className="text-sm sm:text-base font-black text-amber-700 font-mono block">
                 {Math.round(targetQibla)}°
               </span>
-              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">Barat Laut (BBU)</span>
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block font-medium truncate">Barat Laut (BL)</span>
             </div>
 
             <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5 min-w-0">
@@ -676,96 +653,8 @@ export default function PrayerTimesView() {
                 {Math.abs(Math.round(diffAngle))}°
               </span>
               <span className="text-[8px] sm:text-[9px] block font-bold truncate">
-                {isFacingQibla ? 'TEPAT KIBLAT' : diffAngle > 0 ? 'Putar Kanan' : 'Putar Kiri'}
+                {isFacingQibla ? 'TEPAT KIBLAT' : `${Math.abs(Math.round(diffAngle))}° ke Ka'bah`}
               </span>
-            </div>
-          </div>
-
-          {/* 5. PATOKAN NYATA ARAH KIBLAT (UNTUK DI DALAM KAMAR / RUANGAN) */}
-          <div className="w-full max-w-lg p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-3 text-xs text-slate-700">
-            <div className="flex items-center gap-2">
-              <Sun className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              <strong className="text-slate-900">Patokan Praktis Jika di Dalam Ruangan:</strong>
-            </div>
-
-            <p className="text-[11px] leading-relaxed">
-              Bagi wilayah Tasikmalaya & Jawa Barat, arah Kiblat ({Math.round(targetQibla)}°) adalah <strong>sedikit menyerong ke kanan dari arah tempat Matahari Terbenam (Barat)</strong> sekitar 25 derajat ke arah Barat Laut.
-            </p>
-
-            <div className="grid grid-cols-3 gap-2 text-center text-[10px] pt-1 font-medium">
-              <button
-                onClick={() => {
-                  setUseManualMode(true);
-                  setManualHeading(90);
-                }}
-                className="p-2.5 rounded-xl bg-white hover:bg-amber-100/50 border border-slate-200 space-y-0.5 text-left transition shadow-xs"
-              >
-                <span className="text-amber-700 block font-bold">Matahari Terbit</span>
-                <span className="text-slate-500 block text-[9px]">Kiblat di Belakang Kanan</span>
-              </button>
-              <button
-                onClick={() => {
-                  setUseManualMode(true);
-                  setManualHeading(Math.round(targetQibla));
-                }}
-                className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 space-y-0.5 text-left text-emerald-800 font-bold transition shadow-xs"
-              >
-                <span className="block text-emerald-900">🕋 Ka'bah / Kiblat</span>
-                <span className="block text-[9px] text-emerald-700">Lurus ({Math.round(targetQibla)}°)</span>
-              </button>
-              <button
-                onClick={() => {
-                  setUseManualMode(true);
-                  setManualHeading(270);
-                }}
-                className="p-2.5 rounded-xl bg-white hover:bg-orange-100/50 border border-slate-200 space-y-0.5 text-left transition shadow-xs"
-              >
-                <span className="text-orange-700 block font-bold">Matahari Terbenam</span>
-                <span className="text-slate-500 block text-[9px]">Kiblat Serong Kanan 25°</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 6. Slider Pengatur Manual (Untuk Uji Coba di PC / Laptop) */}
-          <div className="w-full max-w-lg space-y-3 pt-1">
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Uji Coba Putar Manual (Laptop / PC)</span>
-                </span>
-                <span className="text-[10px] text-amber-700 font-mono font-bold">
-                  {Math.round(currentHeading)}°
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min="0"
-                max="360"
-                value={currentHeading}
-                onChange={(e) => {
-                  setUseManualMode(true);
-                  setManualHeading(Number(e.target.value));
-                }}
-                className="w-full accent-amber-500 cursor-pointer"
-              />
-
-              <div className="flex justify-between items-center pt-1">
-                <span className="text-[10px] text-slate-500">
-                  Geser untuk melihat instruksi putar badan berubah otomatis
-                </span>
-                <button
-                  onClick={() => {
-                    setUseManualMode(true);
-                    setManualHeading(Math.round(targetQibla));
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-300 hover:bg-emerald-100 transition flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3 text-emerald-600" />
-                  <span>Kunci Kiblat ({Math.round(targetQibla)}°)</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -776,9 +665,8 @@ export default function PrayerTimesView() {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Kalibrasi Magnetometer</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                Panduan Kalibrasi Angka 8
               </span>
               <button
                 onClick={() => setShowCalibrationModal(false)}
