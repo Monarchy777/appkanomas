@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
-import InstallAppBanner from './components/InstallAppBanner';
-import AutoDownloadModal from './components/AutoDownloadModal';
 
 import HomeView from './views/HomeView';
 import PackagesView from './views/PackagesView';
@@ -12,23 +10,24 @@ import AccountView from './views/AccountView';
 import MitraDashboardView from './views/MitraDashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
 
-import TawafSaiCounter from './features/TawafSaiCounter';
-import DigitalTasbih from './features/DigitalTasbih';
-import TalbiyahAudioPlayer from './features/TalbiyahAudioPlayer';
-import KajianTasikmalayaModal from './features/KajianTasikmalayaModal';
-import SavingsCalculatorModal from './features/SavingsCalculatorModal';
-import PackageDetailModal from './features/PackageDetailModal';
-import RegistrationModal from './features/RegistrationModal';
-import NusukGuideModal from './features/NusukGuideModal';
-import LuggageChecklistModal from './features/LuggageChecklistModal';
-import InteractiveMapModal from './features/InteractiveMapModal';
-import JamaahStatusLookupModal from './features/JamaahStatusLookupModal';
-import WhatsAppCenterModal from './features/WhatsAppCenterModal';
-import DocumentPrintModal from './features/DocumentPrintModal';
-import AlQuranModal from './features/AlQuranModal';
-import DailyPrayersModal from './features/DailyPrayersModal';
-import JamaahServicesModal from './features/JamaahServicesModal';
-import DzikirPagiPetangModal from './features/DzikirPagiPetangModal';
+// Code-splitting via React.lazy for instant launch & lightweight bundle
+const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
+const DigitalTasbih = lazy(() => import('./features/DigitalTasbih'));
+const TalbiyahAudioPlayer = lazy(() => import('./features/TalbiyahAudioPlayer'));
+const KajianTasikmalayaModal = lazy(() => import('./features/KajianTasikmalayaModal'));
+const SavingsCalculatorModal = lazy(() => import('./features/SavingsCalculatorModal'));
+const PackageDetailModal = lazy(() => import('./features/PackageDetailModal'));
+const RegistrationModal = lazy(() => import('./features/RegistrationModal'));
+const NusukGuideModal = lazy(() => import('./features/NusukGuideModal'));
+const LuggageChecklistModal = lazy(() => import('./features/LuggageChecklistModal'));
+const InteractiveMapModal = lazy(() => import('./features/InteractiveMapModal'));
+const JamaahStatusLookupModal = lazy(() => import('./features/JamaahStatusLookupModal'));
+const WhatsAppCenterModal = lazy(() => import('./features/WhatsAppCenterModal'));
+const DocumentPrintModal = lazy(() => import('./features/DocumentPrintModal'));
+const AlQuranModal = lazy(() => import('./features/AlQuranModal'));
+const DailyPrayersModal = lazy(() => import('./features/DailyPrayersModal'));
+const JamaahServicesModal = lazy(() => import('./features/JamaahServicesModal'));
+const DzikirPagiPetangModal = lazy(() => import('./features/DzikirPagiPetangModal'));
 
 import { db } from './services/db';
 import { calculatePrayerTimes } from './services/prayerTimes';
@@ -54,7 +53,6 @@ export default function App() {
   const [showWhatsAppCenter, setShowWhatsAppCenter] = useState(false);
   const [whatsAppRecipient, setWhatsAppRecipient] = useState(null);
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
-  const [showInstallBanner, setShowInstallBanner] = useState(true);
 
   // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah, Dzikir Pagi Petang
   const [showQuran, setShowQuran] = useState(false);
@@ -121,16 +119,6 @@ export default function App() {
         onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
         onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
       />
-
-      {/* Auto-Prompt Download / Install PWA Modal Saat Buka Web */}
-      <AutoDownloadModal />
-
-      {/* PWA Mobile Install Banner */}
-      {showInstallBanner && (
-        <div className="pt-2 no-print">
-          <InstallAppBanner onClose={() => setShowInstallBanner(false)} />
-        </div>
-      )}
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto">
@@ -225,104 +213,106 @@ export default function App() {
         role={role}
       />
 
-      {/* Modals & Overlays */}
-      {showQuran && (
-        <AlQuranModal onClose={() => setShowQuran(false)} />
-      )}
+      {/* Modals & Overlays (Lazy Loaded with Suspense for Instant Performance) */}
+      <Suspense fallback={null}>
+        {showQuran && (
+          <AlQuranModal onClose={() => setShowQuran(false)} />
+        )}
 
-      {showDailyPrayers && (
-        <DailyPrayersModal onClose={() => setShowDailyPrayers(false)} />
-      )}
+        {showDailyPrayers && (
+          <DailyPrayersModal onClose={() => setShowDailyPrayers(false)} />
+        )}
 
-      {showDzikir && (
-        <DzikirPagiPetangModal onClose={() => setShowDzikir(false)} />
-      )}
+        {showDzikir && (
+          <DzikirPagiPetangModal onClose={() => setShowDzikir(false)} />
+        )}
 
-      {showJamaahServices && (
-        <JamaahServicesModal
-          onClose={() => setShowJamaahServices(false)}
-          onOpenLookup={() => setShowLookup(true)}
-          onOpenChecklist={() => setShowChecklist(true)}
-          onOpenWhatsApp={() =>
-            window.open(
-              "https://wa.me/628112113363?text=Assalamu%27alaikum%20Admin%20Kanomas%2C%20saya%20ingin%20tanya%20fasilitas%20jamaah.",
-              '_blank'
-            )
-          }
-        />
-      )}
+        {showJamaahServices && (
+          <JamaahServicesModal
+            onClose={() => setShowJamaahServices(false)}
+            onOpenLookup={() => setShowLookup(true)}
+            onOpenChecklist={() => setShowChecklist(true)}
+            onOpenWhatsApp={() =>
+              window.open(
+                "https://wa.me/628112113363?text=Assalamu%27alaikum%20Admin%20Kanomas%2C%20saya%20ingin%20tanya%20fasilitas%20jamaah.",
+                '_blank'
+              )
+            }
+          />
+        )}
 
-      {detailPackage && (
-        <PackageDetailModal
-          pkg={detailPackage}
-          onClose={() => setDetailPackage(null)}
-          onBookNow={(pkg) => setBookingPackage(pkg)}
-        />
-      )}
+        {detailPackage && (
+          <PackageDetailModal
+            pkg={detailPackage}
+            onClose={() => setDetailPackage(null)}
+            onBookNow={(pkg) => setBookingPackage(pkg)}
+          />
+        )}
 
-      {bookingPackage && (
-        <RegistrationModal
-          pkg={bookingPackage}
-          onClose={() => setBookingPackage(null)}
-          defaultMitraCode={role === 'mitra' ? (dbData.mitra?.[0]?.code || '') : ''}
-        />
-      )}
+        {bookingPackage && (
+          <RegistrationModal
+            pkg={bookingPackage}
+            onClose={() => setBookingPackage(null)}
+            defaultMitraCode={role === 'mitra' ? (dbData.mitra?.[0]?.code || '') : ''}
+          />
+        )}
 
-      {showCounter && (
-        <TawafSaiCounter onClose={() => setShowCounter(false)} />
-      )}
+        {showCounter && (
+          <TawafSaiCounter onClose={() => setShowCounter(false)} />
+        )}
 
-      {showTasbih && (
-        <DigitalTasbih onClose={() => setShowTasbih(false)} />
-      )}
+        {showTasbih && (
+          <DigitalTasbih onClose={() => setShowTasbih(false)} />
+        )}
 
-      {showTalbiyah && (
-        <TalbiyahAudioPlayer onClose={() => setShowTalbiyah(false)} />
-      )}
+        {showTalbiyah && (
+          <TalbiyahAudioPlayer onClose={() => setShowTalbiyah(false)} />
+        )}
 
-      {showKajian && (
-        <KajianTasikmalayaModal
-          onClose={() => setShowKajian(false)}
-          role={role}
-        />
-      )}
+        {showKajian && (
+          <KajianTasikmalayaModal
+            onClose={() => setShowKajian(false)}
+            role={role}
+          />
+        )}
 
-      {showSavings && (
-        <SavingsCalculatorModal onClose={() => setShowSavings(false)} />
-      )}
+        {showSavings && (
+          <SavingsCalculatorModal onClose={() => setShowSavings(false)} />
+        )}
 
-      {showNusuk && (
-        <NusukGuideModal onClose={() => setShowNusuk(false)} />
-      )}
+        {showNusuk && (
+          <NusukGuideModal onClose={() => setShowNusuk(false)} />
+        )}
 
-      {showChecklist && (
-        <LuggageChecklistModal onClose={() => setShowChecklist(false)} />
-      )}
+        {showChecklist && (
+          <LuggageChecklistModal onClose={() => setShowChecklist(false)} />
+        )}
 
-      {showMap && (
-        <InteractiveMapModal onClose={() => setShowMap(false)} />
-      )}
+        {showMap && (
+          <InteractiveMapModal onClose={() => setShowMap(false)} />
+        )}
 
-      {showLookup && (
-        <JamaahStatusLookupModal onClose={() => setShowLookup(false)} />
-      )}
+        {showLookup && (
+          <JamaahStatusLookupModal onClose={() => setShowLookup(false)} />
+        )}
 
-      {showWhatsAppCenter && (
-        <WhatsAppCenterModal
-          onClose={() => {
-            setShowWhatsAppCenter(false);
-            setWhatsAppRecipient(null);
-          }}
-          defaultRecipientPhone={whatsAppRecipient?.phone}
-          defaultRecipientName={whatsAppRecipient?.name}
-        />
-      )}
+        {showWhatsAppCenter && (
+          <WhatsAppCenterModal
+            onClose={() => {
+              setShowWhatsAppCenter(false);
+              setWhatsAppRecipient(null);
+            }}
+            defaultRecipientPhone={whatsAppRecipient?.phone}
+            defaultRecipientName={whatsAppRecipient?.name}
+          />
+        )}
 
-      {showDocumentPrint && (
-        <DocumentPrintModal
-          onClose={() => setShowDocumentPrint(false)}
-        />
-      )}
+        {showDocumentPrint && (
+          <DocumentPrintModal
+            onClose={() => setShowDocumentPrint(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

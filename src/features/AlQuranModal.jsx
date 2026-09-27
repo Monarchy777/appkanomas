@@ -563,6 +563,15 @@ export default function AlQuranModal({ onClose }) {
   const [showTajweedGuide, setShowTajweedGuide] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
 
+  // Lock body scroll when Quran modal is mounted
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Helper font family kaligrafi Arab aktif (prioritas pilihan gaya kaligrafi pengguna)
   const getActiveFontFamily = () => {
     switch (calligraphyStyle) {

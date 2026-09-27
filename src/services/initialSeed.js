@@ -14,7 +14,7 @@ export const COMPANY_PROFILE = {
   website: "https://www.kanomastasikmalaya.com",
   address: "Tasikmalaya, Jawa Barat, Indonesia (Melayani Seluruh Priangan Timur & Nasional)",
   operatingHours: "Senin - Sabtu (08.30 - 17.00 WIB)",
-  heroVideo: "/assets/Thawaf.mp4",
+  heroPoster: "/assets/thawaf-poster.jpg",
   logo: "/assets/logo-kanomas.png",
   logoIco: "/assets/logo-kanomas.ico"
 };
@@ -26,7 +26,7 @@ export const INITIAL_MENTORS = [
     role: "Dewan Pembimbing Ibadah Umrah",
     cert: "Kemenag Bersertifikat",
     photo: "/assets/Pembimbing/pembimbing-kh-nono-nurul-hidayat.png",
-    fallbackPhoto: "/assets/Pembimbing/Pembimbing Umroh KH. Nono Nurul Hidayat.png",
+    fallbackPhoto: "/assets/Pembimbing/pembimbing-kh-nono-nurul-hidayat.png",
     desc: "Membimbing jamaah dengan kelembutan, kesabaran, dan pendalaman makna spiritual di setiap manasik dan thawaf."
   },
   {
@@ -35,7 +35,7 @@ export const INITIAL_MENTORS = [
     role: "Dewan Pembimbing Ibadah Umrah",
     cert: "Kemenag Bersertifikat",
     photo: "/assets/Pembimbing/pembimbing-h-irpan-hilmi.png",
-    fallbackPhoto: "/assets/Pembimbing/Pembimbing Umroh H. Irpan Hilmi, Lc,. MA., MH.png",
+    fallbackPhoto: "/assets/Pembimbing/pembimbing-h-irpan-hilmi.png",
     desc: "Alumni Timur Tengah berkeilmuan syariah mendalam, membimbing tata cara ibadah secara presisi sesuai sunnah."
   },
   {
@@ -44,7 +44,7 @@ export const INITIAL_MENTORS = [
     role: "Dewan Pembimbing & Pendamping Ibadah",
     cert: "Kemenag Bersertifikat",
     photo: "/assets/Pembimbing/pembimbing-h-asep-mulyana.png",
-    fallbackPhoto: "/assets/Pembimbing/Pembimbing Umroh H. Asep Mulyana.png",
+    fallbackPhoto: "/assets/Pembimbing/pembimbing-h-asep-mulyana.png",
     desc: "Pendamping ibadah yang ramah dan bersahaja, senantiasa mendampingi jamaah dari persiapan hingga kepulangan."
   },
   {
@@ -53,7 +53,7 @@ export const INITIAL_MENTORS = [
     role: "Dewan Pembimbing Ibadah Umrah & Haji",
     cert: "Kemenag Bersertifikat",
     photo: "/assets/Pembimbing/pembimbing-kh-didi-mochamad-turmudi.png",
-    fallbackPhoto: "/assets/Pembimbing/Pembimbing Umroh KH. Didi Mochamad Turmudi, Lc., MA..png",
+    fallbackPhoto: "/assets/Pembimbing/pembimbing-kh-didi-mochamad-turmudi.png",
     desc: "Ulama kharismatik yang mengayomi, membekali pemahaman hakikat ibadah hingga mencapai kemabruran sejati."
   }
 ];

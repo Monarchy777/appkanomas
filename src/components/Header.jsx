@@ -162,7 +162,7 @@ export default function Header({
               <div>
                 <strong className="text-slate-900 block text-xs font-bold flex items-center gap-1.5">
                   Download File APK Android
-                  <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black tracking-wide">69 MB</span>
+                  <span className="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded font-black tracking-wide">18 MB (Ringan)</span>
                 </strong>
                 <span className="text-[10px] text-slate-600 block">Bisa disimpan & dibagikan via WhatsApp tanpa browser</span>
               </div>
