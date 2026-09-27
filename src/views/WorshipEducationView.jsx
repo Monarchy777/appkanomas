@@ -99,7 +99,7 @@ const ZIKIR_PRESETS = [
   { name: 'Shalawat Nabi', arabic: 'اللّٰهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ', target: 100 }
 ];
 
-export default function WorshipEducationView() {
+export default function WorshipEducationView({ onSelectTab, onBack }) {
   const [activeSubTab, setActiveSubTab] = useState('doa'); // 'doa' | 'counter' | 'tasbih' | 'steps'
   const [playingDoaId, setPlayingDoaId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -183,7 +183,20 @@ export default function WorshipEducationView() {
   const currentActiveRoundData = currentRoundsData[round - 1] || currentRoundsData[0];
 
   return (
-    <div className="space-y-5 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
+    <div className="space-y-4 pb-24 mx-3 sm:mx-6 mt-3 max-w-4xl mx-auto">
+      {/* TOMBOL KEMBALI KE BERANDA */}
+      {(onBack || onSelectTab) && (
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => (onBack ? onBack() : onSelectTab('home'))}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-amber-600 text-xs font-bold transition shadow-xs active:scale-95"
+          >
+            <ChevronLeft className="w-4 h-4 text-amber-600" />
+            <span>Kembali ke Beranda</span>
+          </button>
+        </div>
+      )}
+
       {/* 1. HEADER PANDUAN IBADAH (Card Putih Bersih) */}
       <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-2">
         <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 inline-block">

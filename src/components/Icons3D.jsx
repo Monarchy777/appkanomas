@@ -530,3 +530,171 @@ export function Icon3DPeta({ size = 48, className = "" }) {
     </svg>
   );
 }
+
+// 15. 3D AL-QUR'AN (Magnificent Emerald & Gold Holy Quran with Arabic Calligraphy & Stand)
+export function Icon3DAlQuran({ size = 48, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <radialGradient id="quranBg" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stopColor="#34d399" />
+          <stop offset="40%" stopColor="#059669" />
+          <stop offset="100%" stopColor="#064e3b" />
+        </radialGradient>
+        <linearGradient id="quranGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="50%" stopColor="#eab308" />
+          <stop offset="100%" stopColor="#854d0e" />
+        </linearGradient>
+        <filter id="quranShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#064e3b" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#quranBg)" filter="url(#quranShadow)" />
+      <rect x="4.5" y="4.5" width="55" height="26" rx="15" fill="white" fillOpacity="0.25" />
+      {/* Wooden Rehal / Book Stand Base */}
+      <polygon points="18,48 32,38 46,48 42,50 32,42 22,50" fill="#78350f" opacity="0.9" />
+      <polygon points="20,49 32,41 44,49 42,51 32,43 22,51" fill="#451a03" />
+      {/* Holy Quran Book Open in 3D */}
+      <path d="M14 38C22 36 28 36 32 39C36 36 42 36 50 38L50 19C42 17 36 17 32 20C28 17 22 17 14 19Z" fill="#134e4a" stroke="url(#quranGold)" strokeWidth="1.8" />
+      {/* Cream Quran Pages */}
+      <path d="M16 36C23 34 28 34 32 37C36 34 41 34 48 36L48 20C41 18 36 18 32 21C28 18 23 18 16 20Z" fill="#fffbeb" />
+      {/* Golden Central Spine */}
+      <line x1="32" y1="21" x2="32" y2="37" stroke="#ca8a04" strokeWidth="1.8" />
+      {/* Quran Arabesque Decorative Borders */}
+      <rect x="18" y="22" width="11" height="11" rx="2" fill="none" stroke="#ca8a04" strokeWidth="0.8" strokeDasharray="1 1" />
+      <rect x="35" y="22" width="11" height="11" rx="2" fill="none" stroke="#ca8a04" strokeWidth="0.8" strokeDasharray="1 1" />
+      {/* Calligraphy Lines */}
+      <line x1="20" y1="25" x2="27" y2="25" stroke="#92400e" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="20" y1="28" x2="27" y2="28" stroke="#92400e" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="37" y1="25" x2="44" y2="25" stroke="#92400e" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="37" y1="28" x2="44" y2="28" stroke="#92400e" strokeWidth="1.2" strokeLinecap="round" />
+      {/* Silk Golden Ribbon Hanging */}
+      <path d="M31 21V43L33 41L35 43V21H31Z" fill="url(#quranGold)" filter="drop-shadow(0 2px 3px rgba(0,0,0,0.3))" />
+      {/* Sparkle */}
+      <path d="M47 13L48.5 16.5L52 18L48.5 19.5L47 23L45.5 19.5L42 18L45.5 16.5Z" fill="#ffffff" />
+    </svg>
+  );
+}
+
+// 16. 3D DOA HARIAN (Spiritual Azure & Gold Hands in Du'a with Golden Glow)
+export function Icon3DDoaHarian({ size = 48, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <radialGradient id="doaHarianBg" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stopColor="#38bdf8" />
+          <stop offset="40%" stopColor="#0284c7" />
+          <stop offset="100%" stopColor="#0c4a6e" />
+        </radialGradient>
+        <linearGradient id="goldGlow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="60%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+        <filter id="doaHarianShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#0c4a6e" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#doaHarianBg)" filter="url(#doaHarianShadow)" />
+      <rect x="4.5" y="4.5" width="55" height="26" rx="15" fill="white" fillOpacity="0.25" />
+      {/* Spiritual Golden Radiance Halo */}
+      <circle cx="32" cy="24" r="11" fill="#fde047" opacity="0.3" filter="blur(4px)" />
+      {/* Crescent & Stars of Divine Acceptance */}
+      <path d="M32 15C33.5 15 35 15.5 36 16.5C34.5 17 33.5 18.5 33.5 20.5C33.5 22.5 34.5 24 36 24.5C35 25.5 33.5 26 32 26C29 26 26.5 23.5 26.5 20.5C26.5 17.5 29 15 32 15Z" fill="#fef08a" />
+      <circle cx="38" cy="18" r="1.5" fill="#ffffff" />
+      {/* 3D Cupped Hands Raised in Du'a */}
+      {/* Left Hand */}
+      <path d="M19 43C19 36 24 30 29 28C30.5 27.5 31.5 29 30.5 30.5L25 38C24 39.5 23 42 23 44L20 44C19.5 44 19 43.5 19 43Z" fill="#fed7aa" stroke="#ca8a04" strokeWidth="1" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))" />
+      {/* Right Hand */}
+      <path d="M45 43C45 36 40 30 35 28C33.5 27.5 32.5 29 33.5 30.5L39 38C40 39.5 41 42 41 44L44 44C44.5 44 45 43.5 45 43Z" fill="#fed7aa" stroke="#ca8a04" strokeWidth="1" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))" />
+      {/* Golden Aura Droplets (Berkah) */}
+      <path d="M32 28C32 28 34 32 34 33.5C34 34.6 33.1 35.5 32 35.5C30.9 35.5 30 34.6 30 33.5C30 32 32 28 32 28Z" fill="url(#goldGlow)" />
+      {/* Sparkles */}
+      <path d="M22 20L23 22L25 23L23 24L22 26L21 24L19 23L21 22Z" fill="#ffffff" />
+      <path d="M42 20L43 22L45 23L43 24L42 26L41 24L39 23L41 22Z" fill="#ffffff" />
+    </svg>
+  );
+}
+
+// 17. 3D PELAYANAN JAMAAH (Royal Purple & Gold VIP Hospitality Badge with 5 Stars & Suitcase)
+export function Icon3DPelayananJamaah({ size = 48, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <radialGradient id="layananBg" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stopColor="#c084fc" />
+          <stop offset="40%" stopColor="#9333ea" />
+          <stop offset="100%" stopColor="#581c87" />
+        </radialGradient>
+        <linearGradient id="starGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="50%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+        <filter id="layananShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#581c87" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#layananBg)" filter="url(#layananShadow)" />
+      <rect x="4.5" y="4.5" width="55" height="26" rx="15" fill="white" fillOpacity="0.25" />
+      {/* 3D Golden VIP Medallion */}
+      <circle cx="32" cy="33" r="16" fill="#4c1d95" stroke="url(#starGold)" strokeWidth="2.5" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.35))" />
+      {/* Concierge Bell & Service Badge */}
+      <path d="M26 36C26 31 29 27 32 27C35 27 38 31 38 36H26Z" fill="#fde047" />
+      <rect x="23" y="36" width="18" height="4" rx="2" fill="#ca8a04" />
+      <circle cx="32" cy="25" r="2" fill="#ffffff" />
+      {/* 5-Star Arc Rating */}
+      <g fill="#fef08a" transform="translate(16, 14)">
+        <polygon points="4,4 5,6 7,6 5.5,7.5 6,9.5 4,8 2,9.5 2.5,7.5 1,6 3,6" />
+        <polygon points="10,2 11,4 13,4 11.5,5.5 12,7.5 10,6 8,7.5 8.5,5.5 7,4 9,4" />
+        <polygon points="16,1 17,3 19,3 17.5,4.5 18,6.5 16,5 14,6.5 14.5,4.5 13,3 15,3" fill="#ffffff" />
+        <polygon points="22,2 23,4 25,4 23.5,5.5 24,7.5 22,6 20,7.5 20.5,5.5 19,4 21,4" />
+        <polygon points="28,4 29,6 31,6 29.5,7.5 30,9.5 28,8 26,9.5 26.5,7.5 25,6 27,6" />
+      </g>
+      {/* VIP Ribbon Banner */}
+      <path d="M22 42L32 46L42 42L40 45L32 49L24 45Z" fill="url(#starGold)" filter="drop-shadow(0 2px 3px rgba(0,0,0,0.3))" />
+    </svg>
+  );
+}
+
+// 18. 3D JADWAL SHOLAT & ARAH KIBLAT (Mosque Dome + 3D Compass Combo)
+export function Icon3DSholatKiblat({ size = 48, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <radialGradient id="sholatKiblatBg" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stopColor="#6ee7b7" />
+          <stop offset="40%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#065f46" />
+        </radialGradient>
+        <linearGradient id="needleGoldSK" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="60%" stopColor="#eab308" />
+          <stop offset="100%" stopColor="#a16207" />
+        </linearGradient>
+        <filter id="sholatKiblatShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#065f46" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#sholatKiblatBg)" filter="url(#sholatKiblatShadow)" />
+      <rect x="4.5" y="4.5" width="55" height="26" rx="15" fill="white" fillOpacity="0.25" />
+      {/* Mosque Dome Silhouette Behind */}
+      <path d="M32 15C25 20 22 25 22 32H42C42 25 39 20 32 15Z" fill="#064e3b" stroke="#34d399" strokeWidth="1" />
+      <path d="M32 11V15" stroke="#fde047" strokeWidth="1.5" />
+      <circle cx="32" cy="11" r="1.5" fill="#fde047" />
+      {/* Floating 3D Compass Bezel */}
+      <circle cx="32" cy="36" r="15" fill="#022c22" stroke="url(#needleGoldSK)" strokeWidth="2.5" filter="drop-shadow(0 3px 5px rgba(0,0,0,0.5))" />
+      <circle cx="32" cy="36" r="12" fill="#064e3b" stroke="#34d399" strokeWidth="0.8" strokeDasharray="2 3" />
+      {/* Ka'bah North Pointer (Red) */}
+      <polygon points="32,23 35.5,36 32,34" fill="#ef4444" />
+      <polygon points="32,23 28.5,36 32,34" fill="#dc2626" />
+      {/* South Pointer (Silver) */}
+      <polygon points="32,49 35.5,36 32,38" fill="#e2e8f0" />
+      <polygon points="32,49 28.5,36 32,38" fill="#94a3b8" />
+      {/* Center Pivot */}
+      <circle cx="32" cy="36" r="3" fill="#fde047" />
+    </svg>
+  );
+}
+

@@ -24,6 +24,9 @@ import InteractiveMapModal from './features/InteractiveMapModal';
 import JamaahStatusLookupModal from './features/JamaahStatusLookupModal';
 import WhatsAppCenterModal from './features/WhatsAppCenterModal';
 import DocumentPrintModal from './features/DocumentPrintModal';
+import AlQuranModal from './features/AlQuranModal';
+import DailyPrayersModal from './features/DailyPrayersModal';
+import JamaahServicesModal from './features/JamaahServicesModal';
 
 import { db } from './services/db';
 import { calculatePrayerTimes } from './services/prayerTimes';
@@ -50,6 +53,11 @@ export default function App() {
   const [whatsAppRecipient, setWhatsAppRecipient] = useState(null);
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah
+  const [showQuran, setShowQuran] = useState(false);
+  const [showDailyPrayers, setShowDailyPrayers] = useState(false);
+  const [showJamaahServices, setShowJamaahServices] = useState(false);
 
   // Subscribe to database changes
   useEffect(() => {
@@ -127,6 +135,9 @@ export default function App() {
             mentors={mentors}
             nextPrayer={prayerInfo.nextPrayer}
             onSelectTab={handleTabSelect}
+            onOpenQuran={() => setShowQuran(true)}
+            onOpenDailyPrayers={() => setShowDailyPrayers(true)}
+            onOpenJamaahServices={() => setShowJamaahServices(true)}
             onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
             onOpenCounter={() => setShowCounter(true)}
             onOpenTasbih={() => setShowTasbih(true)}
@@ -152,6 +163,8 @@ export default function App() {
 
         {activeTab === 'worship' && (
           <WorshipEducationView
+            onSelectTab={handleTabSelect}
+            onBack={() => handleTabSelect('home')}
             onOpenCounter={() => setShowCounter(true)}
             onOpenTasbih={() => setShowTasbih(true)}
             onOpenTalbiyah={() => setShowTalbiyah(true)}
@@ -192,14 +205,42 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating Bottom Navigation */}
+      {/* Floating Bottom Navigation (4 Tabs: Beranda, WA Admin, Paket, Bantuan) */}
       <BottomNav
         activeTab={activeTab}
         onSelectTab={handleTabSelect}
+        onOpenWhatsApp={() =>
+          window.open(
+            "https://wa.me/628112113363?text=Assalamu%27alaikum%20Admin%20Kanomas%2C%20saya%20ingin%20konsultasi%20mengenai%20layanan%20Umrah%20dan%20Haji.",
+            '_blank'
+          )
+        }
         role={role}
       />
 
       {/* Modals & Overlays */}
+      {showQuran && (
+        <AlQuranModal onClose={() => setShowQuran(false)} />
+      )}
+
+      {showDailyPrayers && (
+        <DailyPrayersModal onClose={() => setShowDailyPrayers(false)} />
+      )}
+
+      {showJamaahServices && (
+        <JamaahServicesModal
+          onClose={() => setShowJamaahServices(false)}
+          onOpenLookup={() => setShowLookup(true)}
+          onOpenChecklist={() => setShowChecklist(true)}
+          onOpenWhatsApp={() =>
+            window.open(
+              "https://wa.me/628112113363?text=Assalamu%27alaikum%20Admin%20Kanomas%2C%20saya%20ingin%20tanya%20fasilitas%20jamaah.",
+              '_blank'
+            )
+          }
+        />
+      )}
+
       {detailPackage && (
         <PackageDetailModal
           pkg={detailPackage}
