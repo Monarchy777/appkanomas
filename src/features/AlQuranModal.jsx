@@ -256,12 +256,12 @@ export const TAJWEED_COLORS = {
   }
 };
 
-// FUNGSI PEMANJANG HURUF ARAB (KASHIDA / TATWEEL) SEPERTI SCREENSHOT 2
-// Menghubungkan huruf sambung sehingga bentuknya panjang, anggun, dan tidak mepet
-function elongateArabic(text, enabled = true) {
+// FUNGSI PEMANJANG HURUF ARAB (KASHIDA / TATWEEL AMAN)
+// Hanya aktif bila dipilih oleh pengguna, menangkap seluruh tanda harakat/waqaf agar tidak merusak ligatur atau menumpuk
+function elongateArabic(text, enabled = false) {
   if (!text || !enabled) return text;
-  // Sisipkan tatweel \u0640 pada huruf sambung tengah kata
-  return text.replace(/([بتثجحخسشصضطظعغفقكلمنهي][\u064B-\u065F\u0670]?)(?=[بتثجحخسشصضطظعغفقكلمنهي])/g, '$1\u0640');
+  // Sisipkan tatweel \u0640 hanya setelah seluruh tanda harakat/tanda baca selesai
+  return text.replace(/([بتثجحخسشصضطظعغفقكلمنهي][\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*)(?=[بتثجحخسشصضطظعغفقكلمنهي])/g, '$1\u0640');
 }
 
 // Tree Parser Tajweed Markup
@@ -302,7 +302,7 @@ function parseTajweedTree(text) {
   return parseSeq();
 }
 
-function renderTajweedNodes(nodes, isDark = false, isKashida = true) {
+function renderTajweedNodes(nodes, isDark = false, isKashida = false) {
   const palette = isDark ? TAJWEED_COLORS.dark : TAJWEED_COLORS.mushaf;
 
   return nodes.map((node, idx) => {
@@ -327,7 +327,7 @@ function renderTajweedNodes(nodes, isDark = false, isKashida = true) {
   });
 }
 
-function renderFallbackTajweed(text, isDark = false, isKashida = true) {
+function renderFallbackTajweed(text, isDark = false, isKashida = false) {
   if (!text) return null;
   const processed = elongateArabic(text, isKashida);
   // 1. Ghunnah/Idgham (Pink), 2. Qalqalah (Biru), 3. Mad (Hijau), 4. Tanwin/Ikhfa (Hijau), 5. Iqlab (Biru)
@@ -397,7 +397,7 @@ export default function AlQuranModal({ onClose }) {
     }
   });
 
-  const [isKashidaLong, setIsKashidaLong] = useState(true); // Huruf panjang seperti screenshot 2
+  const [isKashidaLong, setIsKashidaLong] = useState(false); // Default false agar proporsi huruf LPMQ Kemenag natural tanpa harakat tumpang tindih
   const [showTajweed, setShowTajweed] = useState(true);
   const [showLatin, setShowLatin] = useState(true);
   const [showTranslation, setShowTranslation] = useState(true);
@@ -750,6 +750,9 @@ export default function AlQuranModal({ onClose }) {
   const currentTheme = THEME_PALETTES[themeMode] || THEME_PALETTES.mushaf;
   const isDark = currentTheme.isDark;
 
+  // Rasio tinggi baris dinamis agar huruf Arab dan harakat tidak tumpang tindih saat font dibesarkan
+  const dynamicArabicLineHeight = Math.max(3.2, 3.0 + ((arabicFontSize - 22) * 0.045));
+
   // Render Arab dengan Tajwid & Elongation
   const renderArabic = (ayat) => {
     if (!showTajweed) {
@@ -1030,21 +1033,22 @@ export default function AlQuranModal({ onClose }) {
                         style={{
                           fontSize: `${arabicFontSize}px`,
                           color: currentTheme.arabicColor,
-                          lineHeight: '2.9',
-                          letterSpacing: '0.03em',
-                          wordSpacing: '0.15em'
+                          lineHeight: dynamicArabicLineHeight,
+                          letterSpacing: '0.02em',
+                          wordSpacing: '0.12em'
                         }}
-                        className="font-quran-lpmq font-normal select-text"
+                        className="font-quran-lpmq font-normal select-text mb-4 sm:mb-5"
                       >
                         {renderArabic(ayat)}
 
                         {/* ORNAMEN BINGKAI HIJAU EMAS NOMOR AYAT PERSIS SCREENSHOT 1 & 2 */}
                         <span
                           onClick={() => handleOpenRincian(ayat)}
-                          className="inline-flex items-center justify-center align-middle mx-2 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                          className="inline-flex items-center justify-center align-middle mx-2 my-1 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                          style={{ verticalAlign: 'middle', lineHeight: 1 }}
                           title={`Ayat ${ayat.nomorAyat} - Klik untuk lihat Rincian & Tafsir`}
                         >
-                          <span className="relative inline-flex items-center justify-center px-3.5 py-0.5 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20">
+                          <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
                             {ayat.nomorAyat}
                           </span>
                         </span>
@@ -1053,28 +1057,34 @@ export default function AlQuranModal({ onClose }) {
 
                     {/* B. TRANSLITERASI LATIN (KONTRAS TINGGI, JELAS DI SEMUA 3 MODE) */}
                     {showLatin && ayat.teksLatin && (
-                      <p
-                        style={{
-                          fontSize: `${latinFontSize}px`,
-                          color: currentTheme.latinColor
-                        }}
-                        className="leading-relaxed font-medium select-text"
-                      >
-                        {ayat.teksLatin}
-                      </p>
+                      <div className="mt-3.5 sm:mt-4 pt-1">
+                        <p
+                          style={{
+                            fontSize: `${latinFontSize}px`,
+                            color: currentTheme.latinColor,
+                            lineHeight: '1.75'
+                          }}
+                          className="font-medium select-text"
+                        >
+                          {ayat.teksLatin}
+                        </p>
+                      </div>
                     )}
 
                     {/* C. TERJEMAHAN BAHASA INDONESIA (KONTRAS TINGGI, JELAS DI SEMUA 3 MODE) */}
                     {showTranslation && ayat.teksIndonesia && (
-                      <p
-                        style={{
-                          fontSize: `${latinFontSize}px`,
-                          color: currentTheme.translationColor
-                        }}
-                        className="leading-relaxed font-normal select-text opacity-95"
-                      >
-                        {ayat.teksIndonesia}
-                      </p>
+                      <div className="mt-2.5 sm:mt-3">
+                        <p
+                          style={{
+                            fontSize: `${latinFontSize}px`,
+                            color: currentTheme.translationColor,
+                            lineHeight: '1.75'
+                          }}
+                          className="font-normal select-text opacity-95"
+                        >
+                          {ayat.teksIndonesia}
+                        </p>
+                      </div>
                     )}
 
                     {/* D. CATATAN PRIBADI JAMAAH (JIKA ADA) */}

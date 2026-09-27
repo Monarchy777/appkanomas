@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import InstallAppBanner from './components/InstallAppBanner';
+import AutoDownloadModal from './components/AutoDownloadModal';
 
 import HomeView from './views/HomeView';
 import PackagesView from './views/PackagesView';
@@ -53,7 +54,7 @@ export default function App() {
   const [showWhatsAppCenter, setShowWhatsAppCenter] = useState(false);
   const [whatsAppRecipient, setWhatsAppRecipient] = useState(null);
   const [showDocumentPrint, setShowDocumentPrint] = useState(false);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showInstallBanner, setShowInstallBanner] = useState(true);
 
   // New Modals: Al-Qur'an, Doa Harian, Pelayanan Jamaah, Dzikir Pagi Petang
   const [showQuran, setShowQuran] = useState(false);
@@ -120,6 +121,9 @@ export default function App() {
         onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
         onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
       />
+
+      {/* Auto-Prompt Download / Install PWA Modal Saat Buka Web */}
+      <AutoDownloadModal />
 
       {/* PWA Mobile Install Banner */}
       {showInstallBanner && (

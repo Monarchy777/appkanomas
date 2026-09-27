@@ -215,13 +215,13 @@ export default function HomeView({
       </section>
 
       {/* 2. WAKTU SHOLAT BERIKUTNYA (CUKUP 1 BARIS DENGAN TOMBOL ARAH KIBLAT) */}
-      <section className="px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+      <section className="px-3.5 py-3 sm:px-5 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center flex-shrink-0">
             <Clock className="w-5 h-5 text-amber-600" />
           </div>
-          <div className="flex items-center gap-2 min-w-0 text-sm sm:text-base font-bold text-slate-800 truncate">
-            <span className="text-slate-500 font-semibold whitespace-nowrap">Sholat Berikutnya:</span>
+          <div className="min-w-0 text-xs sm:text-sm md:text-base font-bold text-slate-800 leading-snug">
+            <span className="text-slate-500 font-semibold mr-1.5 hidden xs:inline">Sholat Berikutnya:</span>
             <span className="font-black text-amber-700 font-mono whitespace-nowrap">
               {nextPrayer ? `${nextPrayer.name} ${nextPrayer.time} WIB` : 'Subuh 04:30 WIB'}
             </span>
@@ -230,7 +230,7 @@ export default function HomeView({
 
         <button
           onClick={() => onSelectTab('prayer')}
-          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 flex-shrink-0 whitespace-nowrap"
+          className="px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 flex-shrink-0 whitespace-nowrap"
         >
           <Compass className="w-4 h-4 text-amber-100" />
           <span>Arah Kiblat</span>
@@ -284,16 +284,16 @@ export default function HomeView({
 
         <div className="space-y-3">
           {/* BARIS 1: 1. Al Quran, 2. Jadwal Sholat & Arah Kiblat, 3. Ibadah Umrah, 4. Pelayanan Nusuk */}
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
             {/* 1. Al Quran */}
             <button
               onClick={onOpenQuran}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DAlQuran size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Al-Qur'an
               </span>
             </button>
@@ -301,12 +301,12 @@ export default function HomeView({
             {/* 2. Jadwal Sholat & Arah Kiblat */}
             <button
               onClick={() => onSelectTab('prayer')}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DSholatKiblat size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Sholat & Kiblat
               </span>
             </button>
@@ -314,12 +314,12 @@ export default function HomeView({
             {/* 3. Ibadah Umrah (Miqat, Thawaf, Sa'i, Tahallul, Doa Manasik) */}
             <button
               onClick={() => onSelectTab('worship')}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DTawaf size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-700 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-700 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Ibadah Umrah
               </span>
             </button>
@@ -327,28 +327,28 @@ export default function HomeView({
             {/* 4. Pelayanan Nusuk */}
             <button
               onClick={onOpenNusuk}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DNusuk size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Layanan Nusuk
               </span>
             </button>
           </div>
 
           {/* BARIS 2: 1. Paket Umrah, 2. Tabungan Umrah, 3. Doa Harian, 4. Pelayanan Jamaah */}
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
             {/* 1. Paket Umrah */}
             <button
               onClick={() => onSelectTab('packages')}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DPaket size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Paket Umrah
               </span>
             </button>
@@ -356,12 +356,12 @@ export default function HomeView({
             {/* 2. Tabungan Umrah */}
             <button
               onClick={onOpenSavings}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-teal-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DTabungan size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-teal-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-teal-600 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Tabungan Umrah
               </span>
             </button>
@@ -369,12 +369,12 @@ export default function HomeView({
             {/* 3. Doa Harian */}
             <button
               onClick={onOpenDailyPrayers}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-sky-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DDoaHarian size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Doa Harian
               </span>
             </button>
@@ -382,12 +382,12 @@ export default function HomeView({
             {/* 4. Pelayanan Jamaah */}
             <button
               onClick={onOpenJamaahServices}
-              className="p-2.5 sm:p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-purple-500 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group active:scale-95 shadow-xs min-h-[105px] sm:min-h-[118px]"
+              className="p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/90 hover:border-purple-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[120px] sm:min-h-[132px] h-full group active:scale-95 shadow-xs"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
                 <Icon3DPelayananJamaah size={44} />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-snug line-clamp-2 min-h-[32px] flex items-center justify-center text-center">
+              <span className="w-full text-xs sm:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight text-center break-words mt-auto pb-0.5">
                 Pelayanan Jamaah
               </span>
             </button>

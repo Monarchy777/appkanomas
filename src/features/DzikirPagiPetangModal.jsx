@@ -292,11 +292,11 @@ export default function DzikirPagiPetangModal({ onClose }) {
     window.open(url, '_blank');
   };
 
-  // Font Size Classes
+  // Font Size Classes dengan line-height aman bertingkat anti-tabrakan harakat
   const arabicSizeClass = {
-    normal: 'text-2xl sm:text-3xl leading-[2.3]',
-    medium: 'text-3xl sm:text-4xl leading-[2.5]',
-    large: 'text-4xl sm:text-5xl leading-[2.7]'
+    normal: 'text-2xl sm:text-3xl leading-[2.6]',
+    medium: 'text-3xl sm:text-4xl leading-[2.9]',
+    large: 'text-4xl sm:text-5xl leading-[3.2]'
   }[fontSize];
 
   // Theme Classes
