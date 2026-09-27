@@ -39,7 +39,7 @@ export default function InstallAppBanner({ onClose }) {
       }
       setDeferredPrompt(null);
     } else {
-      alert("Untuk menginstal aplikasi:\n\n• Di Android/Chrome: Ketuk menu titik tiga (⋮) lalu pilih 'Install app' atau 'Tambahkan ke Layar Utama'.\n• Di iPhone/Safari: Ketuk tombol Share [↑] di bawah lalu pilih 'Add to Home Screen' (+).");
+      window.dispatchEvent(new CustomEvent('kanomas-open-install-modal'));
     }
   };
 
