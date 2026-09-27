@@ -1530,144 +1530,132 @@ export default function AlQuranModal({ onClose }) {
                       )}
 
                       {/* ================================================================ */}
-                      {/* E. BILAH AKSI AYAT (DIR="LTR", RAPI, TERSTRUKTUR, ELEGAN)        */}
+                      {/* E. BILAH AKSI AYAT (1 BARIS SEJAJAR, ELEGAN, RAPI & NYAMAN)      */}
                       {/* ================================================================ */}
                       {(isToolbarOpen || !hiddenReadMode) && (
                         <div
                           dir="ltr"
                           onClick={(e) => e.stopPropagation()}
-                          className="pt-3 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-200"
+                          className="pt-2 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-200"
                         >
-                          <div className={`p-3 rounded-2xl border shadow-md space-y-2.5 ${
+                          <div className={`p-1.5 sm:p-2 rounded-2xl border shadow-md flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth ${
                             currentTheme.isDark
-                              ? 'bg-slate-900/90 border-slate-700 text-white'
-                              : 'bg-white/95 border-emerald-300 text-slate-800 shadow-emerald-950/5'
+                              ? 'bg-slate-900/95 border-slate-700 text-white shadow-black/40'
+                              : 'bg-white border-emerald-300 text-slate-800 shadow-emerald-950/10'
                           }`}>
-                            {/* Header Bilah Aksi: Info Ayat & Tombol Tutup */}
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-200/50 dark:border-slate-800">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => handleOpenJumpModal(ayat.nomorAyat)}
-                                  className="flex items-center justify-center px-2.5 py-0.5 bg-gradient-to-r from-[#0a7c29] to-[#064e1c] text-amber-300 font-mono text-xs font-black rounded-lg border border-amber-300/40 shadow-xs hover:scale-105 active:scale-95 transition"
-                                  title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat`}
-                                >
-                                  Ayat {ayat.nomorAyat}
-                                </button>
-                                <span className="text-[11px] font-bold opacity-75">
-                                  QS. {selectedSurah.namaLatin} : {ayat.nomorAyat}
-                                </span>
-                              </div>
+                            {/* 1. Badge Loncat Ayat */}
+                            <button
+                              onClick={() => handleOpenJumpModal(ayat.nomorAyat)}
+                              className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-[#0a7c29] to-[#064e1c] text-amber-300 font-mono text-[11px] font-black rounded-xl border border-amber-300/40 shadow-xs hover:scale-105 active:scale-95 transition"
+                              title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
+                            >
+                              <span>Ayat</span>
+                              <span className="bg-amber-300/20 px-1 rounded">{ayat.nomorAyat}</span>
+                            </button>
 
-                              {/* Tombol Tutup Toolbar */}
-                              {hiddenReadMode && (
-                                <button
-                                  onClick={() => setActiveAyatId(null)}
-                                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                                  title="Tutup Menu"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
+                            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 flex-shrink-0 mx-0.5" />
+
+                            {/* 2. Tombol Aksi 1 Baris Sejajar */}
+                            {/* A. AUDIO */}
+                            <button
+                              onClick={() => playAyatAudio(index)}
+                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
+                                isAudioPlaying
+                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                              }`}
+                              title={isAudioPlaying ? 'Jeda Audio Ayat' : 'Putar Audio Ayat'}
+                            >
+                              {isAudioPlaying ? (
+                                <Pause className="w-3.5 h-3.5 text-white" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
                               )}
-                            </div>
+                              <span>{isAudioPlaying ? 'Jeda' : 'Audio'}</span>
+                            </button>
 
-                            {/* Grid Tombol Aksi: 4 Kolom di Mobile, 7 Kolom di Layar Lebar */}
-                            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 text-[11px] font-bold">
-                              {/* 1. PUTAR AUDIO */}
-                              <button
-                                onClick={() => playAyatAudio(index)}
-                                className={`py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 transition active:scale-95 border ${
-                                  isAudioPlaying
-                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                                    : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                                }`}
-                                title={isAudioPlaying ? 'Jeda Audio Ayat' : 'Putar Audio Ayat'}
-                              >
-                                {isAudioPlaying ? (
-                                  <Pause className="w-4 h-4 text-white" />
-                                ) : (
-                                  <Play className="w-4 h-4 text-[#0a7c29] dark:text-emerald-400" />
-                                )}
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">
-                                  {isAudioPlaying ? 'Jeda' : 'Audio'}
-                                </span>
-                              </button>
+                            {/* B. TAFSIR */}
+                            <button
+                              onClick={() => handleOpenRincian(ayat)}
+                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                              title="Buka Tafsir & Rincian Ayat (Kemenag / Ibnu Katsir)"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 stroke-[2.3]" />
+                              <span>Tafsir</span>
+                            </button>
 
-                              {/* 2. TAFSIR & RINCIAN */}
-                              <button
-                                onClick={() => handleOpenRincian(ayat)}
-                                className="py-2 px-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
-                                title="Buka Rincian & Tafsir Kemenag / Ibnu Katsir"
-                              >
-                                <BookOpen className="w-4 h-4 stroke-[2.3]" />
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">Tafsir</span>
-                              </button>
+                            {/* C. SALIN */}
+                            <button
+                              onClick={() => handleCopyAyat(ayat)}
+                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                              title="Salin Ayat & Terjemah"
+                            >
+                              {copiedAyatNum === ayat.nomorAyat ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                              <span>{copiedAyatNum === ayat.nomorAyat ? 'Tersalin' : 'Salin'}</span>
+                            </button>
 
-                              {/* 3. SALIN (COPY) */}
-                              <button
-                                onClick={() => handleCopyAyat(ayat)}
-                                className="py-2 px-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
-                                title="Salin Ayat & Terjemah"
-                              >
-                                {copiedAyatNum === ayat.nomorAyat ? (
-                                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                ) : (
-                                  <Copy className="w-4 h-4" />
-                                )}
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">
-                                  {copiedAyatNum === ayat.nomorAyat ? 'Tersalin' : 'Salin'}
-                                </span>
-                              </button>
+                            {/* D. SHARE */}
+                            <button
+                              onClick={() => handleOpenShareModal(ayat)}
+                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                              title="Bagikan Ayat (Kartu Gambar Dinamis)"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                              <span>Share</span>
+                            </button>
 
-                              {/* 4. SHARE (KARTU GAMBAR SESUAI TEMA) */}
-                              <button
-                                onClick={() => handleOpenShareModal(ayat)}
-                                className="py-2 px-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
-                                title="Bagikan Ayat (Kartu Gambar Otomatis Sesuai Tema)"
-                              >
-                                <Share2 className="w-4 h-4" />
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">Share</span>
-                              </button>
+                            {/* E. CATATAN */}
+                            <button
+                              onClick={() => handleOpenNoteModal(ayat)}
+                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                savedNote
+                                  ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 text-amber-800 dark:text-amber-300'
+                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                              }`}
+                              title="Tandai Catatan Pribadi"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-amber-500" />
+                              <span>Catatan</span>
+                            </button>
 
-                              {/* 5. TANDAI CATATAN PRIBADI */}
-                              <button
-                                onClick={() => handleOpenNoteModal(ayat)}
-                                className={`py-2 px-1 rounded-xl border flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs ${
-                                  savedNote
-                                    ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 text-amber-800 dark:text-amber-300'
-                                    : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                                }`}
-                                title="Tandai Catatan Pribadi"
-                              >
-                                <FileText className="w-4 h-4 text-amber-500" />
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">Catatan</span>
-                              </button>
+                            {/* F. SIMPAN (BOOKMARK) */}
+                            <button
+                              onClick={() => handleToggleBookmark(ayat)}
+                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                isBookmarked
+                                  ? 'bg-emerald-600 text-white border-emerald-600'
+                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                              }`}
+                              title={isBookmarked ? 'Hapus dari Simpanan' : 'Simpan Ayat'}
+                            >
+                              <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current text-white' : ''}`} />
+                              <span>{isBookmarked ? 'Disimpan' : 'Simpan'}</span>
+                            </button>
 
-                              {/* 6. SIMPAN / BOOKMARK */}
-                              <button
-                                onClick={() => handleToggleBookmark(ayat)}
-                                className={`py-2 px-1 rounded-xl border flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs ${
-                                  isBookmarked
-                                    ? 'bg-emerald-600 text-white border-emerald-600'
-                                    : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                                }`}
-                                title={isBookmarked ? 'Hapus dari Simpanan' : 'Simpan Ayat'}
-                              >
-                                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current text-white' : ''}`} />
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">
-                                  {isBookmarked ? 'Disimpan' : 'Simpan'}
-                                </span>
-                              </button>
+                            {/* G. TAJWID */}
+                            <button
+                              onClick={() => setShowTajweedGuide(true)}
+                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                              title="Panduan Warna Tajwid"
+                            >
+                              <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <span>Tajwid</span>
+                            </button>
 
-                              {/* 7. PANDUAN TAJWID */}
+                            {/* Tombol Tutup (X) */}
+                            {hiddenReadMode && (
                               <button
-                                onClick={() => setShowTajweedGuide(true)}
-                                className="py-2 px-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-2xs"
-                                title="Panduan Warna Tajwid"
+                                onClick={() => setActiveAyatId(null)}
+                                className="flex-shrink-0 ml-auto p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                title="Tutup Menu"
                               >
-                                <HelpCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                <span className="truncate max-w-full text-[10px] sm:text-[11px]">Tajwid</span>
+                                <X className="w-4 h-4" />
                               </button>
-                            </div>
+                            )}
                           </div>
                         </div>
                       )}
