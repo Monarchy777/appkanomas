@@ -922,9 +922,9 @@ export default function AlQuranModal({ onClose }) {
   // Pilihan Mushaf & Tulisan Arab Resmi ('indonesia' | 'madinah' | 'modern')
   const [mushafType, setMushafType] = useState(() => {
     try {
-      return localStorage.getItem('kanomas_mushaf_type') || 'madinah';
+      return localStorage.getItem('kanomas_mushaf_type_v3') || 'indonesia';
     } catch {
-      return 'madinah';
+      return 'indonesia';
     }
   });
 
@@ -1173,6 +1173,7 @@ export default function AlQuranModal({ onClose }) {
   const handleMushafTypeChange = (type) => {
     setMushafType(type);
     try {
+      localStorage.setItem('kanomas_mushaf_type_v3', type);
       localStorage.setItem('kanomas_mushaf_type', type);
     } catch {}
   };
@@ -1954,7 +1955,7 @@ export default function AlQuranModal({ onClose }) {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
         }}
-        className="relative w-full max-w-4xl h-full sm:h-[96vh] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 transition-colors duration-200"
+        className={`relative w-full max-w-4xl h-full sm:h-[96vh] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 transition-colors duration-200 ${isDark ? 'dark text-white' : 'text-slate-900'}`}
       >
         {/* Dark translucent overlay for image background to guarantee crisp, sharp, contrast text */}
         {currentTheme.type === 'image' && (
@@ -2355,18 +2356,24 @@ export default function AlQuranModal({ onClose }) {
 
                   {/* Search Bar */}
                   <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Cari nama surat, arti, atau nomor (contoh: Al-Baqarah, Sapi, 36)..."
-                      className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0a7c29] shadow-2xs"
+                      className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] shadow-2xs transition ${
+                        isDark
+                          ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                          : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                      }`}
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 transition ${
+                          isDark ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
+                        }`}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -2756,7 +2763,11 @@ export default function AlQuranModal({ onClose }) {
                 onClick={handlePrevSurah}
                 disabled={selectedSurah.nomor <= 1}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
-                  selectedSurah.nomor <= 1 ? 'opacity-20 cursor-not-allowed' : 'text-[#0a7c29] hover:bg-emerald-100/50'
+                  selectedSurah.nomor <= 1
+                    ? 'opacity-20 cursor-not-allowed'
+                    : isDark
+                    ? 'text-emerald-300 hover:bg-white/10'
+                    : 'text-[#0a7c29] hover:bg-emerald-100/50'
                 }`}
                 title="Surat Sebelumnya"
               >
@@ -2793,7 +2804,11 @@ export default function AlQuranModal({ onClose }) {
                 onClick={handleNextSurah}
                 disabled={selectedSurah.nomor >= 114}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
-                  selectedSurah.nomor >= 114 ? 'opacity-20 cursor-not-allowed' : 'text-[#0a7c29] hover:bg-emerald-100/50'
+                  selectedSurah.nomor >= 114
+                    ? 'opacity-20 cursor-not-allowed'
+                    : isDark
+                    ? 'text-emerald-300 hover:bg-white/10'
+                    : 'text-[#0a7c29] hover:bg-emerald-100/50'
                 }`}
                 title="Surat Selanjutnya"
               >
@@ -3339,13 +3354,17 @@ export default function AlQuranModal({ onClose }) {
 
               {/* Search bar */}
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari nama surat (contoh: Ar-Ra'd, Al-Fath, Yasin)..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#0a7c29]"
+                  className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] border transition ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                      : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500'
+                  }`}
                 />
               </div>
 
@@ -3390,7 +3409,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 1: RINCIAN & TAFSIR                                 */}
         {/* ======================================================== */}
         {showRincianModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-lg max-h-[88vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -3489,7 +3508,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 2: PENGATURAN LENGKAP                               */}
         {/* ======================================================== */}
         {showSettingsModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-md max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4335,7 +4354,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 5: LONCAT KE AYAT TERTENTU (DENGAN BATAS MAKS AYAT) */}
         {/* ======================================================== */}
         {showJumpModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4472,7 +4491,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 4: CATATAN PRIBADI AYAT                             */}
         {/* ======================================================== */}
         {showNoteModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4545,7 +4564,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 6: PENGATURAN TAJWID INTERAKTIF (PERSIS MYQURAN)    */}
         {/* ======================================================== */}
         {showTajweedGuide && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-[#cbf7d2] text-slate-800 border-emerald-400'
             }`}>
@@ -4730,7 +4749,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 7: PILIH AYAT LANGSUNG DARI DAFTAR SURAT           */}
         {/* ======================================================== */}
         {surahAyatJumpModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-md max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4781,7 +4800,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 7B: PILIH SURAT (114 SURAT LENGKAP - NAVIGASI CEPAT) */}
         {/* ======================================================== */}
         {showSurahPickerModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4802,20 +4821,26 @@ export default function AlQuranModal({ onClose }) {
               {/* Search bar inside modal */}
               <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
                   <input
                     type="text"
                     value={quickSurahFilter}
                     onChange={(e) => setQuickSurahFilter(e.target.value)}
                     placeholder="Cari nomor atau nama surat (contoh: 36, Yasin, Al-Mulk)..."
-                    className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0a7c29]"
+                    className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] transition ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                        : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500'
+                    }`}
                     autoFocus
                   />
                   {quickSurahFilter && (
                     <button
                       type="button"
                       onClick={() => setQuickSurahFilter('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 transition ${
+                        isDark ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
+                      }`}
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -4875,7 +4900,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 7C: GRID NOMOR AYAT (INTERAKTIF - NAVIGASI CEPAT)    */}
         {/* ======================================================== */}
         {showAyatGridPicker && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-md max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4932,7 +4957,7 @@ export default function AlQuranModal({ onClose }) {
         {/* MODAL 8: BUAT TARGET KHATAMAN BARU                       */}
         {/* ======================================================== */}
         {showNewKhatamModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
             <div className={`w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
@@ -4951,7 +4976,7 @@ export default function AlQuranModal({ onClose }) {
 
               <form onSubmit={handleCreateKhatam} className="p-4 sm:p-5 space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className={`block font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                     Judul Program Khataman *
                   </label>
                   <input
@@ -4960,12 +4985,16 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.title}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, title: e.target.value })}
                     placeholder="Contoh: Khataman Ramadhan 1447H, Khataman Rutin"
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className={`block font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                     Nama Khataman Siapa / Niat Untuk *
                   </label>
                   <input
@@ -4974,13 +5003,17 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.targetPerson}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetPerson: e.target.value })}
                     placeholder="Contoh: Pribadi, Untuk Ibu Tercinta, Almarhum Ayah"
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                    }`}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className={`block font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       Tanggal Awal Baca *
                     </label>
                     <input
@@ -4988,11 +5021,15 @@ export default function AlQuranModal({ onClose }) {
                       required
                       value={newKhatamInput.startDate}
                       onChange={(e) => setNewKhatamInput({ ...newKhatamInput, startDate: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                        isDark
+                          ? 'bg-slate-800 border-slate-700 text-white'
+                          : 'bg-slate-50 border-slate-300 text-slate-900'
+                      }`}
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className={`block font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                       Target Waktu (Hari)
                     </label>
                     <input
@@ -5001,13 +5038,17 @@ export default function AlQuranModal({ onClose }) {
                       max="365"
                       value={newKhatamInput.targetDays}
                       onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetDays: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                        isDark
+                          ? 'bg-slate-800 border-slate-700 text-white'
+                          : 'bg-slate-50 border-slate-300 text-slate-900'
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className={`block font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                     Catatan / Doa & Harapan (Opsional)
                   </label>
                   <textarea
@@ -5015,7 +5056,11 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.notes}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, notes: e.target.value })}
                     placeholder="Tulis niat doa, harapan, atau pesan untuk khataman ini..."
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                    }`}
                   />
                 </div>
 
