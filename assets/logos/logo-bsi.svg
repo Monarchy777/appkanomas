@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- BSI Star Emblem -->
+  <g transform="translate(12, 11)">
+    <!-- 8-point geometric star flower with teal and orange petals -->
+    <path d="M24 4 L28 18 L42 22 L28 26 L24 40 L20 26 L6 22 L20 18 Z" fill="#00A39D"/>
+    <path d="M24 10 L27 19 L36 22 L27 25 L24 34 L21 25 L12 22 L21 19 Z" fill="#F37021"/>
+    <circle cx="38" cy="10" r="4" fill="#00A39D"/>
+  </g>
+  <!-- Typography -->
+  <text x="64" y="37" font-family="'Inter', 'Arial Black', sans-serif" font-size="25" font-weight="900" fill="#00A39D" letter-spacing="1">BSI</text>
+  <text x="66" y="50" font-family="'Inter', sans-serif" font-size="7.5" font-weight="800" fill="#52525B" letter-spacing="0.8">BANK SYARIAH INDONESIA</text>
+</svg>
