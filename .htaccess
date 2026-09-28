@@ -64,6 +64,20 @@ DirectoryIndex index.html
 Options -Indexes
 
 <IfModule mod_headers.c>
+  # CORS Policy for Mobile Apps (Capacitor https://localhost) & Web
+  Header always set Access-Control-Allow-Origin "*"
+  Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, HEAD"
+  Header always set Access-Control-Allow-Headers "*"
+
+  # Pastikan file JSON (version.json) dan APK selalu fresh & bebas CORS
+  <FilesMatch "\.(json|apk)$">
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, OPTIONS, HEAD"
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
   # Pastikan file HTML dan root tidak pernah dicache browser
   <FilesMatch "\.(html|htm)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
