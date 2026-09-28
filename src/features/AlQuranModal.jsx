@@ -466,9 +466,14 @@ export function normalizeQuranText(text, isMadinah = false) {
     // 4. Hapus tanda ruku khusus Kemenag (ࣖ) yang tidak didukung font modern
     .replace(/\u08D6/g, '')
     // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
-    .replace(/\u06E4/g, '\u0653')
-    .replace(/\s+/g, ' ');
+    .replace(/\u06E4/g, '\u0653');
 
+  // 6. Pada Mushaf Madinah, gunakan sukun resmi Rasm Utsmani Madinah (kepala kha' \u06E1) persis MyQuran
+  if (isMadinah) {
+    cleaned = cleaned.replace(/\u0652/g, '\u06E1');
+  }
+
+  cleaned = cleaned.replace(/\s+/g, ' ');
   return cleaned.trim();
 }
 
@@ -1375,7 +1380,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v11_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v12_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
