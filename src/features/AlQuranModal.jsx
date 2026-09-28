@@ -468,10 +468,8 @@ export function normalizeQuranText(text, isMadinah = false) {
     // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
     .replace(/\u06E4/g, '\u0653');
 
-  // 6. Pada Mushaf Madinah, gunakan sukun resmi Rasm Utsmani Madinah (kepala kha' \u06E1) persis MyQuran
-  if (isMadinah) {
-    cleaned = cleaned.replace(/\u0652/g, '\u06E1');
-  }
+  // 6. Gunakan sukun resmi Rasm Utsmani (kepala kha' \u06E1) persis MyQuran untuk tampilan tanda mati yang otentik
+  cleaned = cleaned.replace(/\u0652/g, '\u06E1');
 
   cleaned = cleaned.replace(/\s+/g, ' ');
   return cleaned.trim();
@@ -1019,6 +1017,16 @@ export default function AlQuranModal({ onClose }) {
     };
     document.addEventListener('gesturestart', preventGesture, { passive: false });
     document.addEventListener('gesturechange', preventGesture, { passive: false });
+
+    try {
+      // Bersihkan cache surah versi lawas (v1 - v11) agar user otomatis mendapat rasm Utsmani dan sukun terbaru
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('kanomas_surah_') && !key.startsWith('kanomas_surah_v12_')) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch {}
 
     return () => {
       document.body.style.overflow = originalOverflow;

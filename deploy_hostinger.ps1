@@ -16,7 +16,7 @@ if (-not (Test-Path "dist\index.html")) {
 # 2. Persiapkan folder temporary untuk cabang produksi 'main'
 $temp = Join-Path $env:TEMP "deploy-main-kanomas"
 if (Test-Path $temp) {
-    Remove-Item -Recurse -Force $temp
+    Remove-Item -Recurse -Force $temp -ErrorAction SilentlyContinue
 }
 
 Write-Host "[2/4] Mengambil repository remote (branch main)..." -ForegroundColor Yellow
@@ -62,7 +62,7 @@ try {
     }
 } finally {
     Pop-Location
-    Remove-Item -Recurse -Force $temp
+    Remove-Item -Recurse -Force $temp -ErrorAction SilentlyContinue
 }
 
 Write-Host "=========================================" -ForegroundColor Green

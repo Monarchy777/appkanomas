@@ -1,5 +1,4 @@
-// Service Worker for Aplikasi Kanomas PWA (Lightweight & Safe)
-const CACHE_NAME = 'kanomas-cache-v3';
+const CACHE_NAME = 'kanomas-cache-v4-hafs';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
