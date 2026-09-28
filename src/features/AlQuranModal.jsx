@@ -1072,13 +1072,15 @@ export default function AlQuranModal({ onClose }) {
     }
   };
 
-  // Helper font family kaligrafi Arab aktif (Hanya Indonesia, Madinah, Modern)
+  // Helper font family kaligrafi Arab aktif (Indonesia: LPMQ, Madinah: KFGQPC Hafs, Modern: Noto Naskh)
   const getActiveFontFamily = () => {
     if (mushafType === 'modern') {
       return "'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif";
     }
-    // Indonesia & Madinah keduanya menggunakan kaligrafi resmi KFGQPC Hafs Utsmani (sama persis dengan MyQuran)
-    return "'KFGQPC Uthmanic Script HAFS', 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', serif";
+    if (mushafType === 'indonesia') {
+      return "'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', serif";
+    }
+    return "'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
