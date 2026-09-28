@@ -20,42 +20,48 @@ import {
   Icon3DPelayananJamaah
 } from '../components/Icons3D';
 
-// 5 Banner Promo & Kekuatan Kanomas (Ganti otomatis setiap 3 detik)
+// 5 Banner Utama Kanomas (Rotasi otomatis per 10 detik)
+// Latar belakang foto sinematik murni tanpa teks bertabrakan, teks responsif disajikan via overlay modern
 const PROMO_BANNERS = [
   {
     id: 1,
     image: '/assets/banners/banner-1-kemenag.jpg',
-    tag: 'Akreditasi A Resmi',
-    title: 'Izin Resmi Kemenag RI (PPIU U.310)',
-    subtitle: 'Garansi 100% kepastian berangkat dengan perlindungan penuh'
+    tag: 'Agen Resmi Kemenag RI',
+    title: 'PT Kanomas Arasy Wisata - Agen Resmi Berizin',
+    subtitle: 'Penyelenggara Ibadah Umrah (PPIU U.310) & Haji Khusus (PIHK) Berizin Resmi Kemenag RI & Terakreditasi A',
+    actionType: 'lookup'
   },
   {
     id: 2,
-    image: '/assets/banners/banner-2-hotel.jpg',
-    tag: 'Hotel Bintang 5',
-    title: 'Pelataran Ka’bah 0 Meter',
-    subtitle: 'Akses langsung jalan kaki ke pelataran Masjidil Haram'
+    image: '/assets/banners/banner-2-direct-flight.jpg',
+    tag: 'Pilihan Direct Flight',
+    title: 'Penerbangan Langsung Tanpa Transit',
+    subtitle: 'Pilihan maskapai bintang lima Garuda Indonesia & Saudia Airlines rute langsung Jakarta ke Madinah & Jeddah',
+    actionType: 'packages'
   },
   {
     id: 3,
-    image: '/assets/banners/banner-3-promo.jpg',
-    tag: 'Promo Umrah 1447H',
-    title: 'Penerbangan Langsung Direct Flight',
-    subtitle: 'Garuda Indonesia & Saudia Airlines rute Jakarta ke Madinah'
+    image: '/assets/banners/banner-3-manasik-sunnah.jpg',
+    tag: 'Sesuai Sunnah',
+    title: 'Manasik & Bimbingan Ibadah Sesuai Sunnah',
+    subtitle: 'Dibimbing langsung oleh asatidz Ahlussunnah berkompeten sesuai tuntunan Al-Qur\'an dan As-Sunnah',
+    actionType: 'kajian'
   },
   {
     id: 4,
-    image: '/assets/banners/banner-4-bimbingan.jpg',
-    tag: 'Bimbingan Sunnah',
-    title: 'Manasik Intensif Sesuai Sunnah',
-    subtitle: 'Didampingi pembimbing bersertifikat resmi Kemenag RI'
+    image: '/assets/banners/banner-4-haji-khusus.jpg',
+    tag: 'Haji Khusus',
+    title: 'Program Haji Khusus & Furoda Resmi',
+    subtitle: 'Kepastian keberangkatan tanpa antre bertahun-tahun dengan fasilitas maktab tenda VIP ber-AC di Arafah & Mina',
+    actionType: 'packages'
   },
   {
     id: 5,
-    image: '/assets/banners/banner-5-haji.jpg',
-    tag: 'Haji Khusus VIP',
-    title: 'Tenda Maktab VIP Armuzna',
-    subtitle: 'Kenyamanan ibadah haji khusus dengan fasilitas terbaik'
+    image: '/assets/banners/banner-5-tabungan-umrah.jpg',
+    tag: 'Tabungan Umrah',
+    title: 'Perencanaan Tabungan Umrah Mudah & Amanah',
+    subtitle: 'Wujudkan niat suci ke Baitullah dengan setoran fleksibel, aman, transparan, dan terpercaya',
+    actionType: 'savings'
   }
 ];
 
@@ -117,11 +123,11 @@ export default function HomeView({
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Auto-play slider setiap 3 detik
+  // Auto-play slider setiap 10 detik sesuai permintaan pengguna
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % PROMO_BANNERS.length);
-    }, 3000);
+    }, 10000);
     return () => clearInterval(timer);
   }, []);
 
@@ -133,41 +139,58 @@ export default function HomeView({
     setCurrentSlide((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
   };
 
+  const handleBannerClick = (banner) => {
+    if (banner.actionType === 'savings') {
+      onOpenSavings?.();
+    } else if (banner.actionType === 'packages') {
+      onSelectTab?.('packages');
+    } else if (banner.actionType === 'kajian') {
+      onOpenKajian?.();
+    } else if (banner.actionType === 'lookup') {
+      onOpenLookup?.();
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 pb-24 px-3 sm:px-6 pt-3">
-      {/* 1. SLIDER PROMO & KEKUATAN KANOMAS (BERGANTI SETIAP 3 DETIK) */}
-      <section className="relative w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900 group">
-        <div className="relative h-52 sm:h-72 md:h-80 w-full overflow-hidden">
+      {/* 1. SLIDER PROMO & KEKUATAN KANOMAS (BERGANTI SETIAP 10 DETIK) */}
+      <section className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-900 group">
+        <div className="relative h-56 sm:h-72 md:h-80 w-full overflow-hidden">
           {PROMO_BANNERS.map((banner, index) => {
             const isActive = index === currentSlide;
             return (
               <div
                 key={banner.id}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                onClick={() => handleBannerClick(banner)}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out cursor-pointer ${
                   isActive ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                 }`}
               >
                 <img
                   src={banner.image}
                   alt={banner.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-1000"
                   loading={index === 0 ? 'eager' : 'lazy'}
                 />
 
                 {/* Gradient Shadow untuk Keterbacaan Tulisan */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent" />
 
                 {/* Content Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white space-y-1 sm:space-y-1.5 z-20">
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-7 text-white space-y-2 z-20">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-md">
+                      <Sparkles className="w-3.5 h-3.5" />
                       {banner.tag}
                     </span>
+                    <span className="text-[10px] text-white/70 font-semibold bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full hidden sm:inline-block">
+                      10s Rotasi
+                    </span>
                   </div>
-                  <h3 className="text-lg sm:text-2xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-sm">
+                  <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-white font-sans tracking-tight leading-snug drop-shadow-md">
                     {banner.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-200 drop-shadow-sm font-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-200 drop-shadow-sm font-medium leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
                     {banner.subtitle}
                   </p>
                 </div>

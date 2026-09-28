@@ -1,13 +1,13 @@
 {
-  "version": "2026.1.4",
-  "versionCode": 2028,
+  "version": "2026.1.5",
+  "versionCode": 2029,
   "releaseDate": "28 September 2026",
-  "title": "Pembaruan Tampilan Kanomas (Dzikir Pagi Petang & Navigasi Pesawat)",
+  "title": "Pembaruan Banner Sinematik & Rotasi 10 Detik",
   "notes": [
-    "Ikon Dzikir Pagi Petang 3D resmi menggantikan ikon Nusuk di Menu Utama Beranda.",
-    "Paket Umrah kini terpusat di Bottom Navigation Bar dengan ikon Pesawat yang modern & elegan.",
-    "Ikon Tasbih Digital 3D ditambahkan langsung ke Menu Utama Beranda.",
-    "Peningkatan kestabilan sistem koneksi WhatsApp Commander & dev server."
+    "Pembaruan 5 Banner Utama visual murni tanpa teks menumpuk: Agen Resmi Berizin, Direct Flight, Manasik Sunnah, Haji Khusus, dan Tabungan Umrah.",
+    "Interval rotasi banner disetel otomatis setiap 10 detik dengan transisi halus.",
+    "Banner interaktif: sentuh banner untuk langsung membuka fitur terkait (Paket, Tabungan, Bimbingan, atau Cek Izin).",
+    "Bypass CORS native untuk pembaruan instan pada perangkat Android."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
   "apkSize": "19.6 MB"
