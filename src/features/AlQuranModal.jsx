@@ -445,10 +445,37 @@ export function getAyatPageNumber(surahNomor, ayatNomor) {
   return Math.min(604, surah.hal + pageOffset);
 }
 
-// FUNGSI KASHIDA / TATWEEL (MEMPERTAHANKAN KEASLIAN KALIGRAFI TANPA MERUSAK FONT LIGATUR)
-export function applyKashidaToArabic(text) {
-  if (!text) return '';
-  return text;
+// FUNGSI PEMANJANG HURUF / KASHIDA (TATWEEL)
+// Mengurai ligatur bertumpuk vertikal (seperti Lam di atas Ha pada 'لَهُمْ' menjadi sejajar mendatar 'لَـهُمْ' di depan, serta Ta pada 'فَتَـحْنَا' dan 'تَـجْرِي')
+// Menjaga keaslian kaidah Rasm Utsmani dan 100% kompatibel dengan mesin warna tajwid.
+export function applyKashidaToArabic(text, mode = 'unstack') {
+  if (!text || mode === 'off') return text || '';
+  let res = text;
+
+  // 1. Lam + Ha (له / لہ -> لـه) agar huruf Lam selalu berada di DEPAN pada garis dasar dan TIDAK menindih di atas Ha
+  res = res.replace(/([\u0644][\u064B-\u065F\u0670\u06E1]*)([\u0647\u06C1])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 2. Ta + Ha/Jim/Kha (تح / تج / تخ -> تـح / تـج / تـخ) agar gigi Ta jelas terpisah di depan kepala jim/ha
+  res = res.replace(/([\u062A][\u064B-\u065F\u0670\u06E1]*)([\u062D\u062C\u062E])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 3. Gigi Ba/Tha/Nun/Ya + Jim/Ha/Kha (misal يَـحْزُنُهُمُ, نَـحْنُ, بِـحَمْدِ, يَـجْعَلُونَ)
+  res = res.replace(/([\u0628\u062B\u0646\u064A\u0649][\u064B-\u065F\u0670\u06E1]*)([\u062D\u062C\u062E])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 4. Gigi Ba/Ta/Tha/Nun/Ya + Mim (misal بِـسْمِ, تَـمْشِي, نَـعَمْ, ثُـمَّ)
+  res = res.replace(/([\u0628\u062A\u062B\u0646\u064A][\u064B-\u065F\u0670\u06E1]*)([\u0645])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 5. Sin/Shin + Mim (misal بِسْـمِ) agar Mim tidak tenggelam di bawah lengkungan Sin
+  res = res.replace(/([\u0633\u0634][\u064B-\u065F\u0670\u06E1]*)([\u0645])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 6. Ya/Alif Maqsura + Ha (misal عَلَيْـهِمْ, إِلَيْـهِ, فِيـهِمْ, بَيْنَـهُمْ)
+  res = res.replace(/([\u064A\u0649][\u064B-\u065F\u0670\u06E1]*)([\u0647\u06C1])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+
+  // 7. Mode Ekstra: Elongasi sambungan menyeluruh antarkata agar huruf lebih lapang dan renggang
+  if (mode === 'extra') {
+    res = res.replace(/([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A][\u064B-\u065F\u0670\u06E1]*)(\u0640?)([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A])/g, (m, p1, t, p2) => p1 + '\u0640' + p2);
+  }
+
+  return res;
 }
 
 // NORMALISASI TEKS ARAB AL-QUR'AN (MEMPERBAIKI FATHATAIN, NORMALISASI MEEM IQLAB, & MERAPIKAN WAQAF)
@@ -953,6 +980,27 @@ export default function AlQuranModal({ onClose }) {
     } catch {}
   };
 
+  // Pemanjang Huruf & Sambungan Sejajar (Kashida / Tatweel):
+  // Nilai: 'unstack' (Sejajar/Rekomendasi - Lam di depan Ha, Ta di depan Ha/Jim), 'extra' (Ekstra Panjang), 'off' (Asli Rapat)
+  const [kashidaMode, setKashidaMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_kashida');
+      if (saved === 'off' || saved === 'extra' || saved === 'unstack') return saved;
+      if (saved === 'false') return 'off';
+      if (saved === 'true') return 'unstack';
+      return 'unstack'; // Default 'unstack' (Sejajar & Rapi, Lam di depan Ha)
+    } catch {
+      return 'unstack';
+    }
+  });
+
+  const handleChangeKashidaMode = (mode) => {
+    setKashidaMode(mode);
+    try {
+      localStorage.setItem('kanomas_quran_kashida', mode);
+    } catch {}
+  };
+
   const [activeAyatId, setActiveAyatId] = useState(null); // Ayat yang sedang aktif dibuka toolbar-nya
 
   const [latinType, setLatinType] = useState('kemenag'); // 'kemenag' | 'english'
@@ -1118,12 +1166,13 @@ export default function AlQuranModal({ onClose }) {
     return 'font-quran-lpmq';
   };
 
-  // Helper teks Arab ayat sesuai mushaf aktif dengan normalisasi menyeluruh
+  // Helper teks Arab ayat sesuai mushaf aktif dengan normalisasi menyeluruh & kashida anti-menumpuk
   const getAyatArabText = (ayat) => {
     if (!ayat) return '';
     const isMadinah = (mushafType === 'madinah' || mushafType === 'modern') && !!ayat.teksArabMadinah;
     const raw = isMadinah ? ayat.teksArabMadinah : (ayat.teksArab || '');
-    return normalizeQuranText(raw, isMadinah);
+    const normalized = normalizeQuranText(raw, isMadinah);
+    return applyKashidaToArabic(normalized, kashidaMode);
   };
 
   // Save Preferences
@@ -3776,14 +3825,93 @@ export default function AlQuranModal({ onClose }) {
                     </button>
                   </div>
 
+                  {/* Pemanjang Huruf (Kashida / Tatweel Sambungan Sejajar) */}
+                  <div className={`p-3 rounded-2xl border transition ${
+                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
+                  }`}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <span className="block text-xs font-black">Pemanjang Huruf (Kashida / Sambungan Sejajar)</span>
+                        <span className="text-[10px] opacity-75 block leading-normal mt-0.5">
+                          Mengurai huruf bertumpuk vertikal agar huruf seperti <span className="font-bold">ل</span> pada <span className="font-bold">لَـهُمْ</span> tidak menindih di atas <span className="font-bold">ه</span> melainkan berada <span className="text-emerald-600 dark:text-emerald-400 font-bold">di depan</span> sejajar mendatar, serta huruf <span className="font-bold">ت</span> pada <span className="font-bold">تَـجْرِي</span> dan <span className="font-bold">فَتَـحْنَا</span>.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3 Opsi Mode Kashida */}
+                    <div className="grid grid-cols-3 gap-1.5 mt-2">
+                      <button
+                        onClick={() => handleChangeKashidaMode('unstack')}
+                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
+                          kashidaMode === 'unstack'
+                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>Sejajar (Rekomendasi)</span>
+                        <span className="text-[8px] opacity-80">Anti-Tumpuk</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleChangeKashidaMode('extra')}
+                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
+                          kashidaMode === 'extra'
+                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>Ekstra Panjang</span>
+                        <span className="text-[8px] opacity-80">Lebar & Renggang</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleChangeKashidaMode('off')}
+                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
+                          kashidaMode === 'off'
+                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>Kaligrafi Asli</span>
+                        <span className="text-[8px] opacity-80">Rapat Standar</span>
+                      </button>
+                    </div>
+
+                    {/* Live Visual Preview */}
+                    <div className="mt-2.5 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-center">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-emerald-800 dark:text-emerald-300 px-1 mb-1">
+                        <span>Pratinjau Huruf:</span>
+                        <span className="text-[9px] font-normal opacity-75">
+                          {kashidaMode === 'unstack' ? 'Lam di depan Ha • Sejajar' : kashidaMode === 'extra' ? 'Elongasi Luas' : 'Rapat Asli'}
+                        </span>
+                      </div>
+                      <p
+                        className="text-lg sm:text-xl py-1 text-emerald-950 dark:text-emerald-100 font-quran-lpmq select-none"
+                        dir="rtl"
+                      >
+                        {kashidaMode === 'off'
+                          ? 'لَهُمْ • تَجْرِي • فَتَحْنَا • عَلَيْهِمْ'
+                          : kashidaMode === 'extra'
+                          ? applyKashidaToArabic('لَهُمْ • تَجْرِي • فَتَحْنَا • عَلَيْهِمْ', 'extra')
+                          : 'لَـهُمْ • تَـجْرِي • فَتَـحْنَا • عَلَيْـهِمْ'}
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Spasi Lapang / Spacious Reading */}
                   <div className={`flex items-center justify-between p-3 rounded-2xl border transition ${
                     isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
                   }`}>
                     <div className="space-y-0.5 max-w-[80%]">
-                      <span className="block text-xs font-black">Spasi Lapang & Anti-Menumpuk</span>
+                      <span className="block text-xs font-black">Spasi Lapang Antarkata</span>
                       <span className="text-[10px] opacity-75 block leading-normal">
-                        Memberi jarak lega antarkata dan sambungan horizontal lapang agar huruf seperti <span className="font-bold">تَجْرِي</span> dan <span className="font-bold">فَتَحْنَا</span> sangat jelas dan nyaman dibaca.
+                        Memberi jarak jeda antarkata yang lebih lega agar setiap lafadz terpisah dengan jelas dan nyaman dibaca.
                       </span>
                     </div>
                     <button
