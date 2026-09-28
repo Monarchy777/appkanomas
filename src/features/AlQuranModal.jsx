@@ -530,7 +530,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
     }
   }
 
-  // 3. Render per kata agar tetap inline RTL murni tanpa memutus ligatur kaligrafi
+  // 3. Render per kata utuh agar RTL murni 100% ligatur dan harakat tidak terputus/rusak
   const cleanText = text.trim();
   const words = cleanText.split(/\s+/);
   let charCursor = text.indexOf(cleanText);
@@ -540,41 +540,36 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
     const wordEnd = wordStart + word.length;
     charCursor = wordEnd;
 
-    const parts = [];
-    let localIndex = 0;
-
-    for (let c = 0; c < word.length; ) {
+    // Cari anotasi tajwid dalam kata ini (tanpa memotong suku kata)
+    let matchedItem = null;
+    for (let c = 0; c < word.length; c++) {
       const globalPos = wordStart + c;
       if (annotations.has(globalPos)) {
-        const item = annotations.get(globalPos);
-        if (c > localIndex) {
-          parts.push(word.substring(localIndex, c));
-        }
-        parts.push(
-          <span
-            key={`g-${globalPos}`}
-            style={{ color: item.color, display: 'inline', fontWeight: 500 }}
-            className="font-normal select-text transition-colors duration-150"
-            title={item.title}
-          >
-            {item.full}
-          </span>
-        );
-        c += item.full.length;
-        localIndex = c;
-      } else {
-        c++;
+        matchedItem = annotations.get(globalPos);
+        break;
       }
     }
 
-    if (localIndex < word.length) {
-      parts.push(word.substring(localIndex));
+    if (matchedItem) {
+      return (
+        <span
+          key={`w-${wordIdx}`}
+          style={{
+            color: matchedItem.color,
+            display: 'inline',
+            fontWeight: 600
+          }}
+          className="select-text transition-colors duration-150"
+          title={matchedItem.title}
+        >
+          {word}{wordIdx < words.length - 1 ? ' ' : ''}
+        </span>
+      );
     }
 
     return (
-      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate' }}>
-        {parts}
-        {wordIdx < words.length - 1 ? ' ' : ''}
+      <span key={`w-${wordIdx}`} style={{ display: 'inline' }}>
+        {word}{wordIdx < words.length - 1 ? ' ' : ''}
       </span>
     );
   });
@@ -687,7 +682,14 @@ export default function AlQuranModal({ onClose }) {
     }
   });
 
-  const [showTajweed, setShowTajweed] = useState(true);
+  const [showTajweed, setShowTajweed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_tajweed');
+      return saved !== null ? saved === 'true' : false;
+    } catch {
+      return false;
+    }
+  });
   const [showLatin, setShowLatin] = useState(true);
   const [showTranslation, setShowTranslation] = useState(true);
   const [showHizb, setShowHizb] = useState(true);
@@ -851,7 +853,7 @@ export default function AlQuranModal({ onClose }) {
   // Helper font family kaligrafi Arab aktif (Hanya Indonesia, Madinah, Modern)
   const getActiveFontFamily = () => {
     if (mushafType === 'madinah') {
-      return "'KFGQPC Uthman Taha Naskh', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif";
+      return "'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif";
     }
     if (mushafType === 'modern') {
       return "'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif";
@@ -867,12 +869,30 @@ export default function AlQuranModal({ onClose }) {
     return 'font-quran-lpmq';
   };
 
+  // Helper teks Arab ayat sesuai mushaf aktif
+  const getAyatArabText = (ayat) => {
+    if (!ayat) return '';
+    return ((mushafType === 'madinah' || mushafType === 'modern') && ayat.teksArabMadinah)
+      ? ayat.teksArabMadinah
+      : (ayat.teksArab || '');
+  };
+
   // Save Preferences
   const handleThemeChange = (mode) => {
     setThemeMode(mode);
     try {
       localStorage.setItem('kanomas_quran_theme', mode);
     } catch {}
+  };
+
+  const handleToggleTajweed = () => {
+    setShowTajweed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('kanomas_quran_tajweed', String(next));
+      } catch {}
+      return next;
+    });
   };
 
   const handleArabicSizeChange = (val) => {
@@ -1121,7 +1141,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v7_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v8_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -1165,8 +1185,9 @@ export default function AlQuranModal({ onClose }) {
                   let mText = m.text || '';
                   // Hilangkan awalan Bismillah otomatis pada ayat 1 selain Al-Fatihah (1) & At-Taubah (9)
                   if (ayat.nomorAyat === 1 && selectedSurah.nomor > 1 && selectedSurah.nomor !== 9) {
-                    mText = mText.replace(/^[\uFEFF]?بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
                   }
+                  mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]+/, '').trim();
                   return {
                     ...ayat,
                     teksArabMadinah: mText,
@@ -1353,7 +1374,7 @@ export default function AlQuranModal({ onClose }) {
   // 2. Bagikan Gambar Kartu Ayat Langsung ke WhatsApp / Sosmed
   const handleShareCardImage = async (ayat) => {
     if (!ayat) return;
-    const arabText = (mushafType === 'madinah' && ayat.teksArabMadinah) ? ayat.teksArabMadinah : ayat.teksArab;
+    const arabText = getAyatArabText(ayat);
     const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
 
     const canvas = await generateCardCanvas();
@@ -1486,7 +1507,7 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleQuickShareWA = (ayat) => {
-    const arabText = (mushafType === 'madinah' && ayat.teksArabMadinah) ? ayat.teksArabMadinah : ayat.teksArab;
+    const arabText = getAyatArabText(ayat);
     const text = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
     if (navigator.share) {
       navigator.share({
@@ -1501,7 +1522,7 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleCopyAyat = (ayat) => {
-    const arabText = (mushafType === 'madinah' && ayat.teksArabMadinah) ? ayat.teksArabMadinah : ayat.teksArab;
+    const arabText = getAyatArabText(ayat);
     const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat}\n\n${arabText}\n\n${ayat.teksLatin}\n\n"${ayat.teksIndonesia}"\n\n(Aplikasi Kanomas Tour & Travel)`;
     navigator.clipboard?.writeText(text);
     setCopiedAyatNum(ayat.nomorAyat);
@@ -1608,9 +1629,7 @@ export default function AlQuranModal({ onClose }) {
   // Render Arab dengan dukungan Mushaf Madinah vs Indonesia / Modern, & Tajwid Warna
   const renderArabic = (ayat) => {
     if (!ayat) return null;
-    const rawText = (mushafType === 'madinah' && ayat.teksArabMadinah)
-      ? ayat.teksArabMadinah
-      : (ayat.teksArab || '');
+    const rawText = getAyatArabText(ayat);
 
     if (!showTajweed) {
       return rawText;
@@ -3454,7 +3473,7 @@ export default function AlQuranModal({ onClose }) {
                   <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black flex items-center justify-between">
                     <span>Tajwid & Rincian Warna</span>
                     <button
-                      onClick={() => setShowTajweed(!showTajweed)}
+                      onClick={handleToggleTajweed}
                       className={`w-6 h-6 rounded-full border-2 border-slate-700 flex items-center justify-center transition ${
                         showTajweed ? 'bg-amber-400' : 'bg-emerald-800'
                       }`}
@@ -3710,9 +3729,7 @@ export default function AlQuranModal({ onClose }) {
                         }`}
                         dir="rtl"
                       >
-                        {(mushafType === 'madinah' && showShareModal.teksArabMadinah)
-                          ? showShareModal.teksArabMadinah
-                          : showShareModal.teksArab}
+                        {getAyatArabText(showShareModal)}
                       </p>
                       <p className={`text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm px-2 ${
                         isShareDark ? 'text-slate-100' : 'text-slate-800'

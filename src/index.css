@@ -60,7 +60,7 @@
   }
 
   .font-arabic {
-    font-family: 'LPMQ Isep Misbah', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
+    font-family: 'LPMQ Isep Misbah', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
   }
 }
 
@@ -70,7 +70,7 @@
 }
 
 .font-quran-madinah {
-  font-family: 'KFGQPC Uthman Taha Naskh', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif !important;
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif !important;
 }
 
 .font-quran-modern {
