@@ -3,8 +3,8 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 /**
  * Single source of truth for Kanomas Application Build Version
  */
-export const APP_BUILD_VERSION = '2026.1.5';
-export const APP_BUILD_CODE = 2029;
+export const APP_BUILD_VERSION = '2026.1.6';
+export const APP_BUILD_CODE = 2030;
 export const APP_RELEASE_DATE = '28 September 2026';
 
 /**

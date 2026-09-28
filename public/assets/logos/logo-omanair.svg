@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Oman Air Swirl -->
+  <g transform="translate(10, 10)">
+    <circle cx="25" cy="25" r="23" fill="#00818A"/>
+    <path d="M12 34 C12 20, 24 12, 36 18 C28 18, 20 25, 25 34 C28 39, 36 38, 38 32 C38 38, 30 42, 22 40 C16 38, 12 36, 12 34 Z" fill="#D4AF37"/>
+    <path d="M18 20 C24 14, 32 15, 36 20 C32 18, 25 20, 24 26 C20 22, 19 21, 18 20 Z" fill="#FFFFFF"/>
+  </g>
+  <!-- Typography -->
+  <text x="68" y="36" font-family="'Inter', 'Arial Black', sans-serif" font-size="20" font-weight="900" fill="#00818A" letter-spacing="1">OMAN AIR</text>
+  <text x="70" y="50" font-family="'Traditional Arabic', serif" font-size="13" font-weight="700" fill="#D4AF37">الطيران العُماني</text>
+</svg>

@@ -7,7 +7,11 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
-  Award
+  Award,
+  Plane,
+  Building2,
+  CreditCard,
+  Globe2
 } from 'lucide-react';
 import {
   Icon3DAlQuran,
@@ -65,17 +69,17 @@ const PROMO_BANNERS = [
   }
 ];
 
-// Logo Resmi Akreditasi & Regulator Pemerintah untuk Umrah & Haji Khusus
-const OFFICIAL_LOGOS = [
+// 1. Logo Berjalan Resmi & Asosiasi: Kemenag, IATA, KAN, AMPHURI, ASITA (Muncul murni tanpa kotak)
+const RUNNING_OFFICIAL_LOGOS = [
   {
     id: 'kemenag',
     name: 'Kementerian Agama RI',
     src: '/assets/logos/logo-kemenag.png'
   },
   {
-    id: 'siskopatuh',
-    name: 'SISKOPATUH Kemenag RI',
-    src: '/assets/logos/logo-siskopatuh.png'
+    id: 'iata',
+    name: 'IATA - International Air Transport Association',
+    src: '/assets/logos/logo-iata.png'
   },
   {
     id: 'kan',
@@ -83,19 +87,58 @@ const OFFICIAL_LOGOS = [
     src: '/assets/logos/logo-kan.png'
   },
   {
-    id: 'himpuh',
-    name: 'HIMPUH - Asosiasi Haji & Umrah',
-    src: '/assets/logos/logo-himpuh.png'
+    id: 'amphuri',
+    name: 'AMPHURI - Asosiasi Muslim Penyelenggara Haji & Umrah RI',
+    src: '/assets/logos/logo-amphuri.svg'
   },
   {
-    id: 'iata',
-    name: 'IATA International',
-    src: '/assets/logos/logo-iata.png'
+    id: 'asita',
+    name: 'ASITA - Association of The Indonesian Tours and Travel Agencies',
+    src: '/assets/logos/logo-asita.svg'
+  }
+];
+
+// 2. Logo Perusahaan Rekanan & Kerjasama Resmi (Dikelompokkan Berdasarkan Jenis Perusahaan)
+const PARTNER_GROUPS = [
+  {
+    category: 'Maskapai Penerbangan (Airlines)',
+    icon: Plane,
+    description: 'Penerbangan langsung & transit nyaman standar internasional',
+    items: [
+      { id: 'garuda', name: 'Garuda Indonesia', src: '/assets/logos/logo-garuda.svg' },
+      { id: 'saudia', name: 'Saudia Arabia Airlines', src: '/assets/logos/logo-saudia.svg' },
+      { id: 'qatar', name: 'Qatar Airways', src: '/assets/logos/logo-qatar.svg' },
+      { id: 'emirates', name: 'Emirates', src: '/assets/logos/logo-emirates.svg' },
+      { id: 'etihad', name: 'Etihad Airways', src: '/assets/logos/logo-etihad.svg' },
+      { id: 'oman', name: 'Oman Air', src: '/assets/logos/logo-omanair.svg' }
+    ]
   },
   {
-    id: '5pasti',
-    name: '5 Pasti Umrah Kemenag RI',
-    src: '/assets/logos/logo-5pasti.jpg'
+    category: 'Hotel & Akomodasi Tanah Suci',
+    icon: Building2,
+    description: 'Akomodasi bintang lima pelataran Masjidil Haram & Masjid Nabawi',
+    items: [
+      { id: 'movenpick', name: 'Mövenpick Hotels & Resorts', src: '/assets/logos/logo-movenpick.svg' },
+      { id: 'millennium', name: 'Millennium Hotels & Resorts', src: '/assets/logos/logo-millennium.svg' },
+      { id: 'almassa', name: 'Al Massa Hotels Makkah', src: '/assets/logos/logo-almassa.svg' }
+    ]
+  },
+  {
+    category: 'Perbankan Syariah & Keuangan',
+    icon: CreditCard,
+    description: 'Jaminan transaksi aman, transparan, dan tabungan umrah terpercaya',
+    items: [
+      { id: 'bsi', name: 'Bank Syariah Indonesia (BSI)', src: '/assets/logos/logo-bsi.png' }
+    ]
+  },
+  {
+    category: 'Sistem Tiket & Reservasi Global (GDS)',
+    icon: Globe2,
+    description: 'Infrastruktur reservasi tiket penerbangan dan inventori dunia real-time',
+    items: [
+      { id: 'amadeus', name: 'Amadeus Global Travel Network', src: '/assets/logos/logo-amadeus.svg' },
+      { id: 'sabre', name: 'Sabre Travel Network & GDS', src: '/assets/logos/logo-sabre.svg' }
+    ]
   }
 ];
 
@@ -257,26 +300,25 @@ export default function HomeView({
         </button>
       </section>
 
-      {/* 2C. BANNER DAFTAR MITRA SYIAR DENGAN ID KTP & NPWP */}
+      {/* 2C. BANNER DAFTAR MITRA SYIAR (2-3 BARIS PROPORSIONAL DENGAN TOMBOL SLIM) */}
       <section
         onClick={onOpenDaftarMitra}
-        className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white cursor-pointer hover:shadow-lg transition-all flex items-center justify-between gap-3 active:scale-[0.99] shadow-sm border border-emerald-500/40 relative overflow-hidden group"
+        className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white cursor-pointer hover:shadow-md transition-all flex items-center justify-between gap-2.5 active:scale-[0.99] shadow-xs border border-emerald-500/30 relative overflow-hidden group"
       >
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-amber-400/10 to-transparent pointer-events-none" />
-        <div className="flex items-center gap-3 min-w-0 relative z-10">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-400/20 border border-amber-300/40 backdrop-blur-xs flex items-center justify-center flex-shrink-0 text-amber-300 shadow-xs group-hover:scale-105 transition-transform">
-            <Award className="w-6 h-6" />
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-400/20 border border-amber-300/30 flex items-center justify-center flex-shrink-0 text-amber-300 group-hover:scale-105 transition-transform">
+            <Award className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-300">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="min-w-0 leading-tight">
+            <div className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
               <span>Program Kemitraan Syiar Baitullah</span>
             </div>
-            <h3 className="text-sm sm:text-base font-black text-white leading-snug">
-              Daftar Menjadi Mitra Syiar Kanomas
+            <h3 className="text-xs sm:text-sm font-black text-white truncate">
+              Gabung Jadi Mitra Resmi Syiar Kanomas
             </h3>
-            <p className="text-xs text-emerald-100/90 font-medium leading-relaxed">
-              Foto KTP & NPWP data otomatis terisi • Ujrah berkah langsung ke rekening Anda
+            <p className="text-[11px] text-emerald-100/80 font-medium truncate">
+              Ujrah berkah langsung ke rekening • Fasilitas bimbingan lengkap
             </p>
           </div>
         </div>
@@ -286,23 +328,15 @@ export default function HomeView({
             e.stopPropagation();
             if (onOpenDaftarMitra) onOpenDaftarMitra();
           }}
-          className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition active:scale-95 flex-shrink-0 whitespace-nowrap border border-amber-300"
+          className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow-sm transition active:scale-95 flex-shrink-0 whitespace-nowrap border border-amber-200/80"
         >
-          <span>Daftar Sekarang</span>
-          <ChevronRight className="w-4 h-4 text-slate-900" />
+          <span>Daftar</span>
+          <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </section>
 
       {/* 3. MENU UTAMA BERANDA: 2 BARIS X 4 KOLOM (IKON 3D BERWARNA & ELEGAN) */}
-      <section className="space-y-3.5">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>Menu Layanan & Ibadah</span>
-          </h2>
-          <span className="text-xs text-slate-500 font-medium">Ketuk menu untuk membuka</span>
-        </div>
-
+      <section className="space-y-3 pt-0.5">
         <div className="space-y-3">
           {/* BARIS 1: 1. Al Quran, 2. Jadwal Sholat & Arah Kiblat, 3. Ibadah Umrah, 4. Pelayanan Nusuk */}
           <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
@@ -416,8 +450,8 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* 4. LEGALITAS, AKREDITASI RESMI & LOGO ASLI BERJALAN KANAN KE KIRI (HANYA LOGO RESMI AGAK BESAR TANPA TULISAN) */}
-      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4 overflow-hidden">
+      {/* 4. LEGALITAS, AKREDITASI RESMI & LOGO ASOSIASI BERJALAN (BEBAS KOTAK, MURNI IKON) */}
+      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-4 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-3">
           <div>
             <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
@@ -433,25 +467,22 @@ export default function HomeView({
           </span>
         </div>
 
-        {/* LOGO RESMI BERJALAN DARI KANAN KE KIRI (HANYA LOGO, TANPA TEKS KETERANGAN, AGAK BESAR) */}
-        <div className="relative w-full overflow-hidden py-2">
-          {/* Fading gradient edges agar logo masuk dan keluar secara mulus */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+        {/* LOGO BERJALAN: KEMENAG, IATA, KAN, AMPHURI, ASITA (BEBAS DARI KOTAK LUAR, CUKUP IKON BERGILIRAN) */}
+        <div className="relative w-full overflow-hidden py-3">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
-          {/* Jalur Marquee Berjalan */}
-          <div className="animate-marquee gap-4 sm:gap-6 flex items-center">
-            {/* Duplikasi array 3x agar animasi infinite loop berjalan seamless tanpa jeda */}
-            {[...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS, ...OFFICIAL_LOGOS].map((logo, index) => (
+          <div className="animate-marquee gap-8 sm:gap-12 flex items-center">
+            {[...RUNNING_OFFICIAL_LOGOS, ...RUNNING_OFFICIAL_LOGOS, ...RUNNING_OFFICIAL_LOGOS].map((logo, index) => (
               <div
                 key={`${logo.id}-${index}`}
-                className="flex-shrink-0 w-36 sm:w-44 h-20 sm:h-24 p-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex items-center justify-center select-none"
+                className="flex-shrink-0 flex items-center justify-center select-none"
                 title={logo.name}
               >
                 <img
                   src={logo.src}
                   alt={logo.name}
-                  className="max-h-12 sm:max-h-14 max-w-full object-contain filter drop-shadow-2xs"
+                  className="h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[150px] object-contain filter drop-shadow-2xs opacity-85 hover:opacity-100 transition-opacity"
                   loading="lazy"
                 />
               </div>
@@ -459,9 +490,109 @@ export default function HomeView({
           </div>
         </div>
 
-        {/* FOOTER TEXT LEGALITAS */}
-        <div className="pt-2 text-center text-xs text-slate-500 leading-relaxed border-t border-slate-100 font-medium">
-          Izin Penyelenggara Perjalanan Ibadah Umrah (PPIU) No. U.310 Tahun 2020 • PIHK No. PHU/HK.5008/VIII/2019 • Terdaftar SISKOPATUH Kemenag RI
+        {/* KARTU LEGALITAS PPIU & PIHK KANOMAS: RAPI, TERTATA, DAN ENAK DIPANDANG */}
+        <div className="rounded-2xl bg-gradient-to-br from-slate-50 via-slate-50 to-amber-50/30 border border-slate-200/80 p-3.5 sm:p-4.5 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* PPIU UMRAH */}
+            <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-black text-sm flex-shrink-0">
+                PPIU
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">
+                  Izin Umrah Resmi Kemenag
+                </span>
+                <span className="text-xs sm:text-sm font-black text-slate-800 font-mono block">
+                  No. U.310 Tahun 2020
+                </span>
+                <span className="text-[11px] text-emerald-700 font-semibold block truncate">
+                  Penyelenggara Perjalanan Ibadah Umrah
+                </span>
+              </div>
+            </div>
+
+            {/* PIHK HAJI KHUSUS */}
+            <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 font-black text-sm flex-shrink-0">
+                PIHK
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">
+                  Izin Haji Khusus Resmi Kemenag
+                </span>
+                <span className="text-xs sm:text-sm font-black text-slate-800 font-mono block">
+                  No. PHU/HK.5008/VIII/2019
+                </span>
+                <span className="text-[11px] text-amber-700 font-semibold block truncate">
+                  Penyelenggara Ibadah Haji Khusus &amp; Furoda
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-slate-600 font-medium">
+            <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Terintegrasi <strong>SISKOPATUH</strong> Kemenag RI</span>
+            </span>
+            <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Standar <strong>5 Pasti Umrah</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Akreditasi <strong>KAN Unggul "A"</strong></span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. LOGO PARA PERUSAHAAN YANG SUDAH BEKERJASAMA (DIGRUPKAN SESUAI JENIS PERUSAHAAN) */}
+      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-4">
+        <div className="border-b border-slate-100 pb-3">
+          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+            <Award className="w-5 h-5 text-amber-500" />
+            <span>Mitra &amp; Rekanan Resmi Bekerjasama</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Dukungan resmi maskapai bintang 5, jaringan hotel tanah suci, perbankan syariah, dan sistem teknologi tiket global
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {PARTNER_GROUPS.map((group, idx) => {
+            const GroupIcon = group.icon;
+            return (
+              <div key={idx} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 uppercase tracking-wide">
+                    <GroupIcon className="w-4 h-4 text-amber-600" />
+                    <span>{group.category}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
+                    {group.description}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5">
+                  {group.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="h-14 sm:h-16 px-2.5 py-1.5 rounded-xl bg-slate-50/80 border border-slate-200/70 hover:border-amber-400 hover:bg-white hover:shadow-xs transition-all flex items-center justify-center select-none group"
+                      title={item.name}
+                    >
+                      <img
+                        src={item.src}
+                        alt={item.name}
+                        className="max-h-7 sm:max-h-8 max-w-full object-contain filter grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100 transition-all duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

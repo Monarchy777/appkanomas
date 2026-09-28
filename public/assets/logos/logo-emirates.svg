@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Red Emblem Box -->
+  <rect x="12" y="10" width="50" height="50" rx="6" fill="#D71921"/>
+  <!-- Arabic Calligraphy stylized -->
+  <path d="M22 45 Q26 22 40 22 Q46 22 46 30 Q46 42 28 42 M35 26 Q40 26 42 32 M30 36 L48 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Typography -->
+  <text x="74" y="42" font-family="'Times New Roman', 'Georgia', serif" font-size="28" font-weight="700" fill="#D71921" letter-spacing="0.5">Emirates</text>
+</svg>
