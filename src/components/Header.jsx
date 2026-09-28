@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Icon3DStatus, Icon3DCetak, Icon3DWhatsApp } from './Icons3D';
 import { ADMIN_EMAIL } from '../services/auth';
+import { APP_BUILD_VERSION } from '../config/version';
 
 export default function Header({
   role,
@@ -386,9 +387,14 @@ export default function Header({
             </div>
 
             <a
-              href="/kanomas.apk"
+              href="https://appkanomas.mediasosial.net/kanomas.apk"
               download="Kanomas.apk"
-              onClick={() => setShowMenu(false)}
+              onClick={(e) => {
+                setShowMenu(false);
+                try {
+                  window.open('https://appkanomas.mediasosial.net/kanomas.apk', '_system');
+                } catch {}
+              }}
               className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-100 border border-amber-300 hover:border-amber-400 flex items-center justify-between gap-3 shadow-xs transition group"
             >
               <div className="flex items-center gap-3">
@@ -399,11 +405,11 @@ export default function Header({
                   <strong className="text-slate-900 block text-xs sm:text-sm font-bold flex items-center gap-2 flex-wrap">
                     Download File APK Android
                     <span className="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-wider uppercase">
-                      Update 2026 • 19.3 MB
+                      v{APP_BUILD_VERSION} • 23 MB
                     </span>
                   </strong>
                   <span className="text-xs text-slate-600 block mt-0.5">
-                    Versi 2026.1.2 • Ikon & Dzikir Baru • Bisa dibagikan via WA
+                    Versi {APP_BUILD_VERSION} • Fitur Terkini • Bisa dibagikan via WA
                   </span>
                 </div>
               </div>
