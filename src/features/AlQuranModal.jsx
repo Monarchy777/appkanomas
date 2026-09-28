@@ -305,94 +305,127 @@ export const THEME_PALETTES = {
   }
 };
 
-// ATURAN WARNA TAJWID IDENTIK DENGAN MYQURAN & STANDAR KEMENAG RI
+// ATURAN WARNA TAJWID IDENTIK PERSIS DENGAN MYQURAN (8 HUKUM RESMI)
 export const TAJWEED_THEME_RULES = {
   mushaf: {
-    ghunnah: '#e11d48',    // Vivid Rose/Pink: Ghunnah & Idgham Bighunnah
-    qalqalah: '#2563eb',   // Sky Blue: Qalqalah
-    iqlab: '#7c3aed',      // Royal Violet: Iqlab
-    ikhfa: '#059669',      // Mint/Emerald Green: Ikhfa Haqiqi & Syafawi
-    madd: '#dc2626',       // Coral Red: Mad Wajib & Jaiz 4-5 Harakat
-    maddLazim: '#991b1b',  // Deep Maroon: Mad Lazim 6 Harakat
-    idghamBila: '#ea580c', // Bright Orange: Idgham Bilaghunnah
-    tafkhim: '#d97706',    // Golden Amber: Tafkhim Lam Jalalah
+    madd246: '#00ac51',          // Madd 2-4-6 Harakat (Hijau Segar MyQuran)
+    madd45: '#00b0fc',           // Madd 4-5 Harakat (Biru Langit / Cyan)
+    madd6: '#ff57bc',            // Madd 6 Harakat (Pink Magenta)
+    idghamBighunnah: '#ff5896',  // Idgam Bigunnah & Ghunnah (Rose Pink)
+    idghamBilagunnah: '#f91923', // Idgam Bilagunnah (Merah Cerah)
+    ikhfa: '#00c055',            // Ikhfa (Hijau Mint Terang)
+    iqlab: '#00afff',            // Iqlab (Biru Muda / Sky Blue)
+    qalqalah: '#407af8',         // Qalqalah (Biru Kerajaan / Royal Blue)
+    // Aliases
+    ghunnah: '#ff5896',
+    idghamBila: '#f91923',
+    madd: '#00b0fc',
+    maddLazim: '#ff57bc',
     base: '#022c22'
   },
   light: {
-    ghunnah: '#e11d48',
-    qalqalah: '#2563eb',
-    iqlab: '#7c3aed',
-    ikhfa: '#059669',
-    madd: '#dc2626',
-    maddLazim: '#991b1b',
-    idghamBila: '#ea580c',
-    tafkhim: '#d97706',
+    madd246: '#00ac51',
+    madd45: '#00b0fc',
+    madd6: '#ff57bc',
+    idghamBighunnah: '#ff5896',
+    idghamBilagunnah: '#f91923',
+    ikhfa: '#00c055',
+    iqlab: '#00afff',
+    qalqalah: '#407af8',
+    ghunnah: '#ff5896',
+    idghamBila: '#f91923',
+    madd: '#00b0fc',
+    maddLazim: '#ff57bc',
     base: '#000000'
   },
   dark: {
-    ghunnah: '#fb7185',    // Light Rose Pink
-    qalqalah: '#38bdf8',   // Sky Blue
-    iqlab: '#c084fc',      // Lavender Violet
-    ikhfa: '#40d093',      // Mint Teal (exact MyQuran dark mode #40D093)
-    madd: '#f87171',       // Coral Red
-    maddLazim: '#f43f5e',  // Vibrant Crimson
-    idghamBila: '#fb923c', // Warm Orange
-    tafkhim: '#f8be38',    // Golden Amber (exact MyQuran dark mode #F8BE38)
+    madd246: '#22c55e',          // Madd 2-4-6 Harakat (Emerald)
+    madd45: '#38bdf8',           // Madd 4-5 Harakat (Sky Blue)
+    madd6: '#f472b6',            // Madd 6 Harakat (Pink)
+    idghamBighunnah: '#fb7185',  // Idgam Bigunnah (Light Rose)
+    idghamBilagunnah: '#ff4d4f', // Idgam Bilagunnah (Red)
+    ikhfa: '#40d093',            // Ikhfa (Mint Teal)
+    iqlab: '#38bdf8',            // Iqlab (Cyan)
+    qalqalah: '#60a5fa',         // Qalqalah (Blue)
+    ghunnah: '#fb7185',
+    idghamBila: '#ff4d4f',
+    madd: '#38bdf8',
+    maddLazim: '#f472b6',
     base: '#ffffff'
   },
   sepia: {
-    ghunnah: '#be123c',
-    qalqalah: '#0284c7',
-    iqlab: '#6d28d9',
-    ikhfa: '#15803d',
-    madd: '#b91c1c',
-    maddLazim: '#881337',
-    idghamBila: '#c2410c',
-    tafkhim: '#b45309',
+    madd246: '#15803d',
+    madd45: '#0284c7',
+    madd6: '#db2777',
+    idghamBighunnah: '#e11d48',
+    idghamBilagunnah: '#dc2626',
+    ikhfa: '#16a34a',
+    iqlab: '#0284c7',
+    qalqalah: '#2563eb',
+    ghunnah: '#e11d48',
+    idghamBila: '#dc2626',
+    madd: '#0284c7',
+    maddLazim: '#db2777',
     base: '#1c1917'
   },
   navy: {
-    ghunnah: '#fb7185',
-    qalqalah: '#38bdf8',
-    iqlab: '#c084fc',
+    madd246: '#22c55e',
+    madd45: '#38bdf8',
+    madd6: '#f472b6',
+    idghamBighunnah: '#fb7185',
+    idghamBilagunnah: '#ff4d4f',
     ikhfa: '#40d093',
-    madd: '#f87171',
-    maddLazim: '#f43f5e',
-    idghamBila: '#fb923c',
-    tafkhim: '#f8be38',
+    iqlab: '#38bdf8',
+    qalqalah: '#60a5fa',
+    ghunnah: '#fb7185',
+    idghamBila: '#ff4d4f',
+    madd: '#38bdf8',
+    maddLazim: '#f472b6',
     base: '#ffffff'
   },
   cream: {
-    ghunnah: '#b91c1c',
-    qalqalah: '#0284c7',
-    iqlab: '#6d28d9',
-    ikhfa: '#047857',
-    madd: '#b91c1c',
-    maddLazim: '#881337',
-    idghamBila: '#c2410c',
-    tafkhim: '#b45309',
+    madd246: '#00ac51',
+    madd45: '#00b0fc',
+    madd6: '#ff57bc',
+    idghamBighunnah: '#ff5896',
+    idghamBilagunnah: '#f91923',
+    ikhfa: '#00c055',
+    iqlab: '#00afff',
+    qalqalah: '#407af8',
+    ghunnah: '#ff5896',
+    idghamBila: '#f91923',
+    madd: '#00b0fc',
+    maddLazim: '#ff57bc',
     base: '#18181b'
   },
   kabah: {
-    ghunnah: '#fb7185',
-    qalqalah: '#38bdf8',
-    iqlab: '#c084fc',
+    madd246: '#22c55e',
+    madd45: '#38bdf8',
+    madd6: '#f472b6',
+    idghamBighunnah: '#fb7185',
+    idghamBilagunnah: '#ff4d4f',
     ikhfa: '#40d093',
-    madd: '#f87171',
-    maddLazim: '#f43f5e',
-    idghamBila: '#fb923c',
-    tafkhim: '#f8be38',
+    iqlab: '#38bdf8',
+    qalqalah: '#60a5fa',
+    ghunnah: '#fb7185',
+    idghamBila: '#ff4d4f',
+    madd: '#38bdf8',
+    maddLazim: '#f472b6',
     base: '#ffffff'
   },
   nature: {
-    ghunnah: '#fb7185',
-    qalqalah: '#38bdf8',
-    iqlab: '#c084fc',
+    madd246: '#22c55e',
+    madd45: '#38bdf8',
+    madd6: '#f472b6',
+    idghamBighunnah: '#fb7185',
+    idghamBilagunnah: '#ff4d4f',
     ikhfa: '#40d093',
-    madd: '#f87171',
-    maddLazim: '#f43f5e',
-    idghamBila: '#fb923c',
-    tafkhim: '#f8be38',
+    iqlab: '#38bdf8',
+    qalqalah: '#60a5fa',
+    ghunnah: '#fb7185',
+    idghamBila: '#ff4d4f',
+    madd: '#38bdf8',
+    maddLazim: '#f472b6',
     base: '#ffffff'
   }
 };
@@ -413,8 +446,6 @@ export function getAyatPageNumber(surahNomor, ayatNomor) {
 }
 
 // FUNGSI KASHIDA / TATWEEL (MEMPERTAHANKAN KEASLIAN KALIGRAFI TANPA MERUSAK FONT LIGATUR)
-// Penyesuaian kashida & renggang dilakukan via OpenType 'jalt' (Justification Alternates),
-// CSS text-justify, dan word-spacing agar jenis kaligrafi (LPMQ / Amiri) tetap 100% identik.
 export function applyKashidaToArabic(text) {
   if (!text) return '';
   return text;
@@ -428,8 +459,9 @@ export function normalizeQuranText(text, isMadinah = false) {
     .replace(/[\u06ED\u06EA\u06EB]/g, '')
     // 2. Bersihkan karakter kontrol tak kasat mata
     .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
-    // 3. Pisahkan tanda waqaf yang menempel langsung tanpa spasi agar tidak bertumpuk/menindih harakat tanwin
+    // 3. Pisahkan tanda waqaf baik sebelum maupun sesudahnya agar tidak menindih huruf/tanwin
     .replace(/([^\s])([ۖ-ۜۘ-ۛ])/g, '$1 $2')
+    .replace(/([ۖ-ۜۘ-ۛ])([^\s])/g, '$1 $2')
     // 4. Hapus tanda ruku khusus Kemenag (ࣖ) yang tidak didukung font modern
     .replace(/\u08D6/g, '')
     // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
@@ -439,14 +471,20 @@ export function normalizeQuranText(text, isMadinah = false) {
   return cleaned.trim();
 }
 
-// RENDER TAJWID AMAN DENGAN RTL MURNI, KAIDAH ILMU TAJWID, & DUKUNGAN TERJEMAH PER KATA UNIFIED
-function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOptions = null) {
+// RENDER TAJWID AMAN DENGAN RTL MURNI, KAIDAH ILMU TAJWID PERSIS MYQURAN, & TANPA ZWJ (ANTI-MENUMPUK)
+function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOptions = null, tajweedFilters = null) {
   if (!text) return null;
   const palette = TAJWEED_THEME_RULES[themeMode] || TAJWEED_THEME_RULES.mushaf;
 
+  // Master switch check: jika tajwid dimatikan global atau via filter master
+  const isMasterActive = showTajweed && (tajweedFilters ? tajweedFilters.master !== false : true);
+
   const annotations = new Map();
 
-  if (showTajweed) {
+  if (isMasterActive) {
+    // Helper untuk cek apakah aturan tajwid tertentu diaktifkan user
+    const isFilterOn = (key) => (!tajweedFilters || tajweedFilters[key] !== false);
+
     // 1. Ekstrak seluruh grapheme cluster dari teks ayat lengkap
     const GRAPHEME_REGEX = /([\u0621-\u063F\u0641-\u064A\u0671-\u06D3])([\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
     const graphemes = [];
@@ -462,7 +500,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
       });
     }
 
-    // 2. Petakan aturan tajwid ke setiap grapheme dengan analisis huruf yang saling terikat
+    // 2. Petakan aturan tajwid ke setiap grapheme dengan kaidah persis MyQuran
     for (let i = 0; i < graphemes.length; i++) {
       const g = graphemes[i];
       const base = g.base;
@@ -488,95 +526,100 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
       let color = null;
       let title = '';
 
-      // A. Hukum Nun Sakinah & Tanwin (Kedua huruf yang saling terikat diwarnai bersama)
-      if (isTanwin || isNunSakinah || hasSmallMeem) {
+      // A. Madd 6 Harakat (Mad Lazim) - Pink Magenta MyQuran
+      if ((marks.includes('\u0653') || marks.includes('~')) && nextMarks.includes('\u0651')) {
+        if (isFilterOn('madd6')) {
+          color = palette.madd6;
+          title = 'Madd 6 Harakat (Mad Lazim)';
+        }
+      }
+      // B. Madd 4-5 Harakat (Mad Wajib Muttashil & Mad Jaiz Munfashil) - Biru Langit MyQuran
+      else if (marks.includes('\u0653') || marks.includes('~')) {
+        if (isFilterOn('madd45')) {
+          color = palette.madd45;
+          title = 'Madd 4-5 Harakat (Mad Wajib / Jaiz)';
+        }
+      }
+      // C. Hukum Nun Sakinah & Tanwin
+      else if (isTanwin || isNunSakinah || hasSmallMeem) {
+        // C1. Iqlab (Nun/Tanwin bertemu Ba) - Biru Muda MyQuran
         if (hasSmallMeem || nextBase === 'ب') {
-          color = palette.iqlab;
-          title = 'Iqlab (Nun/Tanwin menjadi Mim & Dengung saat bertemu Ba)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.iqlab, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          if (isFilterOn('iqlab')) {
+            color = palette.iqlab;
+            title = 'Iqlab (Nun/Tanwin menjadi Mim & Dengung saat bertemu Ba)';
+            if (nextGrapheme) {
+              annotations.set(nextGrapheme.start, { color: palette.iqlab, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+            }
           }
-        } else if (nextBase && 'ينمو'.includes(nextBase)) {
-          color = palette.ghunnah;
-          title = 'Idgham Bighunnah (Melebur dengan Dengung 2 Harakat)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.ghunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+        }
+        // C2. Idgam Bigunnah (Nun/Tanwin bertemu ينمو) - Rose Pink MyQuran
+        else if (nextBase && 'ينمو'.includes(nextBase)) {
+          if (isFilterOn('idghamBighunnah')) {
+            color = palette.idghamBighunnah;
+            title = 'Idgam Bigunnah (Melebur dengan Dengung 2 Harakat)';
+            if (nextGrapheme) {
+              annotations.set(nextGrapheme.start, { color: palette.idghamBighunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+            }
           }
-        } else if (nextBase && 'لر'.includes(nextBase)) {
-          color = palette.idghamBila;
-          title = 'Idgham Bilaghunnah (Melebur Tanpa Dengung)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.idghamBila, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+        }
+        // C3. Idgam Bilagunnah (Nun/Tanwin bertemu ل / ر) - Merah Cerah MyQuran
+        else if (nextBase && 'لر'.includes(nextBase)) {
+          if (isFilterOn('idghamBilagunnah')) {
+            color = palette.idghamBilagunnah;
+            title = 'Idgam Bilagunnah (Melebur Tanpa Dengung)';
+            if (nextGrapheme) {
+              annotations.set(nextGrapheme.start, { color: palette.idghamBilagunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+            }
           }
-        } else if (nextBase && 'ءأإهعحغخ'.includes(nextBase)) {
-          color = null; // Idzhar Halqi: Dibaca jelas tanpa warna
-        } else if (nextBase && 'تثجدذزسشصضطظفقك'.includes(nextBase)) {
-          color = palette.ikhfa;
-          title = 'Ikhfa Haqiqi (Samar-samar dengan Dengung)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.ikhfa, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+        }
+        // C4. Idzhar Halqi (ء ه ع ح غ خ) - Jelas / Tanpa Warna
+        else if (nextBase && 'ءأإهعحغخ'.includes(nextBase)) {
+          color = null;
+        }
+        // C5. Ikhfa Haqiqi (15 huruf) - Hijau Mint MyQuran (Hanya nun/tanwin yang diwarnai)
+        else if (nextBase && 'تثجدذزسشصضطظفقك'.includes(nextBase)) {
+          if (isFilterOn('ikhfa')) {
+            color = palette.ikhfa;
+            title = 'Ikhfa (Samar-samar dengan Dengung)';
           }
         }
       }
-      // B. Ghunnah Musyaddadah (Nun bertasydid / Mim bertasydid)
+      // D. Ghunnah Musyaddadah (Nun bertasydid / Mim bertasydid) - Rose Pink MyQuran
       else if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
-        color = palette.ghunnah;
-        title = 'Ghunnah Musyaddadah (Dengung 2 Harakat)';
+        if (isFilterOn('idghamBighunnah')) {
+          color = palette.idghamBighunnah;
+          title = 'Idgam Bigunnah / Ghunnah (Dengung 2 Harakat)';
+        }
       }
-      // C. Hukum Mim Sakinah (Kedua huruf yang saling berinteraksi diwarnai bersama)
+      // E. Hukum Mim Sakinah
       else if (base === 'م' && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null))) {
         if (nextBase === 'ب') {
-          color = palette.ikhfa;
-          title = 'Ikhfa Syafawi (Mim Sukun bertemu Ba, Samar dengan Dengung)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.ikhfa, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          if (isFilterOn('ikhfa')) {
+            color = palette.ikhfa;
+            title = 'Ikhfa Syafawi (Mim Sukun bertemu Ba, Samar dengan Dengung)';
           }
         } else if (nextBase === 'م') {
-          color = palette.ghunnah;
-          title = 'Idgham Mimi / Mutamatsilain (Dengung 2 Harakat)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.ghunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          if (isFilterOn('idghamBighunnah')) {
+            color = palette.idghamBighunnah;
+            title = 'Idgham Mimi / Mutamatsilain (Dengung 2 Harakat)';
+            if (nextGrapheme) {
+              annotations.set(nextGrapheme.start, { color: palette.idghamBighunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+            }
           }
         }
       }
-      // D. Qalqalah (Baju Di Thoko: ب ج د ط ق)
+      // F. Qalqalah (Baju Di Thoko: قطبجد) - Biru Kerajaan MyQuran
       else if ('قطبجد'.includes(base) && (marks.includes('\u0652') || marks.includes('\u06E1') || (!nextBase && !/[\u064E\u064F\u0650\u0651]/.test(marks)))) {
-        color = palette.qalqalah;
-        title = 'Qalqalah (Pantulan Suara)';
-      }
-      // E. Madd Wajib / Jaiz / Lazim (Tanda Layar ~ / \u0653)
-      else if (marks.includes('\u0653') || marks.includes('~')) {
-        if (nextMarks.includes('\u0651')) {
-          color = palette.maddLazim;
-          title = 'Madd Lazim (Panjang 6 Harakat)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.maddLazim, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
-          }
-        } else if (nextBase && 'ءأإئؤ'.includes(nextBase)) {
-          color = palette.madd;
-          title = 'Madd Wajib / Jaiz (Panjang 4-5 Harakat)';
-          if (nextGrapheme) {
-            annotations.set(nextGrapheme.start, { color: palette.madd, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
-          }
-        } else {
-          color = palette.madd;
-          title = 'Madd (Panjang 4-5 Harakat)';
-        }
-      }
-      // F. Tafkhim Lam Jalalah (Lafazh Allah dibaca tebal setelah fathah / dhammah)
-      else if (base === 'ل' && marks.includes('\u0651') && (marks.includes('\u0670') || marks.includes('\u064E')) && nextBase === 'ه') {
-        const prevGrapheme = i > 0 ? graphemes[i - 1] : null;
-        const prevMarks = prevGrapheme ? prevGrapheme.marks : '';
-        if (!prevMarks.includes('\u0650')) {
-          color = palette.tafkhim || '#d97706';
-          title = 'Tafkhim Lam Jalalah (Dibaca Tebal)';
+        if (isFilterOn('qalqalah')) {
+          color = palette.qalqalah;
+          title = 'Qalqalah (Pantulan Suara)';
         }
       }
 
       if (color && !annotations.has(g.start)) {
         annotations.set(g.start, { color, title, full: g.full, end: g.end, base: g.base });
-        // Jika hukum tanwin (terutama fathatan) diikuti oleh Alif penopang tanwin tanpa harakat (e.g. جًا):
-        // Ikutkan alif tersebut dalam warna yang sama agar ligatur tidak terbelah & posisi fathatan tetap sempurna!
+        // Jika hukum tanwin (fathatan) diikuti oleh Alif penopang tanpa harakat (e.g. جًا):
+        // Satukan alif dalam warna yang sama agar ligatur tidak terbelah & posisi fathatan tetap sempurna!
         if (isTanwin && marks.includes('\u064B')) {
           const nextIndex = i + 1;
           if (nextIndex < graphemes.length) {
@@ -590,17 +633,26 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
         }
       }
     }
+
+    // G. Madd 2-4-6 Harakat (Mad 'Aridh Lissukun pada akhir ayat) - Hijau Segar MyQuran
+    if (isFilterOn('madd246') && graphemes.length >= 2) {
+      const secondLastG = graphemes[graphemes.length - 2];
+      if ('ويى'.includes(secondLastG.base) && !annotations.has(secondLastG.start)) {
+        annotations.set(secondLastG.start, {
+          color: palette.madd246,
+          title: "Madd 2-4-6 Harakat (Mad 'Aridh Lissukun)",
+          full: secondLastG.full,
+          end: secondLastG.end,
+          base: secondLastG.base
+        });
+      }
+    }
   }
 
-  // 3. Render per-kata dengan proteksi ZWJ & tata letak arti perkata terintegrasi
-  const CONNECTS_LEFT = new Set('بتثجحخسشصضطظعغفقكلمنهيىئ'.split(''));
+  // 3. Render per-kata MURNI TANPA ZWJ (mencegah penumpukan tanda baca dan huruf saling menimpa)
   const cleanText = text.trim();
   const words = cleanText.split(/\s+/);
-  let charCursor = text.indexOf(cleanText);
-
-  const getBareChar = (str) => str.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D0-\u08FF\u200D]/g, '').slice(-1);
-  const getFirstBareChar = (str) => str.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D0-\u08FF\u200D]/g, '').charAt(0);
-
+  let charCursor = 0;
   let wbwCounter = 0;
 
   return words.map((word, wordIdx) => {
@@ -635,24 +687,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
         if (annotations.has(globalPos)) {
           const item = annotations.get(globalPos);
           if (c > localIdx) {
-            let beforeStr = word.substring(localIdx, c);
-            const lastChar = getBareChar(beforeStr);
-            if (CONNECTS_LEFT.has(lastChar)) {
-              beforeStr += '\u200D';
-            }
-            parts.push(beforeStr);
-          }
-
-          let spanContent = item.full;
-          const prevChar = getBareChar(word.substring(0, c));
-          if (CONNECTS_LEFT.has(prevChar)) {
-            spanContent = '\u200D' + spanContent;
-          }
-
-          const nextRemainder = word.substring(c + item.full.length);
-          const nextChar = getFirstBareChar(nextRemainder);
-          if (CONNECTS_LEFT.has(item.base) && nextChar) {
-            spanContent = spanContent + '\u200D';
+            parts.push(word.substring(localIdx, c));
           }
 
           parts.push(
@@ -660,15 +695,12 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
               key={`g-${globalPos}`}
               style={{
                 color: item.color,
-                display: 'inline',
-                fontWeight: 400,
-                fontSize: 'inherit',
-                lineHeight: 'inherit'
+                display: 'inline'
               }}
               className="select-text transition-colors duration-150"
               title={item.title}
             >
-              {spanContent}
+              {item.full}
             </span>
           );
           c += item.full.length;
@@ -679,12 +711,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
       }
 
       if (localIdx < word.length) {
-        let afterStr = word.substring(localIdx);
-        const prevChar = getBareChar(word.substring(0, localIdx));
-        if (CONNECTS_LEFT.has(prevChar)) {
-          afterStr = '\u200D' + afterStr;
-        }
-        parts.push(afterStr);
+        parts.push(word.substring(localIdx));
       }
       wordContent = parts;
     }
@@ -740,7 +767,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
       );
     }
 
-    // Tampilan paragraf biasa saat terjemah per kata tidak aktif
+    // Tampilan ayat biasa saat terjemah per kata tidak aktif
     return (
       <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 400 }}>
         {wordContent}
@@ -860,10 +887,29 @@ export default function AlQuranModal({ onClose }) {
   const [showTajweed, setShowTajweed] = useState(() => {
     try {
       const saved = localStorage.getItem('kanomas_quran_tajweed');
-      return saved !== null ? saved === 'true' : false;
+      return saved !== null ? saved === 'true' : true;
     } catch {
-      return false;
+      return true;
     }
+  });
+
+  // Filter 8 Kaidah Tajwid Resmi Identik MyQuran
+  const [tajweedFilters, setTajweedFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_tajweed_filters_v2');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      master: true,
+      madd246: true,
+      madd45: true,
+      madd6: true,
+      idghamBighunnah: true,
+      idghamBilagunnah: true,
+      ikhfa: true,
+      iqlab: true,
+      qalqalah: true
+    };
   });
   const [showLatin, setShowLatin] = useState(true);
   const [showTranslation, setShowTranslation] = useState(true);
@@ -1064,6 +1110,16 @@ export default function AlQuranModal({ onClose }) {
         localStorage.setItem('kanomas_quran_tajweed', String(next));
       } catch {}
       return next;
+    });
+  };
+
+  const handleToggleTajweedFilter = (key) => {
+    setTajweedFilters((prev) => {
+      const updated = { ...prev, [key]: !prev[key] };
+      try {
+        localStorage.setItem('kanomas_tajweed_filters_v2', JSON.stringify(updated));
+      } catch {}
+      return updated;
     });
   };
 
@@ -1847,7 +1903,7 @@ export default function AlQuranModal({ onClose }) {
       arabicColor: currentTheme.arabicColor
     } : null;
 
-    return renderSafeTajweed(rawText, themeMode, showTajweed, wbwOptions);
+    return renderSafeTajweed(rawText, themeMode, showTajweed, wbwOptions, tajweedFilters);
   };
 
   // Hitung perkiraan nomor halaman berdasarkan urutan ayat
@@ -2623,6 +2679,22 @@ export default function AlQuranModal({ onClose }) {
                   title="Ganti Tema Warna"
                 >
                   <Palette className="w-4 h-4" />
+                </button>
+
+                {/* Pengaturan Tajwid & Warna (MyQuran) */}
+                <button
+                  onClick={() => setShowTajweedGuide(true)}
+                  className={`w-8 h-8 rounded-xl active:scale-95 flex items-center justify-center transition relative ${
+                    showTajweed && tajweedFilters.master
+                      ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                      : 'hover:bg-white/20 text-white'
+                  }`}
+                  title="Pengaturan Kaidah Tajwid & Warna (Identik MyQuran)"
+                >
+                  <span className="text-[10px] font-black uppercase tracking-tighter">TAJ</span>
+                  {showTajweed && tajweedFilters.master && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-900" />
+                  )}
                 </button>
 
                 {/* Pengaturan */}
@@ -4399,102 +4471,186 @@ export default function AlQuranModal({ onClose }) {
         )}
 
         {/* ======================================================== */}
-        {/* MODAL 6: PANDUAN WARNA TAJWID LENGKAP                    */}
+        {/* MODAL 6: PENGATURAN TAJWID INTERAKTIF (PERSIS MYQURAN)    */}
         {/* ======================================================== */}
         {showTajweedGuide && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-            <div className={`w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 border ${
-              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className={`w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border ${
+              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-[#cbf7d2] text-slate-800 border-emerald-400'
             }`}>
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="w-5 h-5 text-emerald-500" />
-                  <h3 className="text-base font-black">
-                    Panduan Warna Tajwid
-                  </h3>
-                </div>
+              {/* Header Hijau MyQuran */}
+              <div className="bg-[#0a7c29] text-white px-5 py-3.5 flex items-center justify-between">
+                <span className="w-6" />
+                <h3 className="text-base font-bold tracking-wide">
+                  Pengaturan
+                </h3>
                 <button
                   onClick={() => setShowTajweedGuide(false)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition ${
-                    isDark ? 'bg-slate-800 text-slate-300 hover:text-white' : 'bg-slate-100 text-slate-500 hover:text-slate-800'
-                  }`}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/20 transition active:scale-95"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="space-y-2.5 text-xs">
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#e11d48] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Pink / Magenta: Ghunnah & Idgham Bighunnah</span>
-                    <span className="text-[11px] opacity-75">Dengung 2 harakat saat nun/mim bertasydid atau nun/tanwin bertemu ينمو</span>
+              {/* Daftar Kaidah Tajwid dengan Indikator Warna & Saklar */}
+              <div className="p-4 space-y-1.5 text-sm select-none">
+                {/* 1. Master Toggle: Tajwid */}
+                <div
+                  onClick={() => {
+                    handleToggleTajweedFilter('master');
+                    if (!showTajweed) setShowTajweed(true);
+                  }}
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl cursor-pointer transition active:scale-98 ${
+                    isDark
+                      ? 'bg-slate-800/90 hover:bg-slate-800'
+                      : 'bg-emerald-600/15 hover:bg-emerald-600/25'
+                  }`}
+                >
+                  <span className="font-bold text-sm">Tajwid</span>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                    (showTajweed && tajweedFilters.master)
+                      ? 'bg-[#ffff00] border-emerald-900 shadow-sm scale-105'
+                      : 'bg-slate-400/30 border-slate-500'
+                  }`}>
+                    {(showTajweed && tajweedFilters.master) && (
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-900" />
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#2563eb] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Biru Cerah: Qalqalah</span>
-                    <span className="text-[11px] opacity-75">Pantulan suara huruf sukun قطبجد (baju di thoko)</span>
+                {/* 2. Madd 2-4-6 Harakat */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('madd246')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Madd 2-4-6 Harakat</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.madd246
+                      ? 'bg-[#00ac51] border-emerald-900 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.madd246 && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#7c3aed] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Ungu: Iqlab</span>
-                    <span className="text-[11px] opacity-75">Tukar bunyi nun sukun / tanwin menjadi mim saat bertemu huruf ba (ب)</span>
+                {/* 3. Madd 4-5 Harakat */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('madd45')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Madd 4-5 Harakat</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.madd45
+                      ? 'bg-[#00b0fc] border-sky-900 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.madd45 && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#059669] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Hijau Zamrud: Ikhfa Haqiqi & Syafawi</span>
-                    <span className="text-[11px] opacity-75">Samar-samar berdengung saat bertemu 15 huruf ikhfa atau mim sukun bertemu ba</span>
+                {/* 4. Madd 6 Harakat */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('madd6')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Madd 6 Harakat</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.madd6
+                      ? 'bg-[#ff57bc] border-pink-900 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.madd6 && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#ea580c] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Oranye: Idgham Bilaghunnah</span>
-                    <span className="text-[11px] opacity-75">Lebur tanpa dengung saat nun sukun/tanwin bertemu lam (ل) atau ra (ر)</span>
+                {/* Divider Line */}
+                <div className={`border-t my-1 ${isDark ? 'border-slate-800' : 'border-emerald-300/80'}`} />
+
+                {/* 5. Idgam Bigunnah */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('idghamBighunnah')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Idgam Bigunnah</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.idghamBighunnah
+                      ? 'bg-[#ff5896] border-rose-900 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.idghamBighunnah && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#dc2626] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Merah Cerah: Mad Wajib & Jaiz</span>
-                    <span className="text-[11px] opacity-75">Panjang 4-5 harakat (tanda layar ~ bertemu hamzah)</span>
+                {/* 6. Idgam Bilagunnah */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('idghamBilagunnah')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Idgam Bilagunnah</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.idghamBilagunnah
+                      ? 'bg-[#f91923] border-red-950 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.idghamBilagunnah && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#991b1b] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Merah Marun: Mad Lazim</span>
-                    <span className="text-[11px] opacity-75">Panjang 6 harakat penuh (tanda layar ~ bertemu tasydid/sukun)</span>
+                {/* 7. Ikhfa */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('ikhfa')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Ikhfa</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.ikhfa
+                      ? 'bg-[#00c055] border-emerald-950 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.ikhfa && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#d97706] flex-shrink-0 shadow-sm" />
-                  <div>
-                    <span className="font-bold block">Kuning Emas / Amber: Tafkhim Lam Jalalah</span>
-                    <span className="text-[11px] opacity-75">Lafazh Allah dibaca tebal setelah harakat fathah atau dhammah</span>
+                {/* 8. Iqlab */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('iqlab')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Iqlab</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.iqlab
+                      ? 'bg-[#00afff] border-sky-950 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.iqlab && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                </div>
+
+                {/* 9. Qalqalah */}
+                <div
+                  onClick={() => handleToggleTajweedFilter('qalqalah')}
+                  className="flex items-center justify-between px-3.5 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                >
+                  <span className="font-semibold text-xs sm:text-sm">Qalqalah</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    tajweedFilters.qalqalah
+                      ? 'bg-[#407af8] border-blue-950 shadow-xs'
+                      : 'bg-transparent border-slate-400 opacity-40'
+                  }`}>
+                    {tajweedFilters.qalqalah && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => setShowTajweedGuide(false)}
-                className="w-full py-2.5 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs shadow-xs transition active:scale-95"
-              >
-                Mengerti
-              </button>
+              {/* Footer Tombol Selesai */}
+              <div className="p-3 bg-black/5 dark:bg-slate-950/40 border-t border-emerald-300 dark:border-slate-800">
+                <button
+                  onClick={() => setShowTajweedGuide(false)}
+                  className="w-full py-2.5 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs shadow-xs transition active:scale-95"
+                >
+                  Selesai
+                </button>
+              </div>
             </div>
           </div>
         )}
