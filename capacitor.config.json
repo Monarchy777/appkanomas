@@ -3,8 +3,13 @@
   "appName": "Kanomas",
   "webDir": "dist",
   "server": {
+    "url": "https://appkanomas.mediasosial.net",
+    "cleartext": true,
     "androidScheme": "https",
-    "cleartext": true
+    "allowNavigation": [
+      "appkanomas.mediasosial.net",
+      "*.mediasosial.net"
+    ]
   },
   "ios": {
     "contentInset": "always",
