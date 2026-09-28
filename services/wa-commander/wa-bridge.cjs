@@ -38,8 +38,8 @@ const QR_IMAGE_PATH = path.resolve(__dirname, 'qr-code.png');
 const TRANSCRIPT_PATH = 'C:/Users/Desktop/.gemini/antigravity/brain/ff63607c-fe79-4756-a256-9a007b4b484c/.system_generated/logs/transcript.jsonl';
 
 const CASCADE_ID = 'ff63607c-fe79-4756-a256-9a007b4b484c';
-const CSRF_TOKEN = '2fe04268-a077-4265-bf2d-dc96df730999';
-const LS_PORT = 54162;
+let CSRF_TOKEN = '2fe04268-a077-4265-bf2d-dc96df730999';
+let LS_PORT = 54162;
 const BRIDGE_HTTP_PORT = 3899;
 
 const TARGET_PHONE = '6282112114222';
@@ -51,11 +51,15 @@ let transcriptFileSize = 0;
 const sentMessageIds = new Set();
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
-// Antrian Perintah (Command Queue)
+// Antrian Perintah (Command Queue) & Auto-Retry Watchdog
 const commandQueue = [];
 let isBusyExecuting = false;
 let executionTimeoutTimer = null;
 let currentExecutingCommand = null;
+let lastKnownUserPrompt = null;
+let autoRetryCount = 0;
+const MAX_AUTO_RETRIES = 2; // Auto-run on error maksimal 2x
+let isRetrying = false;
 let lastExecutionResult = {
   status: 'IDLE',
   command: null,
@@ -204,8 +208,53 @@ async function sendWhatsAppMessage(jid, text, quoted = null) {
   }
 }
 
+// Ambil pesan user terakhir dari transcript jika perintah dikirim di luar WA (misal langsung dari IDE)
+function getLastUserPromptFromTranscript() {
+  try {
+    if (!fs.existsSync(TRANSCRIPT_PATH)) return null;
+    const content = fs.readFileSync(TRANSCRIPT_PATH, 'utf8');
+    const lines = content.trim().split('\n');
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const entry = JSON.parse(lines[i]);
+        if (entry.source === 'USER_INPUT' && entry.content) {
+          const trimmed = entry.content.trim();
+          if (trimmed.startsWith('[AUTO-RETRY SYSTEM')) continue;
+          return trimmed;
+        }
+      } catch (e) {}
+    }
+  } catch (e) {
+    console.error('[GET-LAST-PROMPT-ERR]', e.message);
+  }
+  return null;
+}
+
+// Deteksi dinamis port LanguageServer dan CSRF token jika berubah
+function refreshLanguageServerDetails() {
+  try {
+    const cp = require('child_process');
+    const psCmd = `(Get-CimInstance Win32_Process | Where-Object { $_.Name -like '*language_server*' } | Select-Object -First 1).CommandLine`;
+    const cmdLine = cp.execSync(`powershell -NoProfile -Command "${psCmd}"`, { encoding: 'utf8', timeout: 5000 });
+    if (cmdLine) {
+      const tokenMatch = cmdLine.match(/--csrf_token\s+([a-zA-Z0-9-]+)/);
+      if (tokenMatch && tokenMatch[1]) {
+        CSRF_TOKEN = tokenMatch[1];
+        console.log(`[DISCOVERY] Updated CSRF_TOKEN: ${CSRF_TOKEN}`);
+      }
+      const bridgeUrlMatch = cmdLine.match(/--host_bridge_url=http:\/\/127\.0\.0\.1:(\d+)/);
+      if (bridgeUrlMatch && bridgeUrlMatch[1]) {
+        LS_PORT = parseInt(bridgeUrlMatch[1], 10) + 1;
+        console.log(`[DISCOVERY] Updated LS_PORT: ${LS_PORT}`);
+      }
+    }
+  } catch (e) {
+    console.warn('[DISCOVERY-WARN] Failed to refresh LanguageServer details:', e.message);
+  }
+}
+
 // Forward incoming user prompt into Antigravity AI IDE
-function forwardToAntigravity(promptText) {
+function forwardToAntigravity(promptText, retried = false) {
   return new Promise((resolve, reject) => {
     console.log(`[ANTIGRAVITY-FWD] Forwarding prompt to IDE: "${promptText}"`);
 
@@ -236,8 +285,18 @@ function forwardToAntigravity(promptText) {
       });
     });
 
-    req.on('error', (err) => {
+    req.on('error', async (err) => {
       console.error('[ANTIGRAVITY-FWD-ERR]', err.message);
+      if (!retried && (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT')) {
+        console.log('[ANTIGRAVITY-FWD] Mencoba me-refresh port & token LanguageServer...');
+        refreshLanguageServerDetails();
+        try {
+          const retryOk = await forwardToAntigravity(promptText, true);
+          return resolve(retryOk);
+        } catch (retryErr) {
+          return reject(retryErr);
+        }
+      }
       reject(err);
     });
 
@@ -253,6 +312,10 @@ async function processNextInQueue() {
   const nextItem = commandQueue.shift();
   isBusyExecuting = true;
   currentExecutingCommand = nextItem.text;
+  lastKnownUserPrompt = nextItem.text;
+  autoRetryCount = 0;
+  isRetrying = false;
+
   lastExecutionResult = {
     status: 'RUNNING',
     command: currentExecutingCommand,
@@ -287,6 +350,8 @@ async function processNextInQueue() {
     );
     isBusyExecuting = false;
     currentExecutingCommand = null;
+    autoRetryCount = 0;
+    isRetrying = false;
     commandQueue.length = 0;
     updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
     ensureDevServerRunning(true);
@@ -305,6 +370,8 @@ async function processNextInQueue() {
     };
     isBusyExecuting = false;
     currentExecutingCommand = null;
+    autoRetryCount = 0;
+    isRetrying = false;
     commandQueue.length = 0;
     updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
     ensureDevServerRunning(true);
@@ -340,7 +407,7 @@ function initTranscriptMonitoring() {
   }
 }
 
-// Cek pembaruan transcript untuk menangkap jawaban selesai dari AI
+// Cek pembaruan transcript untuk menangkap jawaban selesai dari AI atau error
 async function checkTranscriptUpdates() {
   try {
     if (!fs.existsSync(TRANSCRIPT_PATH)) return;
@@ -363,6 +430,19 @@ async function checkTranscriptUpdates() {
         if (entry.step_index <= lastProcessedStepIndex) continue;
         lastProcessedStepIndex = entry.step_index;
 
+        // Tangkap prompt user baru dari chat IDE langsung
+        if (entry.source === 'USER_INPUT' && entry.content) {
+          const trimmedPrompt = entry.content.trim();
+          if (!trimmedPrompt.startsWith('[AUTO-RETRY SYSTEM')) {
+            lastKnownUserPrompt = trimmedPrompt;
+            if (!isRetrying) {
+              currentExecutingCommand = trimmedPrompt;
+              isBusyExecuting = true;
+              autoRetryCount = 0;
+            }
+          }
+        }
+
         const lineStr = typeof line === 'string' ? line : JSON.stringify(line);
         const isExecutionError = (
           (entry.status === 'ERROR' && entry.source !== 'USER_INPUT') ||
@@ -373,43 +453,112 @@ async function checkTranscriptUpdates() {
         );
 
         if (isExecutionError) {
-          const failedCmd = currentExecutingCommand || 'Perintah yang sedang diproses';
+          const failedCmd = currentExecutingCommand || lastKnownUserPrompt || getLastUserPromptFromTranscript() || 'Perintah yang sedang diproses';
           console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index} ("Agent execution terminated due to error")! Perintah: "${failedCmd}"`);
-          console.log('[RECOVERY] Mematikan fungsi server yang berjalan dan menyalakan kembali dev server & bridge WA...');
-
-          lastExecutionResult = {
-            status: 'ERROR',
-            command: failedCmd,
-            error: 'Unknown: Agent execution terminated due to error.',
-            timestamp: new Date().toISOString()
-          };
 
           if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
-          isBusyExecuting = false;
-          currentExecutingCommand = null;
-          commandQueue.length = 0;
-          updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
 
-          // 1. Matikan fungsi server lama yang berjalan & jalankan ulang dev server secara bersih
-          await ensureDevServerRunning(true);
+          if (autoRetryCount < MAX_AUTO_RETRIES) {
+            autoRetryCount++;
+            isRetrying = true;
+            console.log(`[AUTO-RETRY] Auto-Run On Error aktif! Memulai percobaan ${autoRetryCount} dari ${MAX_AUTO_RETRIES}...`);
 
-          // 2. Pastikan bridge WA tetap menyala & sehat
-          ensureWaSocketHealthy();
+            lastExecutionResult = {
+              status: 'RETRYING',
+              command: failedCmd,
+              error: 'Unknown: Agent execution terminated due to error.',
+              retryAttempt: autoRetryCount,
+              maxRetries: MAX_AUTO_RETRIES,
+              timestamp: new Date().toISOString()
+            };
 
-          // 3. Kirim notifikasi status ERROR eksplisit ke WhatsApp
-          const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
-          await sendWhatsAppMessage(
-            targetJid,
-            `❌ *STATUS: ERROR (Perintah Gagal Dijalankan)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* Unknown: Agent execution terminated due to error.\n\nPerintah tidak dapat diselesaikan oleh sistem AI Agent.\n\n🔄 *Tindakan Otomatis Dilaksanakan:*\n• Fungsi server yang berjalan telah dimatikan dan direstart ulang (Port 3000).\n• WhatsApp Bridge dipastikan ON & online.\n• Antrian dibersihkan (0 pending). Silakan kirimkan kembali perintah Anda jika diperlukan.`
-          );
+            updateStatus({
+              isBusyExecuting: true,
+              currentCommand: `[Auto-Retry ${autoRetryCount}/${MAX_AUTO_RETRIES}] ${failedCmd}`
+            });
+
+            // 1. Matikan fungsi server lama & restart dev server port 3000 secara bersih
+            await ensureDevServerRunning(true);
+
+            // 2. Pastikan bridge WA tetap tersambung
+            ensureWaSocketHealthy();
+
+            // 3. Kirim notifikasi ke WhatsApp bahwa Auto-Retry sedang dijalankan secara otomatis
+            const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+            await sendWhatsAppMessage(
+              targetJid,
+              `⚠️ *STATUS: KENDALA RUNTIME TERDETEKSI*\n━━━━━━━━━━━━━━━━━━━━━━━━\n🛑 *Kendala:* Unknown: Agent execution terminated due to error.\n📝 *Perintah:* "${failedCmd}"\n\n🔄 *AUTO-RUN ON ERROR (Percobaan ${autoRetryCount}/${MAX_AUTO_RETRIES}):*\n• Dev Server (Port 3000) telah direstart bersih.\n• AI Agent Antigravity otomatis dipicu dan dijalankan ulang sekarang...\n⏳ Mohon tunggu sebentar, eksekusi sedang dilanjutkan.`
+            );
+
+            // 4. Jeda 2.5 detik lalu trigger Antigravity IDE kembali secara otomatis!
+            setTimeout(async () => {
+              try {
+                const autoRetryPrompt = `[AUTO-RETRY SYSTEM - Percobaan ${autoRetryCount}/${MAX_AUTO_RETRIES}]\n` +
+                  `Sistem Watchdog mendeteksi eksekusi perintah sebelumnya terhenti di tengah jalan karena kendala runtime platform ('Agent execution terminated due to error').\n` +
+                  `Server Vite port 3000 dan bridge WhatsApp sudah direstart bersih dan online.\n` +
+                  `Instruksi: Silakan langsung lanjutkan dan tuntaskan perintah pengguna berikut sampai selesai:\n\n` +
+                  `"${failedCmd}"`;
+
+                console.log(`[AUTO-RETRY] Mengirim prompt auto-trigger ke Antigravity LanguageServer...`);
+                await forwardToAntigravity(autoRetryPrompt);
+
+                // Set timer timeout 4 menit untuk sesi auto-retry ini
+                executionTimeoutTimer = setTimeout(async () => {
+                  console.warn('[QUEUE] Timeout pada auto-retry...');
+                  isBusyExecuting = false;
+                  currentExecutingCommand = null;
+                  autoRetryCount = 0;
+                  isRetrying = false;
+                  updateStatus({ isBusyExecuting: false, currentCommand: null });
+                  ensureDevServerRunning(true);
+                }, 240000);
+              } catch (retryErr) {
+                console.error('[AUTO-RETRY-TRIGGER-ERR]', retryErr.message);
+              }
+            }, 2500);
+
+          } else {
+            // Batas maksimal auto-retry tercapai (2x berturut-turut)
+            console.log(`[AUTO-RETRY] Batas maksimum auto-retry (${MAX_AUTO_RETRIES}) telah tercapai.`);
+            lastExecutionResult = {
+              status: 'ERROR',
+              command: failedCmd,
+              error: `Batas auto-retry tercapai (${MAX_AUTO_RETRIES}x gagal)`,
+              timestamp: new Date().toISOString()
+            };
+
+            autoRetryCount = 0;
+            isRetrying = false;
+            isBusyExecuting = false;
+            currentExecutingCommand = null;
+            commandQueue.length = 0;
+            updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
+
+            // 1. Matikan fungsi server lama & restart dev server secara bersih
+            await ensureDevServerRunning(true);
+
+            // 2. Pastikan bridge WA tetap menyala & sehat
+            ensureWaSocketHealthy();
+
+            // 3. Kirim notifikasi status ERROR eksplisit ke WhatsApp
+            const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+            await sendWhatsAppMessage(
+              targetJid,
+              `❌ *STATUS: ERROR (Batas Auto-Run Tercapai)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* Eksekusi telah dicoba ulang otomatis sebanyak ${MAX_AUTO_RETRIES}x namun runtime tetap mengalami error.\n\n🔄 *Kondisi Sistem:*\n• Dev Server (Port 3000) & Bridge WA tetap ON & standby.\n• Antrian dibersihkan (0 pending).\n💡 *Saran:* Silakan periksa kembali instruksi atau sederhanakan perintah.`
+            );
+          }
         } else if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
           const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
           if (entry.content && !hasToolCalls) {
             console.log(`[TRANSCRIPT] Terdeteksi jawaban final AI (step ${entry.step_index})! Mengirim ke WhatsApp...`);
 
+            // Reset counter auto-retry karena eksekusi telah berhasil tuntas!
+            autoRetryCount = 0;
+            isRetrying = false;
+
             lastExecutionResult = {
               status: 'SUCCESS',
-              command: currentExecutingCommand || 'Perintah selesai',
+              command: currentExecutingCommand || lastKnownUserPrompt || 'Perintah selesai',
               error: null,
               timestamp: new Date().toISOString()
             };
@@ -636,7 +785,11 @@ async function startWhatsAppBridge() {
 
         let execInfo = '💤 *Status AI: Siap Menerima Instruksi Baru.*';
         if (isBusyExecuting) {
-          execInfo = `⚙️ *Status AI: Sedang Aktif Memproses*\n📝 *Perintah:* "${currentExecutingCommand || '-'}"`;
+          if (isRetrying) {
+            execInfo = `🔄 *Status AI: Auto-Run On Error Aktif*\nPercobaan ke-${lastExecutionResult.retryAttempt || 1} dari ${lastExecutionResult.maxRetries || 2}\n📝 *Perintah:* "${currentExecutingCommand || '-'}"`;
+          } else {
+            execInfo = `⚙️ *Status AI: Sedang Aktif Memproses*\n📝 *Perintah:* "${currentExecutingCommand || '-'}"`;
+          }
         } else if (lastExecutionResult.status === 'ERROR') {
           const timeStr = lastExecutionResult.timestamp 
             ? new Date(lastExecutionResult.timestamp).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB'
@@ -660,6 +813,7 @@ async function startWhatsAppBridge() {
 ✨ *Kirim perintah ke Diri Sendiri kapan saja:*
 • Bebas ketik teks instruksi apa saja (bahasa Indonesia natural).
 • Jika sedang ada tugas yang berjalan, perintah Anda otomatis masuk ANTRIAN.
+• Jika terjadi error runtime, sistem memiliki fitur *AUTO-RUN ON ERROR* otomatis!
 • Pesan ke orang lain atau grup otomatis diabaikan aman.
 
 *Perintah Khusus:*
@@ -684,6 +838,9 @@ async function startWhatsAppBridge() {
       // Jika AI sedang idle, langsung jalankan!
       isBusyExecuting = true;
       currentExecutingCommand = text;
+      lastKnownUserPrompt = text;
+      autoRetryCount = 0;
+      isRetrying = false;
       lastExecutionResult = {
         status: 'RUNNING',
         command: text,
@@ -711,6 +868,8 @@ async function startWhatsAppBridge() {
         );
         isBusyExecuting = false;
         currentExecutingCommand = null;
+        autoRetryCount = 0;
+        isRetrying = false;
         commandQueue.length = 0;
         updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
         ensureDevServerRunning(true);
@@ -729,6 +888,8 @@ async function startWhatsAppBridge() {
         };
         isBusyExecuting = false;
         currentExecutingCommand = null;
+        autoRetryCount = 0;
+        isRetrying = false;
         updateStatus({ isBusyExecuting: false, currentCommand: null });
         ensureDevServerRunning(true);
         await sendWhatsAppMessage(
