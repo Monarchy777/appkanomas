@@ -7,7 +7,7 @@
     font-family: 'LPMQ Isep Misbah';
     src: url('/fonts/LPMQ.woff2') format('woff2'),
          url('/fonts/LPMQ.ttf') format('truetype');
-    font-weight: 400;
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
   }
@@ -15,28 +15,21 @@
     font-family: 'LPMQ';
     src: url('/fonts/LPMQ.woff2') format('woff2'),
          url('/fonts/LPMQ.ttf') format('truetype');
-    font-weight: 400;
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
     font-family: 'KFGQPC Uthman Taha Naskh';
     src: url('/fonts/KFGQPC-Uthman-Taha.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'KFGQPC Uthman Taha Naskh';
-    src: url('/fonts/KFGQPC-Uthman-Taha-Bold.woff2') format('woff2');
-    font-weight: 700;
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
     font-family: 'KFGQPC Uthmanic Script HAFS';
     src: url('/fonts/KFGQPC-Hafs.woff2') format('woff2');
-    font-weight: 400;
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
   }
@@ -64,26 +57,35 @@
   }
 }
 
-/* Quranic Typography Fonts: Indonesia, Madinah, Modern */
+/* Quranic Typography Fonts: Indonesia, Madinah, Modern (Sesuai Standar MyQuran The Wali Studio) */
 .font-quran-lpmq {
-  font-family: 'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', serif !important;
-  font-weight: 500 !important;
-  -webkit-text-stroke: 0.25px currentColor;
+  font-family: 'LPMQ Isep Misbah', 'LPMQ', serif !important;
+  font-weight: 500;
+  font-synthesis: none;
+  font-feature-settings: "calt" 1, "liga" 1, "mkmk" 1, "mark" 1;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-quran-madinah {
   font-family: 'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif !important;
-  font-weight: 500 !important;
-  -webkit-text-stroke: 0.25px currentColor;
+  font-weight: 500;
+  font-synthesis: none;
+  font-feature-settings: "calt" 1, "liga" 1, "mkmk" 1, "mark" 1;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-quran-modern {
   font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 500 !important;
-  -webkit-text-stroke: 0.2px currentColor;
+  font-weight: 500;
+  font-synthesis: none;
+  font-feature-settings: "calt" 1, "liga" 1, "mkmk" 1, "mark" 1;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-quran-scheherazade {

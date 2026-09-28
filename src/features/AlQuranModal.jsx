@@ -478,36 +478,45 @@ export function applyKashidaToArabic(text, mode = 'unstack') {
   return res;
 }
 
-// NORMALISASI TEKS ARAB AL-QUR'AN (MEMPERBAIKI FATHATAIN, NORMALISASI MEEM IQLAB, & MERAPIKAN WAQAF)
+// NORMALISASI TEKS ARAB AL-QUR'AN (STANDAR RESMI LPMQ KEMENAG RI PERSIS MYQURAN & RASM UTSMANI MADINAH)
 export function normalizeQuranText(text, isMadinah = false) {
   if (!text) return '';
   let cleaned = text
-    // 1. Normalisasi meem iqlab Tanzil (\u06ED) ke standard small high meem (\u06E2) agar iqlab terbaca rapi di semua font
+    // 1. Bersihkan karakter kontrol tak kasat mata
+    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
+    // 2. Hapus huruf Ae salah tempat (\u06D5) yang sering muncul sebelum waqaf di API equran.id
+    .replace(/\u06D5/g, '')
+    // 3. Hapus tanda ruku khusus (\u08D6) agar tampilan rapi & konsisten
+    .replace(/\u08D6/g, '')
+    // 4. Normalisasi meem iqlab Tanzil (\u06ED) ke standard small high meem (\u06E2)
     .replace(/\u06ED/g, '\u06E2')
     .replace(/[\u06EA\u06EB]/g, '')
-    // 2. Bersihkan karakter kontrol tak kasat mata
-    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
-    // 3. Pisahkan tanda waqaf baik sebelum maupun sesudahnya agar tidak menindih huruf/tanwin
+    // 5. Rapatkan meem iqlab ke kata agar duduk pas di atas tanwin/nun mati persis MyQuran
+    .replace(/\s+(\u06E2)/g, '$1')
+    // 6. Pisahkan tanda waqaf baik sebelum maupun sesudahnya agar tidak menindih huruf/tanwin
     .replace(/([^\s])([ۖ-ۜۘ-ۛ])/g, '$1 $2')
-    .replace(/([ۖ-ۜۘ-ۛ])([^\s])/g, '$1 $2')
-    // 4. Hapus tanda ruku khusus Kemenag (ࣖ) yang tidak didukung font modern
-    .replace(/\u08D6/g, '')
-    // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
-    .replace(/\u06E4/g, '\u0653');
+    .replace(/([ۖ-ۜۘ-ۛ])([^\s])/g, '$1 $2');
 
-  // 6. Normalisasi Dhabth Mad Shilah (Mencegah Dhammah terlihat menjadi Fatahtain):
-  // Pada font KFGQPC Madinah, kode U+0657 (dhammah terbalik Kemenag) dibajak untuk glif open-fathatan.
-  // Jika sedang memproses Mushaf Madinah, konversi dhabth Kemenag ke dhabth resmi Madinah:
-  // Dhammah terbalik (U+0657) -> Dhammah biasa + Wawu kecil (ُۥ / \u064F\u06E5)
-  // Kasrah berdiri (U+0656) -> Kasrah biasa + Ya kecil (ِۦ / \u0650\u06E6)
+  // 7. Normalisasi Dhabth Sesuai Standar Mushaf:
   if (isMadinah) {
+    // A. MUSHAF MADINAH & MODERN (Rasm Utsmani Madinah / King Fahd Complex):
+    // - Dhommah terbalik (U+0657) -> Dhammah biasa + Wawu kecil (ُۥ / \u064F\u06E5)
+    //   (Mencegah kode U+0657 pada font KFGQPC terbaca/terlihat menjadi open fathatan)
+    // - Kasrah berdiri (U+0656) -> Kasrah biasa + Ya kecil (ِۦ / \u0650\u06E6)
+    // - Tanda sukun mati -> Kepala kha' Utsmani (\u06E1)
+    // - Small madda (\u06E4) -> Standard madda (\u0653)
     cleaned = cleaned
       .replace(/\u0657/g, '\u064F\u06E5')
-      .replace(/\u0656/g, '\u0650\u06E6');
+      .replace(/\u0656/g, '\u0650\u06E6')
+      .replace(/\u0652/g, '\u06E1')
+      .replace(/\u06E4/g, '\u0653');
+  } else {
+    // B. MUSHAF STANDAR INDONESIA (MSI LPMQ Kemenag RI persis MyQuran The Wali Studio):
+    // - Tanda sukun SELALU sukun bulat (\u0652). Font LPMQ Isep Misbah menggunakan \u0652 untuk glif sukun bulat otentik.
+    //   Jika ada sisa kepala kha' (\u06E1), kembalikan ke \u0652 agar tidak hilang/kosong!
+    // - Dhommah terbalik (U+0657) dan Kasrah berdiri (U+0656) dipertahankan utuh karena font LPMQ memiliki glif otentik Kemenag!
+    cleaned = cleaned.replace(/\u06E1/g, '\u0652');
   }
-
-  // 7. Gunakan sukun resmi Rasm Utsmani (kepala kha' \u06E1) persis MyQuran untuk tampilan tanda mati yang otentik
-  cleaned = cleaned.replace(/\u0652/g, '\u06E1');
 
   cleaned = cleaned.replace(/\s+/g, ' ');
   return cleaned.trim();
@@ -520,6 +529,11 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
 
   // Master switch check: jika tajwid dimatikan global atau via filter master
   const isMasterActive = showTajweed && (tajweedFilters ? tajweedFilters.master !== false : true);
+
+  // Jika Tajwid OFF dan Terjemah Per-Kata OFF: render teks murni langsung (shaping teks 100% mulus tanpa terpotong span)
+  if (!isMasterActive && (!wbwOptions || !wbwOptions.wbwWords)) {
+    return text;
+  }
 
   const annotations = new Map();
 
@@ -1227,7 +1241,7 @@ export default function AlQuranModal({ onClose }) {
       return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif";
     }
     // Mushaf Standar Indonesia Kemenag: font resmi LPMQ Isep Misbah (menampilkan dhommah terbalik U+0657 otentik)
-    return "'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', 'Scheherazade New', serif";
+    return "'LPMQ Isep Misbah', 'LPMQ', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
@@ -1240,8 +1254,8 @@ export default function AlQuranModal({ onClose }) {
   // Helper teks Arab ayat sesuai mushaf aktif dengan normalisasi menyeluruh & kashida anti-menumpuk
   const getAyatArabText = (ayat) => {
     if (!ayat) return '';
-    const isMadinah = (mushafType === 'madinah' || mushafType === 'modern') && !!ayat.teksArabMadinah;
-    const raw = isMadinah ? ayat.teksArabMadinah : (ayat.teksArab || '');
+    const isMadinah = (mushafType === 'madinah' || mushafType === 'modern');
+    const raw = (isMadinah && ayat.teksArabMadinah) ? ayat.teksArabMadinah : (ayat.teksArab || '');
     const normalized = normalizeQuranText(raw, isMadinah);
     return applyKashidaToArabic(normalized, kashidaMode);
   };
@@ -1524,7 +1538,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v12_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v15_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -3182,9 +3196,10 @@ export default function AlQuranModal({ onClose }) {
                                   lineHeight: dynamicArabicLineHeight + (spaciousMode ? 0.15 : 0),
                                   wordSpacing: spaciousMode ? '0.18em' : '0.04em',
                                   textAlign: 'right',
-                                  fontFeatureSettings: '"calt" 1, "liga" 1, "mkmk" 1',
+                                  fontFeatureSettings: '"calt" 1, "liga" 1, "mkmk" 1, "mark" 1',
+                                  fontSynthesis: 'none',
                                   fontWeight: 500,
-                                  textRendering: 'geometricPrecision',
+                                  textRendering: 'optimizeLegibility',
                                   WebkitFontSmoothing: 'antialiased',
                                   MozOsxFontSmoothing: 'grayscale',
                                   width: '100%'
