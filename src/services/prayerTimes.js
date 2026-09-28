@@ -98,10 +98,31 @@ export function calculatePrayerTimes(cityOrId = 'tasikmalaya', date = new Date()
   const currentHour = (utcHour + timezone + 24) % 24;
 
   let nextIndex = list.findIndex(p => p.raw > currentHour);
+  let isNextDay = false;
   if (nextIndex === -1) {
     nextIndex = 0; // Subuh tomorrow
+    isNextDay = true;
   }
   const nextPrayer = list[nextIndex];
+
+  // Hitung sisa waktu menuju waktu sholat berikutnya
+  let diffHours = nextPrayer.raw - currentHour;
+  if (diffHours < 0 || isNextDay) {
+    diffHours += 24;
+  }
+  const remainingTotalMinutes = Math.max(1, Math.round(diffHours * 60));
+  const remHours = Math.floor(remainingTotalMinutes / 60);
+  const remMinutes = remainingTotalMinutes % 60;
+  let remainingText = '';
+  if (remHours > 0) {
+    remainingText = `${remHours} jam ${remMinutes} mnt lagi`;
+  } else {
+    remainingText = `${remMinutes} menit lagi`;
+  }
+
+  nextPrayer.remainingMinutes = remainingTotalMinutes;
+  nextPrayer.remainingText = remainingText;
+  nextPrayer.timeZoneCode = timeZoneCode;
 
   const dateStr = date.toLocaleDateString('id-ID', {
     timeZone: isSaudi ? 'Asia/Riyadh' : undefined,

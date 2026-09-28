@@ -33,7 +33,17 @@ import {
   Info,
   Sliders,
   Image as ImageIcon,
-  Download
+  Download,
+  Calendar,
+  Plus,
+  CheckCircle,
+  CheckCircle2,
+  Target,
+  ArrowRight,
+  Languages,
+  ListOrdered,
+  Pin,
+  Award
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Capacitor } from '@capacitor/core';
@@ -159,6 +169,40 @@ export const SURAH_LIST = [
   { nomor: 114, nama: "الناس", namaLatin: "An-Nas", arti: "Manusia", jumlahAyat: 6, tempatTurun: "Madinah", wahyu: 21, juz: 30, hal: 604 }
 ];
 
+// DAFTAR 30 JUZ RESMI AL-QUR'AN BESERTA AYAT AWAL DAN AKHIR
+export const JUZ_LIST = [
+  { juz: 1, surahNomor: 1, surahName: "Al-Fatihah", ayat: 1, endSurah: "Al-Baqarah", endAyat: 141, totalAyat: 148 },
+  { juz: 2, surahNomor: 2, surahName: "Al-Baqarah", ayat: 142, endSurah: "Al-Baqarah", endAyat: 252, totalAyat: 111 },
+  { juz: 3, surahNomor: 2, surahName: "Al-Baqarah", ayat: 253, endSurah: "Ali 'Imran", endAyat: 92, totalAyat: 126 },
+  { juz: 4, surahNomor: 3, surahName: "Ali 'Imran", ayat: 93, endSurah: "An-Nisa'", endAyat: 23, totalAyat: 131 },
+  { juz: 5, surahNomor: 4, surahName: "An-Nisa'", ayat: 24, endSurah: "An-Nisa'", endAyat: 147, totalAyat: 124 },
+  { juz: 6, surahNomor: 4, surahName: "An-Nisa'", ayat: 148, endSurah: "Al-Ma'idah", endAyat: 81, totalAyat: 110 },
+  { juz: 7, surahNomor: 5, surahName: "Al-Ma'idah", ayat: 82, endSurah: "Al-An'am", endAyat: 110, totalAyat: 149 },
+  { juz: 8, surahNomor: 6, surahName: "Al-An'am", ayat: 111, endSurah: "Al-A'raf", endAyat: 87, totalAyat: 142 },
+  { juz: 9, surahNomor: 7, surahName: "Al-A'raf", ayat: 88, endSurah: "Al-Anfal", endAyat: 40, totalAyat: 159 },
+  { juz: 10, surahNomor: 8, surahName: "Al-Anfal", ayat: 41, endSurah: "At-Taubah", endAyat: 92, totalAyat: 127 },
+  { juz: 11, surahNomor: 9, surahName: "At-Taubah", ayat: 93, endSurah: "Hud", endAyat: 5, totalAyat: 151 },
+  { juz: 12, surahNomor: 11, surahName: "Hud", ayat: 6, endSurah: "Yusuf", endAyat: 52, totalAyat: 170 },
+  { juz: 13, surahNomor: 12, surahName: "Yusuf", ayat: 53, endSurah: "Ibrahim", endAyat: 52, totalAyat: 154 },
+  { juz: 14, surahNomor: 15, surahName: "Al-Hijr", ayat: 1, endSurah: "An-Nahl", endAyat: 128, totalAyat: 227 },
+  { juz: 15, surahNomor: 17, surahName: "Al-Isra'", ayat: 1, endSurah: "Al-Kahf", endAyat: 74, totalAyat: 185 },
+  { juz: 16, surahNomor: 18, surahName: "Al-Kahf", ayat: 75, endSurah: "Taha", endAyat: 135, totalAyat: 269 },
+  { juz: 17, surahNomor: 21, surahName: "Al-Anbiya'", ayat: 1, endSurah: "Al-Hajj", endAyat: 78, totalAyat: 190 },
+  { juz: 18, surahNomor: 23, surahName: "Al-Mu'minun", ayat: 1, endSurah: "Al-Furqan", endAyat: 20, totalAyat: 202 },
+  { juz: 19, surahNomor: 25, surahName: "Al-Furqan", ayat: 21, endSurah: "An-Naml", endAyat: 55, totalAyat: 339 },
+  { juz: 20, surahNomor: 27, surahName: "An-Naml", ayat: 56, endSurah: "Al-'Ankabut", endAyat: 45, totalAyat: 171 },
+  { juz: 21, surahNomor: 29, surahName: "Al-'Ankabut", ayat: 46, endSurah: "Al-Ahzab", endAyat: 30, totalAyat: 178 },
+  { juz: 22, surahNomor: 33, surahName: "Al-Ahzab", ayat: 31, endSurah: "Yasin", endAyat: 27, totalAyat: 169 },
+  { juz: 23, surahNomor: 36, surahName: "Yasin", ayat: 28, endSurah: "Az-Zumar", endAyat: 31, totalAyat: 357 },
+  { juz: 24, surahNomor: 39, surahName: "Az-Zumar", ayat: 32, endSurah: "Fussilat", endAyat: 46, totalAyat: 175 },
+  { juz: 25, surahNomor: 41, surahName: "Fussilat", ayat: 47, endSurah: "Al-Jasiyah", endAyat: 37, totalAyat: 246 },
+  { juz: 26, surahNomor: 46, surahName: "Al-Ahqaf", ayat: 1, endSurah: "Az-Zariyat", endAyat: 30, totalAyat: 195 },
+  { juz: 27, surahNomor: 51, surahName: "Az-Zariyat", ayat: 31, endSurah: "Al-Hadid", endAyat: 29, totalAyat: 399 },
+  { juz: 28, surahNomor: 58, surahName: "Al-Mujadilah", ayat: 1, endSurah: "At-Tahrim", endAyat: 12, totalAyat: 137 },
+  { juz: 29, surahNomor: 67, surahName: "Al-Mulk", ayat: 1, endSurah: "Al-Mursalat", endAyat: 50, totalAyat: 431 },
+  { juz: 30, surahNomor: 78, surahName: "An-Naba'", ayat: 1, endSurah: "An-Nas", endAyat: 6, totalAyat: 564 }
+];
+
 // DAFTAR QARI PILIHAN INTERNASIONAL
 const QARI_LIST = [
   { id: '05', name: 'Syaikh Misyari Rasyid Al-Afasy' },
@@ -167,23 +211,18 @@ const QARI_LIST = [
   { id: '06', name: 'Syaikh Yasser Al-Dosari' }
 ];
 
-// PALET 4 TEMA PEMBACAAN DENGAN KONTRAS TINGGI TERJAMIN
-// 1. Mushaf Hijau (#d5f5d8) - Persis Screenshot User 1 & 2
-// 2. Terang (#ffffff)
-// 3. Gelap (#09111c) - Teks Putih & Mint Terang, Tidak Akan Hilang/Gelap!
-// 4. Sepia (#fbf6ea) - Nuansa Kertas Mushaf Klasik
-// PALET TEMA & BACKGROUND PEMBACAAN (WARNA POLOS ISLAMI & ELEGAN)
+// PALET TEMA PEMBACAAN DENGAN KONTRAS TINGGI TERJAMIN
 export const THEME_PALETTES = {
   mushaf: {
     id: 'mushaf',
     name: 'Hijau Kemenag',
     type: 'color',
-    bg: '#d5f5d8',
-    arabicColor: '#064e3b',
-    latinColor: '#047857',
+    bg: '#e8f9eb',
+    arabicColor: '#022c22',
+    latinColor: '#064e3b',
     translationColor: '#0f172a',
-    subHeaderBg: 'bg-[#bbf7d0] text-emerald-950 border-emerald-300',
-    bismillahColor: '#065f46',
+    subHeaderBg: 'bg-[#bbf7d0] text-emerald-950 border-emerald-400',
+    bismillahColor: '#064e3b',
     borderDivider: '#a7f3d0',
     highlightBg: 'bg-emerald-200/70 ring-2 ring-emerald-600',
     activeAudioBg: 'bg-emerald-200/60 ring-2 ring-emerald-500',
@@ -196,10 +235,10 @@ export const THEME_PALETTES = {
     bg: '#ffffff',
     arabicColor: '#000000',
     latinColor: '#047857',
-    translationColor: '#1e293b',
-    subHeaderBg: 'bg-slate-50 text-slate-900 border-slate-200',
+    translationColor: '#0f172a',
+    subHeaderBg: 'bg-slate-100 text-slate-900 border-slate-300',
     bismillahColor: '#0f172a',
-    borderDivider: '#e2e8f0',
+    borderDivider: '#cbd5e1',
     highlightBg: 'bg-amber-100 ring-2 ring-amber-400',
     activeAudioBg: 'bg-emerald-50 ring-2 ring-emerald-500',
     isDark: false
@@ -272,11 +311,11 @@ export const TAJWEED_THEME_RULES = {
     ghunnah: '#e11d48',
     qalqalah: '#0284c7',
     iqlab: '#7c3aed',
-    ikhfa: '#059669',
+    ikhfa: '#065f46',
     madd: '#b45309',
     maddLazim: '#dc2626',
     idghamBila: '#ea580c',
-    base: '#064e3b'
+    base: '#022c22'
   },
   light: {
     ghunnah: '#e11d48',
@@ -542,14 +581,80 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
 }
 
 export default function AlQuranModal({ onClose }) {
-  // 1. Navigation & Surah State (Default Surah 48 Al-Fath)
-  const [selectedSurah, setSelectedSurah] = useState(() => SURAH_LIST[47]);
+  // 1. Navigation & Views (Default: Interactive Index List View)
+  const [viewState, setViewState] = useState('index'); // 'index' | 'reader'
+  const [indexTab, setIndexTab] = useState('surah'); // 'surah' | 'juz' | 'khatam' | 'bookmarks'
+  const [selectedSurah, setSelectedSurah] = useState(() => SURAH_LIST[0]); // Default 1 Al-Fatihah
   const [surahDetail, setSurahDetail] = useState(null);
   const [loadingSurah, setLoadingSurah] = useState(false);
   const [showSurahPicker, setShowSurahPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [targetAyatToScroll, setTargetAyatToScroll] = useState(null);
+  const [surahAyatJumpModal, setSurahAyatJumpModal] = useState(null);
 
-  // 2. 4 Mode Bacaan (Default: Mushaf Hijau #d5f5d8)
+  // 1B. Penanda Ayat Terakhir & Auto-Save
+  const [lastReadPosition, setLastReadPosition] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_last_read');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // 1C. Multi-Khataman Al-Quran (Bisa banyak khataman tanpa saling menindih)
+  const [khatamanSessions, setKhatamanSessions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_khataman_sessions');
+      return saved ? JSON.parse(saved) : [
+        {
+          id: 'khatam-1',
+          title: 'Khataman Ramadhan',
+          targetPerson: 'Pribadi',
+          startDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          targetDays: 30,
+          completedJuz: [],
+          lastSurahNomor: 1,
+          lastAyatNomor: 1,
+          notes: 'Niat ikhlas lillahi ta\'ala'
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+  const [showNewKhatamModal, setShowNewKhatamModal] = useState(false);
+  const [newKhatamInput, setNewKhatamInput] = useState({
+    title: '',
+    targetPerson: '',
+    targetDays: 30,
+    startDate: new Date().toISOString().split('T')[0],
+    notes: ''
+  });
+
+  // 1D. Fitur Arti Per Kata (Word-by-Word Translation)
+  const [showWordByWord, setShowWordByWord] = useState(() => {
+    try {
+      return localStorage.getItem('kanomas_quran_wbw') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [wordByWordData, setWordByWordData] = useState({});
+  const [loadingWordByWord, setLoadingWordByWord] = useState(false);
+
+  // Toast feedback
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef(null);
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage('');
+    }, 2800);
+  };
+
+  // 2. 4 Mode Bacaan (Default: Mushaf Hijau)
   const [themeMode, setThemeMode] = useState(() => {
     try {
       return localStorage.getItem('kanomas_quran_theme') || 'mushaf';
@@ -843,6 +948,211 @@ export default function AlQuranModal({ onClose }) {
     try {
       localStorage.setItem('kanomas_hidden_read', val ? 'true' : 'false');
     } catch {}
+  };
+
+  // 1E. Posisi Terakhir & Navigasi
+  const saveLastRead = (surah, ayatNomor) => {
+    if (!surah) return;
+    const data = {
+      surahNomor: surah.nomor,
+      surahName: surah.namaLatin,
+      surahArabic: surah.nama,
+      arti: surah.arti,
+      tempatTurun: surah.tempatTurun,
+      ayatNomor: Number(ayatNomor) || 1,
+      totalAyat: surah.jumlahAyat,
+      timestamp: Date.now(),
+      dateStr: new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
+    setLastReadPosition(data);
+    try {
+      localStorage.setItem('kanomas_quran_last_read', JSON.stringify(data));
+    } catch (e) {}
+    showToast(`📌 Ditandai: QS. ${surah.namaLatin} Ayat ${ayatNomor || 1}`);
+  };
+
+  const handleCloseQuran = () => {
+    if (selectedSurah) {
+      saveLastRead(selectedSurah, activeAyatId || targetAyatToScroll || 1);
+    }
+    onClose();
+  };
+
+  const handleOpenSurah = (surah, targetAyat = 1) => {
+    setSelectedSurah(surah);
+    setViewState('reader');
+    setShowSurahPicker(false);
+    if (targetAyat && targetAyat > 1) {
+      setTargetAyatToScroll(targetAyat);
+    } else {
+      setTargetAyatToScroll(null);
+    }
+  };
+
+  const handleOpenJuz = (juzItem) => {
+    const surah = SURAH_LIST.find((s) => s.nomor === juzItem.surahNomor);
+    if (surah) {
+      handleOpenSurah(surah, juzItem.ayat);
+    }
+  };
+
+  // Scroll otomatis ke ayat target saat dibuka dari Juz / Terakhir Dibaca
+  useEffect(() => {
+    if (targetAyatToScroll && surahDetail && !loadingSurah) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`ayat-card-${targetAyatToScroll}`) || document.getElementById(`ayat-${targetAyatToScroll}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedAyat(targetAyatToScroll);
+          setTimeout(() => setHighlightedAyat(null), 3000);
+        }
+        setTargetAyatToScroll(null);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [targetAyatToScroll, surahDetail, loadingSurah]);
+
+  // Auto-save posisi terakhir saat keluar aplikasi / unmount
+  useEffect(() => {
+    return () => {
+      if (selectedSurah) {
+        try {
+          const lastData = {
+            surahNomor: selectedSurah.nomor,
+            surahName: selectedSurah.namaLatin,
+            surahArabic: selectedSurah.nama,
+            arti: selectedSurah.arti,
+            tempatTurun: selectedSurah.tempatTurun,
+            ayatNomor: 1,
+            totalAyat: selectedSurah.jumlahAyat,
+            timestamp: Date.now(),
+            dateStr: new Date().toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          };
+          localStorage.setItem('kanomas_quran_last_read', JSON.stringify(lastData));
+        } catch {}
+      }
+    };
+  }, [selectedSurah]);
+
+  // Word-by-Word fetcher
+  const fetchWordByWord = async (surahNomor) => {
+    if (wordByWordData[surahNomor]) return;
+    const cacheKey = `kanomas_wbw_${surahNomor}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setWordByWordData((prev) => ({ ...prev, [surahNomor]: JSON.parse(cached) }));
+        return;
+      }
+    } catch {}
+
+    setLoadingWordByWord(true);
+    try {
+      const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahNomor}?words=true&language=id&word_fields=text_uthmani&per_page=300`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.verses) {
+          const mapping = {};
+          json.verses.forEach((v) => {
+            const verseNum = v.verse_number;
+            mapping[verseNum] = (v.words || []).map((w) => ({
+              id: w.id,
+              arab: w.text_uthmani || w.text,
+              latin: w.transliteration?.text || '',
+              arti: w.translation?.text || ''
+            }));
+          });
+          setWordByWordData((prev) => ({ ...prev, [surahNomor]: mapping }));
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(mapping));
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn('Word by word load warning:', err);
+    } finally {
+      setLoadingWordByWord(false);
+    }
+  };
+
+  const handleToggleWordByWord = () => {
+    const nextVal = !showWordByWord;
+    setShowWordByWord(nextVal);
+    try {
+      localStorage.setItem('kanomas_quran_wbw', String(nextVal));
+    } catch {}
+    if (nextVal && selectedSurah) {
+      fetchWordByWord(selectedSurah.nomor);
+    }
+    showToast(nextVal ? '🔤 Arti per kata diaktifkan' : 'Arti per kata dinonaktifkan');
+  };
+
+  useEffect(() => {
+    if (showWordByWord && selectedSurah) {
+      fetchWordByWord(selectedSurah.nomor);
+    }
+  }, [showWordByWord, selectedSurah]);
+
+  // Multi-Khataman Handlers
+  const handleCreateKhatam = (e) => {
+    e?.preventDefault();
+    if (!newKhatamInput.targetPerson && !newKhatamInput.title) return;
+    const newSession = {
+      id: `khatam-${Date.now()}`,
+      title: newKhatamInput.title || `Khataman ${newKhatamInput.targetPerson}`,
+      targetPerson: newKhatamInput.targetPerson || 'Pribadi',
+      startDate: newKhatamInput.startDate || new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+      targetDays: Number(newKhatamInput.targetDays) || 30,
+      completedJuz: [],
+      lastSurahNomor: 1,
+      lastAyatNomor: 1,
+      notes: newKhatamInput.notes || '',
+      createdAt: Date.now()
+    };
+    const updated = [newSession, ...khatamanSessions];
+    setKhatamanSessions(updated);
+    try {
+      localStorage.setItem('kanomas_khataman_sessions', JSON.stringify(updated));
+    } catch {}
+    setShowNewKhatamModal(false);
+    setNewKhatamInput({ title: '', targetPerson: '', targetDays: 30, startDate: new Date().toISOString().split('T')[0], notes: '' });
+    showToast(`✅ Program Khataman untuk "${newSession.targetPerson}" dibuat!`);
+  };
+
+  const handleToggleJuzInKhatam = (sessionId, juzNumber) => {
+    const updated = khatamanSessions.map((s) => {
+      if (s.id !== sessionId) return s;
+      const isCompleted = s.completedJuz.includes(juzNumber);
+      const newCompleted = isCompleted
+        ? s.completedJuz.filter((j) => j !== juzNumber)
+        : [...s.completedJuz, juzNumber].sort((a, b) => a - b);
+      return { ...s, completedJuz: newCompleted };
+    });
+    setKhatamanSessions(updated);
+    try {
+      localStorage.setItem('kanomas_khataman_sessions', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleDeleteKhatam = (sessionId) => {
+    const updated = khatamanSessions.filter((s) => s.id !== sessionId);
+    setKhatamanSessions(updated);
+    try {
+      localStorage.setItem('kanomas_khataman_sessions', JSON.stringify(updated));
+    } catch {}
+    showToast('🗑️ Program khataman berhasil dihapus');
   };
 
   // Fetch Surah Details (equran.id LPMQ Indonesia + alquran.cloud Utsmani Madinah secara paralel)
@@ -1390,82 +1700,1034 @@ export default function AlQuranModal({ onClose }) {
           </div>
         )}
 
-        {/* ======================================================== */}
-        {/* 1. HEADER UTAMA (HIJAU TUA ISLAMI #0a7c29 PERSIS SCREENSHOT) */}
-        {/* ======================================================== */}
-        <div className="bg-[#0a7c29] text-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3 shadow-md flex-shrink-0 z-20 relative">
-          {/* Tombol Back */}
-          <button
-            onClick={() => {
-              if (showSurahPicker) {
-                setShowSurahPicker(false);
-              } else {
-                onClose();
-              }
-            }}
-            className="w-9 h-9 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
-            title="Kembali"
-          >
-            <ChevronLeft className="w-7 h-7 stroke-[3]" />
-          </button>
-
-          {/* Quick Surah Picker Title */}
-          <button
-            onClick={() => setShowSurahPicker(!showSurahPicker)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl hover:bg-white/15 transition font-bold text-sm sm:text-base leading-tight"
-          >
-            <span className="whitespace-nowrap">{selectedSurah.nomor}. {selectedSurah.namaLatin}</span>
-            <span className="text-xs text-emerald-200 font-normal hidden sm:inline whitespace-nowrap">({selectedSurah.jumlahAyat} ayat)</span>
-            <ChevronRight className={`w-4 h-4 transition-transform shrink-0 ${showSurahPicker ? 'rotate-90' : ''}`} />
-          </button>
-
-          {/* Header Action Icons: Loncat, Pemilih Background / Suasana, Pengaturan, Audio */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Tombol Loncat Ayat */}
-            <button
-              onClick={() => setShowJumpModal(true)}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
-              title="Loncat ke Ayat Tertentu"
-            >
-              <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Tombol Ganti Background & Suasana (Foto Ka'bah / Alam / Polos) */}
-            <button
-              onClick={() => setShowThemePicker(!showThemePicker)}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl active:scale-95 flex items-center justify-center transition ${
-                showThemePicker ? 'bg-amber-400 text-slate-950 font-bold shadow-sm' : 'hover:bg-white/20 text-white'
-              }`}
-              title={`Suasana: ${currentTheme.name} (Klik untuk pilih foto Ka'bah, pemandangan, atau warna polos)`}
-            >
-              <Palette className="w-5 h-5" />
-            </button>
-
-            {/* Tombol Pengaturan (Settings Gear) */}
-            <button
-              onClick={() => setShowSettingsModal(true)}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
-              title="Pengaturan Tampilan, Tajwid & Qari"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-
-            {/* Tombol Audio Murottal (Speaker) */}
-            <button
-              onClick={playFullSurah}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl active:scale-95 flex items-center justify-center transition ${
-                isPlayingAudio ? 'bg-amber-400 text-slate-950 font-bold shadow-sm' : 'hover:bg-white/20 text-white'
-              }`}
-              title={isPlayingAudio ? 'Jeda Murottal' : 'Putar Murottal Surah Penuh'}
-            >
-              {isPlayingAudio ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Volume2 className="w-5 h-5" />
-              )}
-            </button>
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900/95 text-white border-2 border-emerald-400 shadow-2xl backdrop-blur-md flex items-center gap-2 text-xs font-black animate-in fade-in zoom-in-95 pointer-events-none tracking-wide">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>{toastMessage}</span>
           </div>
-        </div>
+        )}
+
+        {viewState === 'index' ? (
+          /* ======================================================== */
+          /* INDEX VIEW: DAFTAR SURAT, JUZ, TARGET KHATAMAN, PENANDA */
+          /* ======================================================== */
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Index Header */}
+            <div className="bg-[#0a7c29] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-md flex-shrink-0 z-20">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCloseQuran}
+                  className="w-9 h-9 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
+                  title="Tutup Al-Qur'an"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <div>
+                  <h1 className="text-base sm:text-lg font-black tracking-tight leading-tight flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-amber-300" />
+                    <span>Al-Qur'anul Karim</span>
+                  </h1>
+                  <p className="text-[11px] text-emerald-100 font-medium">
+                    114 Surat • 30 Juz • Khataman • Audio Murottal
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShowThemePicker(!showThemePicker)}
+                  className={`w-9 h-9 rounded-xl active:scale-95 flex items-center justify-center transition ${
+                    showThemePicker ? 'bg-amber-400 text-slate-950 font-bold' : 'hover:bg-white/20 text-white'
+                  }`}
+                  title="Pilih Tema Warna Bacaan"
+                >
+                  <Palette className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-9 h-9 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
+                  title="Pengaturan"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Index Main Scrollable Area */}
+            <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-4">
+              {/* BANNER TERAKHIR DIBACA (JIKA ADA DATA) */}
+              {lastReadPosition && (
+                <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-600 via-[#0a7c29] to-emerald-800 text-white shadow-lg border border-emerald-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-300">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-md">
+                      <Pin className="w-5 h-5 fill-current" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full text-amber-200">
+                          Terakhir Dibaca
+                        </span>
+                        <span className="text-[11px] text-emerald-100 opacity-90">
+                          {lastReadPosition.dateStr}
+                        </span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black mt-0.5">
+                        QS. {lastReadPosition.surahName} : Ayat {lastReadPosition.ayatNomor}
+                      </h3>
+                      <p className="text-xs text-amber-200 font-medium">
+                        Arti Surat: "{lastReadPosition.arti}" ({lastReadPosition.surahArabic})
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const surah = SURAH_LIST.find((s) => s.nomor === lastReadPosition.surahNomor) || SURAH_LIST[0];
+                      handleOpenSurah(surah, lastReadPosition.ayatNomor);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition"
+                  >
+                    <span>Lanjut Baca Sekarang</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* TABS SWITCHER: DAFTAR SURAT | DAFTAR JUZ | TARGET KHATAMAN | PENANDA */}
+              <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-xs overflow-x-auto no-scrollbar">
+                {[
+                  { id: 'surah', label: '📖 Daftar Surat', count: '114' },
+                  { id: 'juz', label: '📑 Daftar Juz', count: '30' },
+                  { id: 'khatam', label: '🎯 Target Khataman', count: khatamanSessions.length },
+                  { id: 'bookmarks', label: '⭐ Penanda & Catatan', count: bookmarks.length }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setIndexTab(tab.id)}
+                    className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
+                      indexTab === tab.id
+                        ? 'bg-[#0a7c29] text-white shadow-md'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      indexTab === tab.id ? 'bg-amber-400 text-slate-950 font-black' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* TAB 1: DAFTAR SURAT */}
+              {indexTab === 'surah' && (
+                <div className="space-y-3">
+                  {/* Search Bar */}
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Cari nama surat, arti, atau nomor (contoh: Al-Baqarah, Sapi, 36)..."
+                      className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0a7c29] shadow-2xs"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Grid 114 Surat */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    {SURAH_LIST.filter(
+                      (s) =>
+                        s.namaLatin.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        s.arti.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        String(s.nomor).includes(searchQuery)
+                    ).map((surah) => (
+                      <div
+                        key={surah.nomor}
+                        className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:border-emerald-500 hover:shadow-md transition space-y-2.5 flex flex-col justify-between"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <span className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-[#0a7c29] dark:text-emerald-300 font-mono font-black text-xs flex items-center justify-center flex-shrink-0 border border-emerald-300 dark:border-emerald-700">
+                              {surah.nomor}
+                            </span>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                                {surah.namaLatin}
+                              </h4>
+                              {/* Prominently Mention Surah Meaning */}
+                              <div className="mt-0.5">
+                                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 inline-block">
+                                  Arti: "{surah.arti}"
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                                {surah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'} • {surah.jumlahAyat} Ayat • Juz {surah.juz}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="font-quran-lpmq text-xl text-[#0a7c29] dark:text-emerald-400 font-bold flex-shrink-0" dir="rtl">
+                            {surah.nama}
+                          </span>
+                        </div>
+
+                        {/* Tombol Aksi: Baca & Pilih Ayat */}
+                        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                          <button
+                            onClick={() => handleOpenSurah(surah, 1)}
+                            className="flex-1 py-1.5 px-3 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1 active:scale-95 transition shadow-2xs"
+                          >
+                            <span>Baca Surat</span>
+                          </button>
+                          <button
+                            onClick={() => setSurahAyatJumpModal(surah)}
+                            className="py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition"
+                            title="Pilih nomor ayat tertentu"
+                          >
+                            <ListOrdered className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
+                            <span>Pilih Ayat</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: DAFTAR JUZ */}
+              {indexTab === 'juz' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {JUZ_LIST.map((juzItem) => (
+                    <div
+                      key={juzItem.juz}
+                      className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:border-emerald-500 hover:shadow-md transition space-y-3 flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-700 text-amber-300 font-black text-xs shadow-xs">
+                          JUZ {juzItem.juz}
+                        </span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                          Total {juzItem.totalAyat} Ayat
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                          <span className="font-semibold text-slate-500">Mulai:</span>
+                          <span className="font-bold">QS. {juzItem.surahName} [Ayat {juzItem.ayat}]</span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                          <span className="font-semibold text-slate-500">Sampai:</span>
+                          <span className="font-bold">QS. {juzItem.endSurah} [Ayat {juzItem.endAyat}]</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleOpenJuz(juzItem)}
+                        className="w-full py-2 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition shadow-2xs"
+                      >
+                        <span>Buka Juz {juzItem.juz}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* TAB 3: TARGET KHATAMAN (MULTI-KHATAMAN) */}
+              {indexTab === 'khatam' && (
+                <div className="space-y-4">
+                  {/* Top Bar: Buat Target Baru */}
+                  <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-700 via-[#0a7c29] to-emerald-900 text-white shadow-md flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm sm:text-base font-black flex items-center gap-2">
+                        <Target className="w-5 h-5 text-amber-300" />
+                        <span>Program Khataman Mandiri</span>
+                      </h3>
+                      <p className="text-[11px] text-emerald-100">
+                        Bisa membuat beberapa target bacaan tanpa saling menindih.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowNewKhatamModal(true)}
+                      className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition flex-shrink-0"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Buat Target Baru</span>
+                    </button>
+                  </div>
+
+                  {/* List of Khataman Sessions */}
+                  {khatamanSessions.length === 0 ? (
+                    <div className="p-8 text-center bg-white/70 dark:bg-slate-800/70 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 space-y-2">
+                      <Target className="w-8 h-8 text-slate-400 mx-auto" />
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                        Belum ada target khataman aktif.
+                      </p>
+                      <button
+                        onClick={() => setShowNewKhatamModal(true)}
+                        className="text-xs font-black text-[#0a7c29] hover:underline"
+                      >
+                        + Klik di sini untuk membuat target pertama
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {khatamanSessions.map((session) => {
+                        const progressPercent = Math.round((session.completedJuz.length / 30) * 100);
+                        return (
+                          <div
+                            key={session.id}
+                            className="p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs shadow-xs space-y-3"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                                    {session.title}
+                                  </h4>
+                                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#0a7c29] dark:text-emerald-300 font-extrabold text-[10px] border border-emerald-300 dark:border-emerald-700">
+                                    Untuk: {session.targetPerson}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                  Mulai: <strong className="text-slate-700 dark:text-slate-200">{session.startDate}</strong> • Target: <strong>{session.targetDays} Hari</strong>
+                                </p>
+                                {session.notes && (
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 italic mt-1 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    "{session.notes}"
+                                  </p>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteKhatam(session.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                                title="Hapus Target Khataman Ini"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-xs font-bold">
+                                <span className="text-slate-600 dark:text-slate-300">
+                                  Kemajuan: {session.completedJuz.length} dari 30 Juz
+                                </span>
+                                <span className="text-emerald-700 dark:text-emerald-300 font-mono">
+                                  {progressPercent}%
+                                </span>
+                              </div>
+                              <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden border border-slate-200 dark:border-slate-600">
+                                <div
+                                  style={{ width: `${progressPercent}%` }}
+                                  className="h-full bg-gradient-to-r from-[#0a7c29] to-amber-400 rounded-full transition-all duration-500"
+                                />
+                              </div>
+                            </div>
+
+                            {/* 30 Juz Interactive Check Grid */}
+                            <div>
+                              <span className="text-[10px] font-black uppercase text-slate-500 block mb-1.5">
+                                Checklist 30 Juz (Ketuk untuk tandai selesai):
+                              </span>
+                              <div className="grid grid-cols-10 sm:grid-cols-15 gap-1.5">
+                                {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNum) => {
+                                  const isDone = session.completedJuz.includes(juzNum);
+                                  return (
+                                    <button
+                                      key={juzNum}
+                                      onClick={() => handleToggleJuzInKhatam(session.id, juzNum)}
+                                      className={`h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center transition active:scale-95 border ${
+                                        isDone
+                                          ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-2xs'
+                                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-emerald-400'
+                                      }`}
+                                      title={`Juz ${juzNum}: ${isDone ? 'Sudah Selesai (klik untuk batalkan)' : 'Belum Selesai (klik untuk tandai)'}`}
+                                    >
+                                      {juzNum}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Action to continue reading */}
+                            <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/60">
+                              <span className="text-[11px] text-slate-500">
+                                {progressPercent === 100 ? '🎉 Alhamdulillah Khatam!' : `Sisa ${30 - session.completedJuz.length} Juz lagi`}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  const nextJuzNum = Array.from({ length: 30 }, (_, i) => i + 1).find((j) => !session.completedJuz.includes(j)) || 1;
+                                  const juzObj = JUZ_LIST.find((j) => j.juz === nextJuzNum);
+                                  if (juzObj) handleOpenJuz(juzObj);
+                                }}
+                                className="px-4 py-1.5 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center gap-1 active:scale-95 transition shadow-2xs"
+                              >
+                                <span>Lanjut Baca Khataman</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: PENANDA & CATATAN */}
+              {indexTab === 'bookmarks' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/40 text-xs">
+                    <span className="font-bold text-amber-800 dark:text-amber-300 block">
+                      Kumpulan Simpanan Ayat & Catatan Ibadah Anda
+                    </span>
+                    <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                      Ketuk kartu untuk langsung membuka ayat di mushaf.
+                    </p>
+                  </div>
+
+                  {/* Bookmarks */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase text-slate-600 dark:text-slate-300 tracking-wider">
+                      Ayat Tersimpan ({bookmarks.length})
+                    </h4>
+                    {bookmarks.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">Belum ada ayat yang disimpan.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {bookmarks.map((bm) => (
+                          <div
+                            key={bm.key}
+                            onClick={() => {
+                              const surah = SURAH_LIST.find((s) => s.nomor === bm.surahNomor);
+                              if (surah) handleOpenSurah(surah, bm.ayatNomor);
+                            }}
+                            className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-emerald-500 cursor-pointer transition shadow-2xs flex items-center justify-between"
+                          >
+                            <div>
+                              <span className="text-xs font-black text-slate-900 dark:text-white block">
+                                QS. {bm.surahNama} : Ayat {bm.ayatNomor}
+                              </span>
+                              <p className="text-[11px] text-slate-500 line-clamp-1">
+                                "{bm.teksIndonesia}"
+                              </p>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* ======================================================== */
+          /* READER VIEW: MUSHAF LENGKAP & AL-QUR'AN READER           */
+          /* ======================================================== */
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Header Reader */}
+            <div className="bg-[#0a7c29] text-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 shadow-md flex-shrink-0 z-20">
+              {/* Tombol Back ke Index Daftar Surat */}
+              <button
+                onClick={() => setViewState('index')}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl hover:bg-white/20 active:scale-95 transition text-white font-bold text-xs"
+                title="Kembali ke Daftar Surat"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Daftar Surat</span>
+              </button>
+
+              {/* Quick Surah Picker Dropdown Title */}
+              <button
+                onClick={() => setShowSurahPicker(!showSurahPicker)}
+                className="flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-white/15 transition font-bold text-xs sm:text-sm leading-tight max-w-[180px] sm:max-w-xs truncate"
+              >
+                <span className="truncate">{selectedSurah.nomor}. {selectedSurah.namaLatin}</span>
+                <ChevronRight className={`w-3.5 h-3.5 transition-transform shrink-0 ${showSurahPicker ? 'rotate-90' : ''}`} />
+              </button>
+
+              {/* Action Buttons: Arti Per Kata, Jump, Theme, Settings, Audio */}
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                {/* Tombol Arti Per Kata */}
+                <button
+                  onClick={handleToggleWordByWord}
+                  className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold active:scale-95 flex items-center gap-1 transition ${
+                    showWordByWord
+                      ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                      : 'hover:bg-white/20 text-white border border-white/30'
+                  }`}
+                  title={showWordByWord ? 'Matikan Arti Per Kata' : 'Aktifkan Arti Per Kata (Kosakata Ayat)'}
+                >
+                  <Languages className="w-3.5 h-3.5" />
+                  <span className="text-[11px] hidden sm:inline">{showWordByWord ? 'Kata Aktif' : 'Per Kata'}</span>
+                </button>
+
+                {/* Loncat Ayat */}
+                <button
+                  onClick={() => setShowJumpModal(true)}
+                  className="w-8 h-8 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
+                  title="Loncat Ayat"
+                >
+                  <Compass className="w-4 h-4" />
+                </button>
+
+                {/* Tema / Suasana */}
+                <button
+                  onClick={() => setShowThemePicker(!showThemePicker)}
+                  className={`w-8 h-8 rounded-xl active:scale-95 flex items-center justify-center transition ${
+                    showThemePicker ? 'bg-amber-400 text-slate-950 font-bold' : 'hover:bg-white/20 text-white'
+                  }`}
+                  title="Ganti Tema Warna"
+                >
+                  <Palette className="w-4 h-4" />
+                </button>
+
+                {/* Pengaturan */}
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-8 h-8 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
+                  title="Pengaturan"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+
+                {/* Audio */}
+                <button
+                  onClick={playFullSurah}
+                  className={`w-8 h-8 rounded-xl active:scale-95 flex items-center justify-center transition ${
+                    isPlayingAudio ? 'bg-amber-400 text-slate-950 font-bold' : 'hover:bg-white/20 text-white'
+                  }`}
+                  title={isPlayingAudio ? 'Jeda Audio' : 'Putar Audio'}
+                >
+                  {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-Header: Navigasi Prev/Next, Mushaf switch, & Arti Surat */}
+            <div className={`${currentTheme.subHeaderBg} border-b px-4 py-2 flex items-center justify-between shadow-xs flex-shrink-0 transition-colors relative z-10`}>
+              <button
+                onClick={handlePrevSurah}
+                disabled={selectedSurah.nomor <= 1}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
+                  selectedSurah.nomor <= 1 ? 'opacity-20 cursor-not-allowed' : 'text-[#0a7c29] hover:bg-emerald-100/50'
+                }`}
+                title="Surat Sebelumnya"
+              >
+                <span className="text-lg font-bold">◀</span>
+              </button>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <h2 className="text-xs sm:text-sm font-black">
+                    {selectedSurah.nomor}. {selectedSurah.namaLatin}
+                  </h2>
+                  <button
+                    onClick={() => handleMushafTypeChange(mushafType === 'madinah' ? 'indonesia' : 'madinah')}
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold border transition active:scale-95 ${
+                      mushafType === 'madinah'
+                        ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-400'
+                        : 'bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border-emerald-400'
+                    }`}
+                    title="Klik untuk beralih antara Mushaf Madinah & Indonesia"
+                  >
+                    {mushafType === 'madinah' ? 'Madinah' : 'Indonesia'} ⇄
+                  </button>
+                </div>
+                <p className="text-[10px] sm:text-[11px] opacity-80 font-medium">
+                  Arti: <strong>"{selectedSurah.arti}"</strong> • {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'}, {selectedSurah.jumlahAyat} ayat • Juz {selectedSurah.juz}
+                </p>
+              </div>
+
+              <button
+                onClick={handleNextSurah}
+                disabled={selectedSurah.nomor >= 114}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
+                  selectedSurah.nomor >= 114 ? 'opacity-20 cursor-not-allowed' : 'text-[#0a7c29] hover:bg-emerald-100/50'
+                }`}
+                title="Surat Selanjutnya"
+              >
+                <span className="text-lg font-bold">▶</span>
+              </button>
+            </div>
+
+            {/* Ayah Scroll Container */}
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 space-y-6 select-text touch-pan-y"
+            >
+              {/* SURAH INTRO BANNER (SEBUTKAN ARTI SURAT DI AWALNYA) */}
+              <div className="relative mx-auto my-3 max-w-xl text-center px-4 py-4 rounded-3xl border-2 border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-950/40 backdrop-blur-xs shadow-md">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                    QS. {selectedSurah.namaLatin} ({selectedSurah.nama})
+                  </h3>
+                </div>
+                <div className="inline-block px-3.5 py-1 rounded-full bg-emerald-700 text-amber-200 font-extrabold text-xs sm:text-sm shadow-xs my-1">
+                  Arti Surat: "{selectedSurah.arti}"
+                </div>
+                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
+                  Golongan {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'} • Urutan Wahyu ke-{selectedSurah.wahyu || '-'} • Terdiri dari {selectedSurah.jumlahAyat} Ayat • Juz {selectedSurah.juz}
+                </p>
+                {lastReadPosition?.surahNomor === selectedSurah.nomor && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-400/20 px-3 py-0.5 rounded-full border border-amber-400/40">
+                    <Pin className="w-3 h-3 fill-current" />
+                    <span>Penanda Terakhir Anda: Ayat {lastReadPosition.ayatNomor}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* BISMILLAH BANNER ORNAMEN KALIGRAFI */}
+              {selectedSurah.nomor !== 9 && selectedSurah.nomor !== 1 && (
+                <div className="relative mx-auto my-4 max-w-xl text-center px-2 z-10">
+                  <div className={`relative py-3.5 px-6 rounded-3xl border-2 border-amber-400/50 shadow-md overflow-hidden ${
+                    currentTheme.type === 'image' || currentTheme.isDark
+                      ? 'bg-slate-900/80 backdrop-blur-md'
+                      : 'bg-gradient-to-r from-emerald-950/15 via-amber-500/10 to-emerald-950/15'
+                  }`}>
+                    <span className="absolute top-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
+                    <span className="absolute top-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
+                    <span className="absolute bottom-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
+                    <span className="absolute bottom-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
+
+                    <div className="relative z-10 space-y-1">
+                      <span
+                        style={{
+                          fontFamily: getActiveFontFamily(),
+                          color: currentTheme.bismillahColor
+                        }}
+                        className="text-2xl sm:text-3xl tracking-wide inline-block select-text font-bold drop-shadow-sm"
+                        dir="rtl"
+                      >
+                        بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+                      </span>
+                      <p style={{ color: currentTheme.translationColor }} className="text-[11px] sm:text-xs font-medium opacity-80 italic">
+                        "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PEMBERITAHUAN AT-TAUBAH */}
+              {selectedSurah.nomor === 9 && (
+                <div className="mx-auto my-3 max-w-lg p-3 rounded-2xl bg-amber-500/15 border border-amber-400/50 text-center text-xs space-y-1 z-10">
+                  <span className="font-bold text-amber-800 dark:text-amber-300 block">Surat At-Taubah dibaca tanpa Basmalah</span>
+                  <p className="text-slate-600 dark:text-slate-300 text-[11px]">
+                    Sesuai ketetapan Rasulullah ﷺ dan para Sahabat, pembacaan diawali langsung dengan ta'awwudz.
+                  </p>
+                </div>
+              )}
+
+              {/* LOADING STATE */}
+              {loadingSurah && (
+                <div className="py-20 text-center space-y-3 z-10">
+                  <Loader2 className="w-10 h-10 text-[#0a7c29] animate-spin mx-auto" />
+                  <p style={{ color: currentTheme.translationColor }} className="text-xs sm:text-sm font-bold opacity-80">
+                    Memuat mushaf QS. {selectedSurah.namaLatin}...
+                  </p>
+                </div>
+              )}
+
+              {/* DAFTAR AYAT */}
+              {!loadingSurah && surahDetail && surahDetail.ayat && (
+                <div className="space-y-6 max-w-3xl mx-auto z-10 relative">
+                  {surahDetail.ayat.map((ayat, index) => {
+                    const noteKey = `${selectedSurah.nomor}:${ayat.nomorAyat}`;
+                    const savedNote = userNotes[noteKey];
+                    const isBookmarked = bookmarks.some((b) => b.key === noteKey);
+                    const isAudioPlaying = isPlayingAudio && activeAyatAudio === ayat.nomorAyat;
+                    const isHighlighted = highlightedAyat === ayat.nomorAyat;
+                    const isToolbarOpen = activeAyatId === ayat.nomorAyat;
+                    const isLastRead = lastReadPosition?.surahNomor === selectedSurah.nomor && lastReadPosition?.ayatNomor === ayat.nomorAyat;
+
+                    const ayatPage = mushafType === 'madinah' && ayat.pageMadinah ? ayat.pageMadinah : getAyatPageNumber(selectedSurah.nomor, ayat.nomorAyat);
+                    const prevAyat = index > 0 ? surahDetail.ayat[index - 1] : null;
+                    const prevAyatPage = prevAyat ? (mushafType === 'madinah' && prevAyat.pageMadinah ? prevAyat.pageMadinah : getAyatPageNumber(selectedSurah.nomor, prevAyat.nomorAyat)) : null;
+                    const isNewPage = index === 0 || ayatPage !== prevAyatPage;
+
+                    return (
+                      <React.Fragment key={ayat.nomorAyat}>
+                        {isNewPage && (
+                          <div className="flex items-center justify-center my-5 pt-1 z-10">
+                            <div className="flex items-center gap-3 w-full max-w-md">
+                              <div className="h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent flex-1" />
+                              <div className={`px-4 py-1 rounded-full border border-amber-400/70 shadow-xs flex items-center gap-2 text-xs font-black ${
+                                currentTheme.isDark || currentTheme.type === 'image'
+                                  ? 'bg-slate-900/90 text-amber-200'
+                                  : 'bg-gradient-to-r from-amber-500/20 via-emerald-500/25 to-amber-500/20 text-slate-800'
+                              }`}>
+                                <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                                <span>Halaman {ayatPage}</span>
+                                <span className="opacity-40">•</span>
+                                <span>{mushafType === 'madinah' ? 'Mushaf Madinah' : 'Standar Kemenag'}</span>
+                                <span className="opacity-40">•</span>
+                                <span>Juz {ayat.juzMadinah || selectedSurah.juz}</span>
+                              </div>
+                              <div className="h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent flex-1" />
+                            </div>
+                          </div>
+                        )}
+
+                        <div
+                          id={`ayat-card-${ayat.nomorAyat}`}
+                          onClick={() => {
+                            setActiveAyatId(activeAyatId === ayat.nomorAyat ? null : ayat.nomorAyat);
+                          }}
+                          style={{
+                            borderBottomColor: currentTheme.borderDivider
+                          }}
+                          className={`space-y-3.5 pb-6 border-b transition-all duration-300 rounded-2xl cursor-pointer relative z-10 ${
+                            isHighlighted
+                              ? currentTheme.highlightBg + ' p-4 rounded-3xl'
+                              : isAudioPlaying
+                              ? currentTheme.activeAudioBg + ' p-4 rounded-3xl'
+                              : isToolbarOpen
+                              ? currentTheme.type === 'image'
+                                ? 'p-4 rounded-3xl ring-2 ring-amber-400/80 bg-slate-900/90 backdrop-blur-md'
+                                : 'p-4 rounded-3xl ring-2 ring-emerald-500/60 bg-emerald-500/5'
+                              : currentTheme.type === 'image'
+                              ? 'p-3.5 rounded-2xl bg-black/35 backdrop-blur-xs hover:bg-black/55 border border-white/5'
+                              : 'p-2 hover:bg-black/5 dark:hover:bg-white/5'
+                          }`}
+                        >
+                          {/* BADGE PENANDA AYAT TERAKHIR DIBACA */}
+                          {isLastRead && (
+                            <div className="flex items-center gap-1.5 text-xs font-black text-amber-800 dark:text-amber-200 bg-amber-400/25 border border-amber-400/70 px-3 py-1 rounded-full w-fit mb-2 animate-pulse">
+                              <Pin className="w-3.5 h-3.5 fill-current" />
+                              <span>Posisi Terakhir Anda Membaca</span>
+                            </div>
+                          )}
+
+                          {/* A. TEKS ARAB DENGAN TAJWID WARNA & NOMOR AYAT LONCAT */}
+                          <div className="w-full" dir="rtl" data-zoom-zone="arabic">
+                            <p
+                              style={{
+                                fontFamily: getActiveFontFamily(),
+                                fontSize: `${arabicFontSize}px`,
+                                color: currentTheme.arabicColor,
+                                lineHeight: dynamicArabicLineHeight,
+                                textAlign: 'justify',
+                                textAlignLast: 'right',
+                                textJustify: 'auto',
+                                wordSpacing: isKashidaLong ? '0.34em' : '0.04em',
+                                fontFeatureSettings: isKashidaLong ? '"jalt" 1, "calt" 1, "liga" 1' : '"calt" 1, "liga" 1',
+                                fontWeight: 500,
+                                textRendering: 'geometricPrecision',
+                                WebkitFontSmoothing: 'antialiased',
+                                MozOsxFontSmoothing: 'grayscale',
+                                width: '100%'
+                              }}
+                              className={`${getArabicFontClass()} font-medium select-text mb-4 sm:mb-5`}
+                            >
+                              {renderArabic(ayat)}
+
+                              {/* BINGKAI NOMOR AYAT */}
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenJumpModal(ayat.nomorAyat);
+                                }}
+                                className="inline-flex items-center justify-center align-middle mx-2 my-1 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                                style={{ verticalAlign: 'middle', lineHeight: 1 }}
+                                title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
+                              >
+                                <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
+                                  {ayat.nomorAyat}
+                                </span>
+                              </span>
+                            </p>
+                          </div>
+
+                          {/* WORD-BY-WORD TRANSLATION (ARTI PER KATA) */}
+                          {showWordByWord && (
+                            <div className="mt-3 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-400/40 select-text" dir="rtl">
+                              <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300 tracking-wider mb-2 flex items-center gap-1.5" dir="ltr">
+                                <Languages className="w-3.5 h-3.5" />
+                                <span>Arti Per Kata (Kosakata Ayat {ayat.nomorAyat}):</span>
+                              </div>
+                              {wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] ? (
+                                <div className="flex flex-wrap items-stretch justify-start gap-2" dir="rtl">
+                                  {wordByWordData[selectedSurah.nomor][ayat.nomorAyat].map((w, wIdx) => {
+                                    if (!w.arab || w.arab === 'End of Ayah' || w.arab === '') return null;
+                                    return (
+                                      <div
+                                        key={w.id || wIdx}
+                                        className="flex flex-col items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-800/95 border border-emerald-300/80 dark:border-emerald-700/60 shadow-xs min-w-[70px] max-w-[150px] text-center"
+                                      >
+                                        <span
+                                          style={{
+                                            fontFamily: getActiveFontFamily(),
+                                            color: currentTheme.arabicColor
+                                          }}
+                                          className="text-lg sm:text-xl font-bold leading-normal mb-1"
+                                        >
+                                          {w.arab}
+                                        </span>
+                                        {w.latin && (
+                                          <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono italic block leading-tight mb-1" dir="ltr">
+                                            {w.latin}
+                                          </span>
+                                        )}
+                                        <span className="text-[11px] text-slate-800 dark:text-slate-200 font-medium block leading-tight border-t border-slate-100 dark:border-slate-700/60 pt-1 w-full" dir="ltr">
+                                          {w.arti || '-'}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="py-2 text-center text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-2" dir="ltr">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  <span>Memuat terjemahan kata per kata...</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* B. TRANSLITERASI LATIN */}
+                          {showLatin && ayat.teksLatin && (
+                            <div className="mt-3 sm:mt-3.5 pt-1 w-full" data-zoom-zone="latin">
+                              <p
+                                style={{
+                                  fontSize: `${latinFontSize}px`,
+                                  color: currentTheme.latinColor,
+                                  lineHeight: '1.75',
+                                  textAlign: 'justify',
+                                  textAlignLast: 'left',
+                                  textJustify: 'inter-word',
+                                  hyphens: 'auto',
+                                  width: '100%'
+                                }}
+                                className="font-medium select-text"
+                              >
+                                {ayat.teksLatin}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* C. TERJEMAHAN BAHASA INDONESIA */}
+                          {showTranslation && ayat.teksIndonesia && (
+                            <div className="mt-2.5 sm:mt-3 w-full" data-zoom-zone="translation">
+                              <p
+                                style={{
+                                  fontSize: `${latinFontSize}px`,
+                                  color: currentTheme.translationColor,
+                                  lineHeight: '1.75',
+                                  textAlign: 'justify',
+                                  textAlignLast: 'left',
+                                  textJustify: 'inter-word',
+                                  hyphens: 'auto',
+                                  width: '100%'
+                                }}
+                                className="font-normal select-text opacity-95"
+                              >
+                                {ayat.teksIndonesia}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* D. CATATAN PRIBADI JAMAAH */}
+                          {savedNote && (
+                            <div
+                              style={{
+                                backgroundColor: isDark ? '#1e293b' : '#ecfdf5',
+                                borderColor: isDark ? '#334155' : '#6ee7b7',
+                                color: isDark ? '#e2e8f0' : '#064e3b'
+                              }}
+                              className="p-3.5 rounded-2xl border flex items-start justify-between gap-3 text-xs shadow-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="space-y-1">
+                                <span className="font-bold flex items-center gap-1.5 text-amber-500">
+                                  <FileText className="w-4 h-4" />
+                                  <span>Catatan Anda ({savedNote.updatedAt}):</span>
+                                </span>
+                                <p className="italic">"{savedNote.text}"</p>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button
+                                  onClick={() => handleOpenNoteModal(ayat)}
+                                  className="text-amber-600 hover:text-amber-700 font-bold px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/50"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteNote(noteKey)}
+                                  className="text-red-500 hover:text-red-700 p-1"
+                                  title="Hapus Catatan"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* E. BILAH AKSI AYAT */}
+                          {(isToolbarOpen || !hiddenReadMode) && (
+                            <div
+                              dir="ltr"
+                              onClick={(e) => e.stopPropagation()}
+                              className="pt-2 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-200"
+                            >
+                              <div className={`p-1.5 sm:p-2 rounded-2xl border shadow-md flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth ${
+                                currentTheme.isDark
+                                  ? 'bg-slate-900/95 border-slate-700 text-white shadow-black/40'
+                                  : 'bg-white border-emerald-300 text-slate-800 shadow-emerald-950/10'
+                              }`}>
+                                {/* Badge Loncat Ayat */}
+                                <button
+                                  onClick={() => handleOpenJumpModal(ayat.nomorAyat)}
+                                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-[#0a7c29] to-[#064e1c] text-amber-300 font-mono text-[11px] font-black rounded-xl border border-amber-300/40 shadow-xs hover:scale-105 active:scale-95 transition"
+                                  title={`Ayat ${ayat.nomorAyat} - Loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
+                                >
+                                  <span>Ayat</span>
+                                  <span className="bg-amber-300/20 px-1 rounded">{ayat.nomorAyat}</span>
+                                </button>
+
+                                {/* TOMBOL PENANDA AYAT TERAKHIR */}
+                                <button
+                                  onClick={() => saveLastRead(selectedSurah, ayat.nomorAyat)}
+                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                    isLastRead
+                                      ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-xs'
+                                      : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  title="Tandai sebagai ayat terakhir dibaca"
+                                >
+                                  <Pin className={`w-3.5 h-3.5 ${isLastRead ? 'fill-current text-slate-950' : 'text-amber-500'}`} />
+                                  <span>{isLastRead ? 'Terakhir Dibaca' : 'Tandai Terakhir'}</span>
+                                </button>
+
+                                <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 flex-shrink-0 mx-0.5" />
+
+                                {/* AUDIO */}
+                                <button
+                                  onClick={() => playAyatAudio(index)}
+                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
+                                    isAudioPlaying
+                                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                                      : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  title={isAudioPlaying ? 'Jeda Audio Ayat' : 'Putar Audio Ayat'}
+                                >
+                                  {isAudioPlaying ? (
+                                    <Pause className="w-3.5 h-3.5 text-white" />
+                                  ) : (
+                                    <Play className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
+                                  )}
+                                  <span>{isAudioPlaying ? 'Jeda' : 'Audio'}</span>
+                                </button>
+
+                                {/* TAFSIR */}
+                                <button
+                                  onClick={() => handleOpenRincian(ayat)}
+                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                                  title="Buka Tafsir & Rincian Ayat"
+                                >
+                                  <BookOpen className="w-3.5 h-3.5 stroke-[2.3]" />
+                                  <span>Tafsir</span>
+                                </button>
+
+                                {/* SALIN */}
+                                <button
+                                  onClick={() => handleCopyAyat(ayat)}
+                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                                  title="Salin Ayat & Terjemah"
+                                >
+                                  {copiedAyatNum === ayat.nomorAyat ? (
+                                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>{copiedAyatNum === ayat.nomorAyat ? 'Tersalin' : 'Salin'}</span>
+                                </button>
+
+                                {/* SHARE */}
+                                <button
+                                  onClick={() => handleOpenShareModal(ayat)}
+                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                                  title="Bagikan Ayat"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                  <span>Share</span>
+                                </button>
+
+                                {/* CATATAN */}
+                                <button
+                                  onClick={() => handleOpenNoteModal(ayat)}
+                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                    savedNote
+                                      ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 text-amber-800 dark:text-amber-300'
+                                      : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  title="Tandai Catatan Pribadi"
+                                >
+                                  <FileText className="w-3.5 h-3.5 text-amber-500" />
+                                  <span>Catatan</span>
+                                </button>
+
+                                {/* SIMPAN (BOOKMARK) */}
+                                <button
+                                  onClick={() => handleToggleBookmark(ayat)}
+                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                    isBookmarked
+                                      ? 'bg-emerald-600 text-white border-emerald-600'
+                                      : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  title={isBookmarked ? 'Hapus dari Simpanan' : 'Simpan Ayat'}
+                                >
+                                  <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current text-white' : ''}`} />
+                                  <span>{isBookmarked ? 'Disimpan' : 'Simpan'}</span>
+                                </button>
+
+                                {/* TAJWID */}
+                                <button
+                                  onClick={() => setShowTajweedGuide(true)}
+                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                                  title="Panduan Warna Tajwid"
+                                >
+                                  <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                  <span>Tajwid</span>
+                                </button>
+
+                                {hiddenReadMode && (
+                                  <button
+                                    onClick={() => setActiveAyatId(null)}
+                                    className="flex-shrink-0 ml-auto p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                    title="Tutup Menu"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ======================================================== */}
         {/* POPUP PEMILIH SUASANA & BACKGROUND (WARNA POLOS ISLAMI) */}
@@ -1491,7 +2753,7 @@ export default function AlQuranModal({ onClose }) {
               {/* Pilihan 6 Warna Polos Nyaman */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
-                  { id: 'mushaf', name: 'Hijau Kemenag', desc: 'Standar Mushaf', color: '#d5f5d8', textColor: '#064e3b', border: '#86efac' },
+                  { id: 'mushaf', name: 'Hijau Kemenag', desc: 'Standar Mushaf', color: '#e8f9eb', textColor: '#022c22', border: '#a7f3d0' },
                   { id: 'light', name: 'Putih Bersih', desc: 'Terang & Kontras', color: '#ffffff', textColor: '#0f172a', border: '#e2e8f0' },
                   { id: 'sepia', name: 'Kertas Sepia', desc: 'Nyaman di Mata', color: '#fbf6ea', textColor: '#854d0e', border: '#fde68a' },
                   { id: 'dark', name: 'Hitam Gelap', desc: 'Malam / AMOLED', color: '#09111c', textColor: '#ffffff', border: '#334155' },
@@ -1537,64 +2799,7 @@ export default function AlQuranModal({ onClose }) {
         )}
 
         {/* ======================================================== */}
-        {/* 2. SUB-HEADER BAR: NAVIGASI SURAT (< 48. Al-Fath >)      */}
-        {/* ======================================================== */}
-        <div className={`${currentTheme.subHeaderBg} border-b px-4 py-2 flex items-center justify-between shadow-xs flex-shrink-0 transition-colors relative z-10`}>
-          {/* Tombol Surat Sebelumnya (<) */}
-          <button
-            onClick={handlePrevSurah}
-            disabled={selectedSurah.nomor <= 1}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
-              selectedSurah.nomor <= 1
-                ? 'opacity-20 cursor-not-allowed text-slate-400'
-                : 'text-[#0a7c29] hover:bg-emerald-100/50'
-            }`}
-            title="Surat Sebelumnya"
-          >
-            <span className="text-xl font-bold">◀</span>
-          </button>
-
-          {/* Identitas Surat Tengah & Tombol Cepat Pindah Mushaf */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2">
-              <h1 className="text-sm sm:text-base font-black tracking-tight">
-                {selectedSurah.nomor}. {selectedSurah.namaLatin}
-              </h1>
-              {/* Badge Mushaf Aktif (Dapat diklik untuk toggle cepat) */}
-              <button
-                onClick={() => handleMushafTypeChange(mushafType === 'madinah' ? 'indonesia' : 'madinah')}
-                className={`text-[10px] px-2 py-0.5 rounded-full font-bold border transition active:scale-95 ${
-                  mushafType === 'madinah'
-                    ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-400/60 hover:bg-amber-500/30'
-                    : 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400/60 hover:bg-emerald-500/30'
-                }`}
-                title="Klik untuk beralih antara Mushaf Madinah & Mushaf Indonesia"
-              >
-                {mushafType === 'madinah' ? 'Mushaf Madinah' : 'Mushaf Indonesia'} ⇄
-              </button>
-            </div>
-            <p className="text-[11px] sm:text-xs opacity-75 font-medium">
-              {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'}, {selectedSurah.jumlahAyat} ayat • Juz {selectedSurah.juz}
-            </p>
-          </div>
-
-          {/* Tombol Surat Selanjutnya (>) */}
-          <button
-            onClick={handleNextSurah}
-            disabled={selectedSurah.nomor >= 114}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
-              selectedSurah.nomor >= 114
-                ? 'opacity-20 cursor-not-allowed text-slate-400'
-                : 'text-[#0a7c29] hover:bg-emerald-100/50'
-            }`}
-            title="Surat Selanjutnya"
-          >
-            <span className="text-xl font-bold">▶</span>
-          </button>
-        </div>
-
-        {/* ======================================================== */}
-        {/* 3. MODAL POPUP PILIH SURAT (114 SURAH LENGKAP)           */}
+        {/* MODAL POPUP PILIH SURAT (114 SURAH LENGKAP)              */}
         {/* ======================================================== */}
         {showSurahPicker && (
           <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl z-30 flex-shrink-0 animate-in slide-in-from-top duration-200 max-h-[60vh] overflow-y-auto">
@@ -1632,9 +2837,7 @@ export default function AlQuranModal({ onClose }) {
                   <button
                     key={surah.nomor}
                     onClick={() => {
-                      setSelectedSurah(surah);
-                      setShowSurahPicker(false);
-                      setSearchQuery('');
+                      handleOpenSurah(surah, 1);
                     }}
                     className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between ${
                       selectedSurah.nomor === surah.nomor
@@ -1659,389 +2862,6 @@ export default function AlQuranModal({ onClose }) {
             </div>
           </div>
         )}
-
-        {/* ======================================================== */}
-        {/* 4. DAFTAR AYAT DENGAN KONTRAS TINGGI DI 3 MODE            */}
-        {/* ======================================================== */}
-        <div
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 space-y-8 select-text touch-pan-y"
-        >
-          {/* BISMILLAH BANNER ORNAMEN KALIGRAFI (Kecuali Surah 9 & Surah 1) */}
-          {selectedSurah.nomor !== 9 && selectedSurah.nomor !== 1 && (
-            <div className="relative mx-auto my-5 max-w-xl text-center px-2 z-10">
-              <div className={`relative py-4 px-6 rounded-3xl border-2 border-amber-400/50 shadow-md overflow-hidden ${
-                currentTheme.type === 'image' || currentTheme.isDark
-                  ? 'bg-slate-900/80 backdrop-blur-md'
-                  : 'bg-gradient-to-r from-emerald-950/15 via-amber-500/10 to-emerald-950/15'
-              }`}>
-                {/* Aksen ornamen sudut kaligrafi */}
-                <span className="absolute top-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                <span className="absolute top-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                <span className="absolute bottom-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                <span className="absolute bottom-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-
-                <div className="relative z-10 space-y-1">
-                  <span
-                    style={{
-                      fontFamily: getActiveFontFamily(),
-                      color: currentTheme.bismillahColor
-                    }}
-                    className="text-2xl sm:text-3xl tracking-wide inline-block select-text font-bold drop-shadow-sm"
-                    dir="rtl"
-                  >
-                    بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
-                  </span>
-                  <p style={{ color: currentTheme.translationColor }} className="text-[11px] sm:text-xs font-medium opacity-80 italic">
-                    "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang"
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PEMBERITAHUAN AT-TAUBAH */}
-          {selectedSurah.nomor === 9 && (
-            <div className="mx-auto my-4 max-w-lg p-3.5 rounded-2xl bg-amber-500/15 border border-amber-400/50 text-center text-xs space-y-1 z-10">
-              <span className="font-bold text-amber-800 dark:text-amber-300 block">Surat At-Taubah dibaca tanpa Basmalah</span>
-              <p className="text-slate-600 dark:text-slate-300 text-[11px]">
-                Sesuai ketetapan Rasulullah ﷺ dan para Sahabat, pembacaan surat ini diawali langsung dengan ta'awwudz.
-              </p>
-            </div>
-          )}
-
-          {/* LOADING STATE */}
-          {loadingSurah && (
-            <div className="py-24 text-center space-y-3 z-10">
-              <Loader2 className="w-10 h-10 text-[#0a7c29] animate-spin mx-auto" />
-              <p style={{ color: currentTheme.translationColor }} className="text-xs sm:text-sm font-bold opacity-80">
-                Memuat mushaf QS. {selectedSurah.namaLatin}...
-              </p>
-            </div>
-          )}
-
-          {/* DAFTAR AYAT */}
-          {!loadingSurah && surahDetail && surahDetail.ayat && (
-            <div className="space-y-6 max-w-3xl mx-auto z-10 relative">
-              {surahDetail.ayat.map((ayat, index) => {
-                const noteKey = `${selectedSurah.nomor}:${ayat.nomorAyat}`;
-                const savedNote = userNotes[noteKey];
-                const isBookmarked = bookmarks.some((b) => b.key === noteKey);
-                const isAudioPlaying = isPlayingAudio && activeAyatAudio === ayat.nomorAyat;
-                const isHighlighted = highlightedAyat === ayat.nomorAyat;
-                const isToolbarOpen = activeAyatId === ayat.nomorAyat;
-
-                // Penanda Halaman Mushaf (Mendukung nomor halaman asli Utsmani Madinah jika aktif)
-                const ayatPage = mushafType === 'madinah' && ayat.pageMadinah ? ayat.pageMadinah : getAyatPageNumber(selectedSurah.nomor, ayat.nomorAyat);
-                const prevAyat = index > 0 ? surahDetail.ayat[index - 1] : null;
-                const prevAyatPage = prevAyat ? (mushafType === 'madinah' && prevAyat.pageMadinah ? prevAyat.pageMadinah : getAyatPageNumber(selectedSurah.nomor, prevAyat.nomorAyat)) : null;
-                const isNewPage = index === 0 || ayatPage !== prevAyatPage;
-
-                return (
-                  <React.Fragment key={ayat.nomorAyat}>
-                    {/* PENANDA AWAL HALAMAN MUSHAF */}
-                    {isNewPage && (
-                      <div className="flex items-center justify-center my-6 pt-2 z-10">
-                        <div className="flex items-center gap-3 w-full max-w-md">
-                          <div className="h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent flex-1" />
-                          <div className={`px-4 py-1.5 rounded-full border border-amber-400/70 shadow-xs flex items-center gap-2 text-xs font-black ${
-                            currentTheme.isDark || currentTheme.type === 'image'
-                              ? 'bg-slate-900/90 text-amber-200'
-                              : 'bg-gradient-to-r from-amber-500/20 via-emerald-500/25 to-amber-500/20 text-slate-800'
-                          }`}>
-                            <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-                            <span>Halaman {ayatPage}</span>
-                            <span className="opacity-40">•</span>
-                            <span>{mushafType === 'madinah' ? 'Mushaf Madinah' : 'Standar Kemenag'}</span>
-                            <span className="opacity-40">•</span>
-                            <span>Juz {ayat.juzMadinah || selectedSurah.juz}</span>
-                          </div>
-                          <div className="h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent flex-1" />
-                        </div>
-                      </div>
-                    )}
-
-                    <div
-                      id={`ayat-card-${ayat.nomorAyat}`}
-                      onClick={() => {
-                        setActiveAyatId(activeAyatId === ayat.nomorAyat ? null : ayat.nomorAyat);
-                      }}
-                      style={{
-                        borderBottomColor: currentTheme.borderDivider
-                      }}
-                      className={`space-y-4 pb-6 border-b transition-all duration-300 rounded-2xl cursor-pointer relative z-10 ${
-                        isHighlighted
-                          ? currentTheme.highlightBg + ' p-4 rounded-3xl'
-                          : isAudioPlaying
-                          ? currentTheme.activeAudioBg + ' p-4 rounded-3xl'
-                          : isToolbarOpen
-                          ? currentTheme.type === 'image'
-                            ? 'p-4 rounded-3xl ring-2 ring-amber-400/80 bg-slate-900/90 backdrop-blur-md'
-                            : 'p-4 rounded-3xl ring-2 ring-emerald-500/60 bg-emerald-500/5'
-                          : currentTheme.type === 'image'
-                          ? 'p-3.5 rounded-2xl bg-black/35 backdrop-blur-xs hover:bg-black/55 border border-white/5'
-                          : 'p-2 hover:bg-black/5 dark:hover:bg-white/5'
-                      }`}
-                    >
-                      {/* A. TEKS ARAB DENGAN TAJWID WARNA & NOMOR AYAT LONCAT */}
-                      <div className="w-full" dir="rtl" data-zoom-zone="arabic">
-                        <p
-                          style={{
-                            fontFamily: getActiveFontFamily(),
-                            fontSize: `${arabicFontSize}px`,
-                            color: currentTheme.arabicColor,
-                            lineHeight: dynamicArabicLineHeight,
-                            textAlign: 'justify',
-                            textAlignLast: 'right',
-                            textJustify: 'auto',
-                            wordSpacing: isKashidaLong ? '0.34em' : '0.04em',
-                            fontFeatureSettings: isKashidaLong ? '"jalt" 1, "calt" 1, "liga" 1' : '"calt" 1, "liga" 1',
-                            fontWeight: 400,
-                            textRendering: 'optimizeLegibility',
-                            WebkitFontSmoothing: 'antialiased',
-                            MozOsxFontSmoothing: 'grayscale',
-                            width: '100%'
-                          }}
-                          className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
-                        >
-                          {renderArabic(ayat)}
-
-                          {/* ORNAMEN BINGKAI NOMOR AYAT (KLIK UNTUK LONCAT AYAT) */}
-                          <span
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenJumpModal(ayat.nomorAyat);
-                            }}
-                            className="inline-flex items-center justify-center align-middle mx-2 my-1 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
-                            style={{ verticalAlign: 'middle', lineHeight: 1 }}
-                            title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ke ayat lain (Maks: ${selectedSurah.jumlahAyat})`}
-                          >
-                            <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
-                              {ayat.nomorAyat}
-                            </span>
-                          </span>
-                        </p>
-                      </div>
-
-                      {/* B. TRANSLITERASI LATIN */}
-                      {showLatin && ayat.teksLatin && (
-                        <div className="mt-3.5 sm:mt-4 pt-1 w-full" data-zoom-zone="latin">
-                          <p
-                            style={{
-                              fontSize: `${latinFontSize}px`,
-                              color: currentTheme.latinColor,
-                              lineHeight: '1.75',
-                              textAlign: 'justify',
-                              textAlignLast: 'left',
-                              textJustify: 'inter-word',
-                              hyphens: 'auto',
-                              width: '100%'
-                            }}
-                            className="font-medium select-text"
-                          >
-                            {ayat.teksLatin}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* C. TERJEMAHAN BAHASA INDONESIA */}
-                      {showTranslation && ayat.teksIndonesia && (
-                        <div className="mt-2.5 sm:mt-3 w-full" data-zoom-zone="translation">
-                          <p
-                            style={{
-                              fontSize: `${latinFontSize}px`,
-                              color: currentTheme.translationColor,
-                              lineHeight: '1.75',
-                              textAlign: 'justify',
-                              textAlignLast: 'left',
-                              textJustify: 'inter-word',
-                              hyphens: 'auto',
-                              width: '100%'
-                            }}
-                            className="font-normal select-text opacity-95"
-                          >
-                            {ayat.teksIndonesia}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* D. CATATAN PRIBADI JAMAAH (JIKA ADA) */}
-                      {savedNote && (
-                        <div
-                          style={{
-                            backgroundColor: isDark ? '#1e293b' : '#ecfdf5',
-                            borderColor: isDark ? '#334155' : '#6ee7b7',
-                            color: isDark ? '#e2e8f0' : '#064e3b'
-                          }}
-                          className="p-3.5 rounded-2xl border flex items-start justify-between gap-3 text-xs shadow-xs"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="space-y-1">
-                            <span className="font-bold flex items-center gap-1.5 text-amber-500">
-                              <FileText className="w-4 h-4" />
-                              <span>Catatan Anda ({savedNote.updatedAt}):</span>
-                            </span>
-                            <p className="italic">
-                              "{savedNote.text}"
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button
-                              onClick={() => handleOpenNoteModal(ayat)}
-                              className="text-amber-600 hover:text-amber-700 font-bold px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/50"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteNote(noteKey)}
-                              className="text-red-500 hover:text-red-700 p-1"
-                              title="Hapus Catatan"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* ================================================================ */}
-                      {/* E. BILAH AKSI AYAT (1 BARIS SEJAJAR, ELEGAN, RAPI & NYAMAN)      */}
-                      {/* ================================================================ */}
-                      {(isToolbarOpen || !hiddenReadMode) && (
-                        <div
-                          dir="ltr"
-                          onClick={(e) => e.stopPropagation()}
-                          className="pt-2 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-200"
-                        >
-                          <div className={`p-1.5 sm:p-2 rounded-2xl border shadow-md flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth ${
-                            currentTheme.isDark
-                              ? 'bg-slate-900/95 border-slate-700 text-white shadow-black/40'
-                              : 'bg-white border-emerald-300 text-slate-800 shadow-emerald-950/10'
-                          }`}>
-                            {/* 1. Badge Loncat Ayat */}
-                            <button
-                              onClick={() => handleOpenJumpModal(ayat.nomorAyat)}
-                              className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-[#0a7c29] to-[#064e1c] text-amber-300 font-mono text-[11px] font-black rounded-xl border border-amber-300/40 shadow-xs hover:scale-105 active:scale-95 transition"
-                              title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
-                            >
-                              <span>Ayat</span>
-                              <span className="bg-amber-300/20 px-1 rounded">{ayat.nomorAyat}</span>
-                            </button>
-
-                            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 flex-shrink-0 mx-0.5" />
-
-                            {/* 2. Tombol Aksi 1 Baris Sejajar */}
-                            {/* A. AUDIO */}
-                            <button
-                              onClick={() => playAyatAudio(index)}
-                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
-                                isAudioPlaying
-                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                              }`}
-                              title={isAudioPlaying ? 'Jeda Audio Ayat' : 'Putar Audio Ayat'}
-                            >
-                              {isAudioPlaying ? (
-                                <Pause className="w-3.5 h-3.5 text-white" />
-                              ) : (
-                                <Play className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
-                              )}
-                              <span>{isAudioPlaying ? 'Jeda' : 'Audio'}</span>
-                            </button>
-
-                            {/* B. TAFSIR */}
-                            <button
-                              onClick={() => handleOpenRincian(ayat)}
-                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                              title="Buka Tafsir & Rincian Ayat (Kemenag / Ibnu Katsir)"
-                            >
-                              <BookOpen className="w-3.5 h-3.5 stroke-[2.3]" />
-                              <span>Tafsir</span>
-                            </button>
-
-                            {/* C. SALIN */}
-                            <button
-                              onClick={() => handleCopyAyat(ayat)}
-                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                              title="Salin Ayat & Terjemah"
-                            >
-                              {copiedAyatNum === ayat.nomorAyat ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
-                              <span>{copiedAyatNum === ayat.nomorAyat ? 'Tersalin' : 'Salin'}</span>
-                            </button>
-
-                            {/* D. SHARE */}
-                            <button
-                              onClick={() => handleOpenShareModal(ayat)}
-                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                              title="Bagikan Ayat (Kartu Gambar Dinamis)"
-                            >
-                              <Share2 className="w-3.5 h-3.5" />
-                              <span>Share</span>
-                            </button>
-
-                            {/* E. CATATAN */}
-                            <button
-                              onClick={() => handleOpenNoteModal(ayat)}
-                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
-                                savedNote
-                                  ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 text-amber-800 dark:text-amber-300'
-                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                              }`}
-                              title="Tandai Catatan Pribadi"
-                            >
-                              <FileText className="w-3.5 h-3.5 text-amber-500" />
-                              <span>Catatan</span>
-                            </button>
-
-                            {/* F. SIMPAN (BOOKMARK) */}
-                            <button
-                              onClick={() => handleToggleBookmark(ayat)}
-                              className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
-                                isBookmarked
-                                  ? 'bg-emerald-600 text-white border-emerald-600'
-                                  : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-                              }`}
-                              title={isBookmarked ? 'Hapus dari Simpanan' : 'Simpan Ayat'}
-                            >
-                              <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current text-white' : ''}`} />
-                              <span>{isBookmarked ? 'Disimpan' : 'Simpan'}</span>
-                            </button>
-
-                            {/* G. TAJWID */}
-                            <button
-                              onClick={() => setShowTajweedGuide(true)}
-                              className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                              title="Panduan Warna Tajwid"
-                            >
-                              <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                              <span>Tajwid</span>
-                            </button>
-
-                            {/* Tombol Tutup (X) */}
-                            {hiddenReadMode && (
-                              <button
-                                onClick={() => setActiveAyatId(null)}
-                                className="flex-shrink-0 ml-auto p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                                title="Tutup Menu"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          )}
-        </div>
 
         {/* ======================================================== */}
         {/* MODAL 1: RINCIAN & TAFSIR                                 */}
@@ -3242,6 +4062,168 @@ export default function AlQuranModal({ onClose }) {
               >
                 Mengerti
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* MODAL 7: PILIH AYAT LANGSUNG DARI DAFTAR SURAT           */}
+        {/* ======================================================== */}
+        {surahAyatJumpModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+            <div className={`w-full max-w-md max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
+              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
+            }`}>
+              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <ListOrdered className="w-5 h-5 text-amber-300" />
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black leading-tight">
+                      Pilih Ayat: QS. {surahAyatJumpModal.namaLatin}
+                    </h3>
+                    <span className="text-[11px] text-emerald-200 font-medium">
+                      Total {surahAyatJumpModal.jumlahAyat} Ayat • {surahAyatJumpModal.arti}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSurahAyatJumpModal(null)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium text-center">
+                  Ketuk nomor ayat untuk langsung mulai membaca:
+                </p>
+                <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
+                  {Array.from({ length: surahAyatJumpModal.jumlahAyat }, (_, i) => i + 1).map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => {
+                        handleOpenSurah(surahAyatJumpModal, num);
+                        setSurahAyatJumpModal(null);
+                      }}
+                      className="py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs sm:text-sm active:scale-95 transition shadow-2xs"
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* MODAL 8: BUAT TARGET KHATAMAN BARU                       */}
+        {/* ======================================================== */}
+        {showNewKhatamModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+            <div className={`w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border ${
+              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
+            }`}>
+              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-amber-300" />
+                  <h3 className="text-base font-black">Buat Target Khataman Baru</h3>
+                </div>
+                <button
+                  onClick={() => setShowNewKhatamModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateKhatam} className="p-4 sm:p-5 space-y-3.5 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Judul Program Khataman *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newKhatamInput.title}
+                    onChange={(e) => setNewKhatamInput({ ...newKhatamInput, title: e.target.value })}
+                    placeholder="Contoh: Khataman Ramadhan 1447H, Khataman Rutin"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Nama Khataman Siapa / Niat Untuk *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newKhatamInput.targetPerson}
+                    onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetPerson: e.target.value })}
+                    placeholder="Contoh: Pribadi, Untuk Ibu Tercinta, Almarhum Ayah"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Tanggal Awal Baca *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={newKhatamInput.startDate}
+                      onChange={(e) => setNewKhatamInput({ ...newKhatamInput, startDate: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Target Waktu (Hari)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={newKhatamInput.targetDays}
+                      onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetDays: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Catatan / Doa & Harapan (Opsional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={newKhatamInput.notes}
+                    onChange={(e) => setNewKhatamInput({ ...newKhatamInput, notes: e.target.value })}
+                    placeholder="Tulis niat doa, harapan, atau pesan untuk khataman ini..."
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setShowNewKhatamModal(false)}
+                    className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 text-white font-black shadow-md transition active:scale-95"
+                  >
+                    Simpan Program
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
