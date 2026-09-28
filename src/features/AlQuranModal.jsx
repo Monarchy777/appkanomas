@@ -919,9 +919,9 @@ export default function AlQuranModal({ onClose }) {
   // Pilihan Mushaf & Tulisan Arab Resmi ('indonesia' | 'madinah' | 'modern')
   const [mushafType, setMushafType] = useState(() => {
     try {
-      return localStorage.getItem('kanomas_mushaf_type') || 'indonesia';
+      return localStorage.getItem('kanomas_mushaf_type') || 'madinah';
     } catch {
-      return 'indonesia';
+      return 'madinah';
     }
   });
 
@@ -1080,7 +1080,7 @@ export default function AlQuranModal({ onClose }) {
     if (mushafType === 'indonesia') {
       return "'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', serif";
     }
-    return "'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif";
+    return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
