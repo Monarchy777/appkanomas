@@ -888,6 +888,162 @@ export default function AlQuranModal({ onClose }) {
   const [quickSurahFilter, setQuickSurahFilter] = useState('');
   const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
 
+  // Sudut rotasi independen untuk putaran roda dengan 1 jari (1-finger touch rotary drag)
+  const [juzRotation, setJuzRotation] = useState(() => -(wheelJuzNum - 1) * 12);
+  const [surahRotation, setSurahRotation] = useState(() => -(quickSurahNum - 1) * (360 / 114));
+  const [ayatRotation, setAyatRotation] = useState(() => -(quickAyatNum - 1) * (360 / Math.max(1, currentQuickSurah.jumlahAyat)));
+  const [isDraggingRing, setIsDraggingRing] = useState(null); // 'juz' | 'surah' | 'ayat' | null
+
+  const wheelContainerRef = useRef(null);
+  const dragStateRef = useRef(null);
+
+  // Sinkronisasi sudut rotasi saat nomor berubah dari luar (misal picker modal / tap)
+  useEffect(() => {
+    if (!isDraggingRing) {
+      setJuzRotation(-(wheelJuzNum - 1) * 12);
+    }
+  }, [wheelJuzNum, isDraggingRing]);
+
+  useEffect(() => {
+    if (!isDraggingRing) {
+      setSurahRotation(-(quickSurahNum - 1) * (360 / 114));
+    }
+  }, [quickSurahNum, isDraggingRing]);
+
+  useEffect(() => {
+    if (!isDraggingRing) {
+      const max = currentQuickSurah.jumlahAyat;
+      setAyatRotation(-(quickAyatNum - 1) * (360 / Math.max(1, max)));
+    }
+  }, [quickAyatNum, currentQuickSurah.jumlahAyat, isDraggingRing]);
+
+  // Handler Putar Roda dengan 1 Jari (1-Finger Rotary Touch & Drag)
+  const handleWheelPointerDown = (e) => {
+    if (!wheelContainerRef.current) return;
+    const rect = wheelContainerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+    const radius = Math.sqrt(dx * dx + dy * dy);
+    // Konversi skala pixel ke radius SVG (basis diameter 340px, radius 170px)
+    const scale = 170 / (rect.width / 2);
+    const svgR = radius * scale;
+
+    let ringType = null;
+    if (svgR < 38) {
+      // Pusat roda: Medallion BACA / Iqra' (tidak putar, ditangani onClick)
+      return;
+    } else if (svgR >= 38 && svgR < 78) {
+      ringType = 'juz';
+    } else if (svgR >= 78 && svgR < 122) {
+      ringType = 'surah';
+    } else if (svgR >= 122) {
+      ringType = 'ayat';
+    }
+
+    if (!ringType) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    const startAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+    dragStateRef.current = {
+      ringType,
+      pointerId: e.pointerId,
+      centerX,
+      centerY,
+      lastAngle: startAngle,
+      totalDelta: 0
+    };
+    setIsDraggingRing(ringType);
+  };
+
+  const handleWheelPointerMove = (e) => {
+    if (!dragStateRef.current) return;
+    const { ringType, centerX, centerY, lastAngle } = dragStateRef.current;
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+    const currentAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    let delta = currentAngle - lastAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+
+    dragStateRef.current.totalDelta += Math.abs(delta);
+    dragStateRef.current.lastAngle = currentAngle;
+
+    if (ringType === 'ayat') {
+      setAyatRotation((prev) => {
+        const next = prev + delta;
+        const max = currentQuickSurah.jumlahAyat;
+        const step = 360 / Math.max(1, max);
+        let rawIdx = Math.round((-next) / step) % max;
+        if (rawIdx < 0) rawIdx += max;
+        const newAyat = rawIdx + 1;
+        if (newAyat !== quickAyatNum) {
+          setQuickAyatNum(newAyat);
+          if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
+        }
+        return next;
+      });
+    } else if (ringType === 'surah') {
+      setSurahRotation((prev) => {
+        const next = prev + delta;
+        const step = 360 / 114;
+        let rawIdx = Math.round((-next) / step) % 114;
+        if (rawIdx < 0) rawIdx += 114;
+        const newSurah = rawIdx + 1;
+        if (newSurah !== quickSurahNum) {
+          setQuickSurahNum(newSurah);
+          const sObj = SURAH_LIST.find((s) => s.nomor === newSurah);
+          if (sObj && sObj.juz !== wheelJuzNum) {
+            setWheelJuzNum(sObj.juz);
+          }
+          if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
+        }
+        return next;
+      });
+    } else if (ringType === 'juz') {
+      setJuzRotation((prev) => {
+        const next = prev + delta;
+        const step = 12; // 360 / 30
+        let rawIdx = Math.round((-next) / step) % 30;
+        if (rawIdx < 0) rawIdx += 30;
+        const newJuz = rawIdx + 1;
+        if (newJuz !== wheelJuzNum) {
+          setWheelJuzNum(newJuz);
+          const targetJuzData = JUZ_LIST[newJuz - 1];
+          if (targetJuzData && targetJuzData.surahNomor !== quickSurahNum) {
+            setQuickSurahNum(targetJuzData.surahNomor);
+            setQuickAyatNum(targetJuzData.ayat || 1);
+          }
+          if (navigator.vibrate) try { navigator.vibrate(10); } catch {}
+        }
+        return next;
+      });
+    }
+  };
+
+  const handleWheelPointerUp = (e) => {
+    if (!dragStateRef.current) return;
+    const { ringType } = dragStateRef.current;
+    dragStateRef.current = null;
+    setIsDraggingRing(null);
+
+    // Snap rotasi ke posisi terdekat agar lurus sejajar jarum penunjuk
+    if (ringType === 'ayat') {
+      const max = currentQuickSurah.jumlahAyat;
+      setAyatRotation(-(quickAyatNum - 1) * (360 / Math.max(1, max)));
+    } else if (ringType === 'surah') {
+      setSurahRotation(-(quickSurahNum - 1) * (360 / 114));
+    } else if (ringType === 'juz') {
+      setJuzRotation(-(wheelJuzNum - 1) * 12);
+    }
+  };
+
   // Helper Rotasi Roda Navigasi 3 Lapis
   const handleRotateJuz = (delta) => {
     setWheelJuzNum((prev) => {
@@ -2196,10 +2352,11 @@ export default function AlQuranModal({ onClose }) {
               )}
 
               {/* ======================================================== */}
-              {/* NAVIGASI 3 RODA BERPUTAR ISLAMI (ISLAMIC ASTROLABE DIAL)  */}
+              {/* ======================================================== */}
+              {/* NAVIGASI 3 RODA BERPUTAR ISLAMI (1-FINGER ROTARY ASTROLABE) */}
               {/* Roda Paling Dalam: Juz | Roda Tengah: Surat | Roda Luar: Ayat */}
               {/* ======================================================== */}
-              <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-xl relative overflow-hidden backdrop-blur-md">
+              <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-2xl relative overflow-hidden backdrop-blur-md">
                 {/* Background Kaligrafi & Ornamen Air Islam */}
                 <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
                   <span className="text-[260px] font-serif leading-none select-none text-emerald-400">۞</span>
@@ -2209,166 +2366,328 @@ export default function AlQuranModal({ onClose }) {
                 <div className="text-center relative z-10 mb-2">
                   <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                     <span>۞</span>
-                    <span>Kemudi Roda Al-Qur'an</span>
+                    <span>Kemudi Roda Al-Qur'an (Putar 1 Jari)</span>
                     <span>۞</span>
                   </div>
-                  <p className="text-[11px] text-emerald-200/80 mt-1">
-                    Putar ◀ ▶ untuk memilih: <strong>Juz (Dalam)</strong> • <strong>Surat (Tengah)</strong> • <strong>Ayat (Luar)</strong>
+                  <p className="text-[11px] text-emerald-200/90 mt-1 font-medium">
+                    👆 <strong>Sentuh & putar roda dengan 1 jari:</strong> Roda Luar (Ayat) • Roda Tengah (Surat) • Roda Dalam (Juz)
                   </p>
                 </div>
 
-                {/* AREA KONSENTRIK 3 RODA DIAL */}
-                <div className="w-[300px] h-[300px] sm:w-[330px] sm:h-[330px] relative mx-auto my-2 flex items-center justify-center select-none">
-                  {/* 1. RODA PALING LUAR: MEMILIH AYAT */}
-                  <div
-                    className="absolute inset-0 rounded-full border-2 border-emerald-500/40 bg-emerald-950/40 shadow-inner flex items-center justify-center"
-                    style={{
-                      transform: `rotate(${((quickAyatNum - 1) / Math.max(1, currentQuickSurah.jumlahAyat)) * 360}deg)`,
-                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                    }}
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-60" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="48" fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="1.5 3" />
-                      <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="0.5" strokeDasharray="1 5" />
-                      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-                        <circle
-                          key={deg}
-                          cx={50 + 46.5 * Math.cos((deg * Math.PI) / 180)}
-                          cy={50 + 46.5 * Math.sin((deg * Math.PI) / 180)}
-                          r="1.2"
-                          fill="#fbbf24"
-                        />
-                      ))}
-                    </svg>
+                {/* BADGE PILIHAN AKTIF DI ATAS RODA (KLIK UNTUK AKSES CEPAT) */}
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 relative z-20 mb-2 flex-wrap">
+                  {/* Badge Juz */}
+                  <div className="px-2.5 py-1 rounded-xl bg-emerald-900/90 border border-emerald-400/50 text-amber-300 text-[11px] sm:text-xs font-black shadow-xs">
+                    JUZ {wheelJuzNum}
                   </div>
-
-                  {/* Kontrol Putar Roda Luar (Ayat): ◀ & ▶ dan Badge */}
+                  {/* Badge Surat */}
                   <button
                     type="button"
-                    onClick={() => handleRotateAyat(-1)}
-                    title="Ayat Sebelumnya (-1)"
-                    className="absolute left-1 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-emerald-800/95 hover:bg-emerald-700 text-amber-300 border border-amber-400/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
+                    onClick={() => setShowSurahPickerModal(true)}
+                    className="px-3 py-1 rounded-xl bg-slate-950/90 hover:bg-slate-900 border border-amber-400/60 text-white text-[11px] sm:text-xs font-black shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
+                    title="Klik untuk memilih surat dari daftar 114 surat"
                   >
-                    ◀
+                    <span className="text-amber-300">{currentQuickSurah.nomor}. {currentQuickSurah.namaLatin}</span>
+                    <span className="font-quran-lpmq text-amber-200 font-bold" dir="rtl">{currentQuickSurah.nama}</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRotateAyat(1)}
-                    title="Ayat Selanjutnya (+1)"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-emerald-800/95 hover:bg-emerald-700 text-amber-300 border border-amber-400/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
-                  >
-                    ▶
-                  </button>
-                  {/* Badge Ayat Terpilih (Puncak Roda Luar) */}
+                  {/* Badge Ayat */}
                   <button
                     type="button"
                     onClick={() => setShowAyatGridPicker(true)}
-                    className="absolute top-1 z-30 px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-[11px] font-black border border-amber-500 shadow-md active:scale-95 transition flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-500 text-slate-950 text-[11px] sm:text-xs font-black shadow-xs flex items-center gap-1 cursor-pointer active:scale-95 transition"
                     title="Klik untuk memilih nomor ayat dari grid"
                   >
                     <span>Ayat {quickAyatNum}</span>
                     <span className="opacity-70 font-normal">/ {currentQuickSurah.jumlahAyat}</span>
                   </button>
+                </div>
 
-                  {/* 2. RODA TENGAH: MEMILIH SURAT */}
-                  <div
-                    className="absolute w-[210px] h-[210px] sm:w-[235px] sm:h-[235px] rounded-full border-2 border-amber-400/70 bg-gradient-to-tr from-emerald-950/80 via-emerald-900/90 to-teal-950/80 shadow-lg flex items-center justify-center"
-                    style={{
-                      transform: `rotate(${((quickSurahNum - 1) / 114) * 360}deg)`,
-                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                    }}
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-50" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="48" fill="none" stroke="#fbbf24" strokeWidth="0.8" strokeDasharray="2 2" />
-                      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
-                        <rect
-                          key={deg}
-                          x="49"
-                          y="2"
-                          width="2"
-                          height="3"
-                          fill="#10b981"
-                          transform={`rotate(${deg} 50 50)`}
-                        />
-                      ))}
-                    </svg>
-                  </div>
-
-                  {/* Kontrol Putar Roda Tengah (Surat): ◀ & ▶ dan Badge */}
-                  <button
-                    type="button"
-                    onClick={() => handleRotateSurah(-1)}
-                    title="Surat Sebelumnya"
-                    className="absolute left-[44px] sm:left-[48px] top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-amber-500/95 hover:bg-amber-400 text-slate-950 font-black border border-white/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
-                  >
-                    ◀
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRotateSurah(1)}
-                    title="Surat Selanjutnya"
-                    className="absolute right-[44px] sm:right-[48px] top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-amber-500/95 hover:bg-amber-400 text-slate-950 font-black border border-white/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
-                  >
-                    ▶
-                  </button>
-                  {/* Badge Nama Surat Latin di Bagian Atas Roda Tengah */}
-                  <button
-                    type="button"
-                    onClick={() => setShowSurahPickerModal(true)}
-                    className="absolute top-[28px] sm:top-[32px] z-30 max-w-[150px] sm:max-w-[170px] px-2 py-0.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-white text-center border border-emerald-400/50 shadow-xs cursor-pointer group active:scale-95 transition"
-                    title="Klik untuk memilih surat dari daftar 114 surat"
-                  >
-                    <span className="text-[10px] sm:text-[11px] font-black text-amber-300 block truncate group-hover:text-amber-200">
-                      {currentQuickSurah.nomor}. {currentQuickSurah.namaLatin}
-                    </span>
-                  </button>
-                  {/* Kaligrafi Surat Arab di Bagian Bawah Roda Tengah */}
-                  <div className="absolute bottom-[28px] sm:bottom-[32px] z-30 text-center pointer-events-none">
-                    <span className="font-quran-lpmq text-sm sm:text-base text-amber-300 font-bold drop-shadow-md" dir="rtl">
-                      {currentQuickSurah.nama}
+                {/* STATUS DRAG AKTIF INDIKATOR */}
+                {isDraggingRing && (
+                  <div className="text-center mb-1">
+                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider animate-pulse shadow-md">
+                      <span>🔄</span>
+                      <span>Memutar Roda {isDraggingRing === 'ayat' ? 'Ayat' : isDraggingRing === 'surah' ? 'Surat' : 'Juz'}...</span>
                     </span>
                   </div>
+                )}
 
-                  {/* 3. RODA PALING DALAM: MEMILIH JUZ */}
-                  <div
-                    className="absolute w-[126px] h-[126px] sm:w-[140px] sm:h-[140px] rounded-full border-2 border-emerald-300/80 bg-gradient-to-b from-[#0a7c29] to-emerald-950 shadow-inner flex items-center justify-center"
-                    style={{
-                      transform: `rotate(${((wheelJuzNum - 1) / 30) * 360}deg)`,
-                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                {/* AREA KONSENTRIK 3 RODA DIAL (PUTAR PAKAI 1 JARI DENGAN NOMOR DI DALAMNYA) */}
+                <div
+                  ref={wheelContainerRef}
+                  onPointerDown={handleWheelPointerDown}
+                  onPointerMove={handleWheelPointerMove}
+                  onPointerUp={handleWheelPointerUp}
+                  onPointerCancel={handleWheelPointerUp}
+                  style={{ touchAction: 'none' }}
+                  className="w-[300px] h-[300px] sm:w-[340px] sm:h-[340px] relative mx-auto my-1 flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+                  title="Sentuh dan putar lingkaran dengan 1 jari: Luar (Ayat), Tengah (Surat), Dalam (Juz)"
+                >
+                  <svg
+                    className="w-full h-full drop-shadow-2xl"
+                    viewBox="0 0 340 340"
+                    style={{ overflow: 'visible' }}
+                  >
+                    <defs>
+                      <radialGradient id="ayatGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="65%" stopColor="#022c22" />
+                        <stop offset="90%" stopColor="#064e3b" />
+                        <stop offset="100%" stopColor="#047857" />
+                      </radialGradient>
+                      <radialGradient id="surahGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="50%" stopColor="#022c22" />
+                        <stop offset="85%" stopColor="#065f46" />
+                        <stop offset="100%" stopColor="#0f766e" />
+                      </radialGradient>
+                      <radialGradient id="juzGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="50%" stopColor="#064e3b" />
+                        <stop offset="85%" stopColor="#047857" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </radialGradient>
+                    </defs>
+
+                    {/* ======================================================== */}
+                    {/* 1. RODA PALING LUAR: AYAT (Radius 144, tebal 42) */}
+                    {/* ======================================================== */}
+                    <g
+                      transform={`rotate(${ayatRotation} 170 170)`}
+                      style={{ transition: isDraggingRing === 'ayat' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                    >
+                      {/* Background Track Ring Ayat */}
+                      <circle
+                        cx="170"
+                        cy="170"
+                        r="144"
+                        stroke="url(#ayatGrad)"
+                        strokeWidth="42"
+                        fill="none"
+                        opacity={isDraggingRing === 'ayat' ? '1' : '0.92'}
+                      />
+                      {/* Garis batas pinggir ring */}
+                      <circle cx="170" cy="170" r="165" stroke={isDraggingRing === 'ayat' ? '#fbbf24' : '#10b981'} strokeWidth="1.2" fill="none" opacity="0.6" strokeDasharray="3 3" />
+                      <circle cx="170" cy="170" r="123" stroke="#f59e0b" strokeWidth="1" fill="none" opacity="0.5" />
+
+                      {/* Ticks & Nomor Ayat di dalam Roda Luar */}
+                      {(() => {
+                        const total = currentQuickSurah.jumlahAyat;
+                        const step = 360 / total;
+                        const items = [];
+                        for (let a = 1; a <= total; a++) {
+                          const ang = (a - 1) * step - 90;
+                          const rad = (ang * Math.PI) / 180;
+                          const isMajor = a === 1 || a % 5 === 0 || a === total;
+                          const isSelected = a === quickAyatNum;
+                          const isNearActive = Math.abs(a - quickAyatNum) <= 2 || (total - Math.abs(a - quickAyatNum) <= 2);
+
+                          // Radial tick marks
+                          const tickLen = isMajor ? 5 : 2.5;
+                          const x1 = 170 + 163 * Math.cos(rad);
+                          const y1 = 170 + 163 * Math.sin(rad);
+                          const x2 = 170 + (163 - tickLen) * Math.cos(rad);
+                          const y2 = 170 + (163 - tickLen) * Math.sin(rad);
+
+                          items.push(
+                            <line
+                              key={`at-${a}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={isSelected ? '#fbbf24' : isMajor ? '#34d399' : '#047857'}
+                              strokeWidth={isSelected ? '2' : isMajor ? '1.2' : '0.6'}
+                            />
+                          );
+
+                          // Nomor ayat tercetak di dalam roda
+                          if (total <= 40 || isMajor || isNearActive) {
+                            const xText = 170 + 144 * Math.cos(rad);
+                            const yText = 170 + 144 * Math.sin(rad);
+                            items.push(
+                              <text
+                                key={`an-${a}`}
+                                x={xText}
+                                y={yText}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={isSelected ? '10' : total > 60 ? '7' : '8'}
+                                fontWeight={isSelected ? '900' : 'bold'}
+                                fill={isSelected ? '#fbbf24' : '#a7f3d0'}
+                                className="font-mono select-none pointer-events-none"
+                              >
+                                {a}
+                              </text>
+                            );
+                          }
+                        }
+                        return items;
+                      })()}
+                    </g>
+
+                    {/* ======================================================== */}
+                    {/* 2. RODA TENGAH: SURAT (Radius 99, tebal 42) */}
+                    {/* ======================================================== */}
+                    <g
+                      transform={`rotate(${surahRotation} 170 170)`}
+                      style={{ transition: isDraggingRing === 'surah' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                    >
+                      {/* Background Track Ring Surat */}
+                      <circle
+                        cx="170"
+                        cy="170"
+                        r="99"
+                        stroke="url(#surahGrad)"
+                        strokeWidth="42"
+                        fill="none"
+                        opacity={isDraggingRing === 'surah' ? '1' : '0.92'}
+                      />
+                      <circle cx="170" cy="170" r="120" stroke={isDraggingRing === 'surah' ? '#fbbf24' : '#f59e0b'} strokeWidth="1.2" fill="none" opacity="0.6" strokeDasharray="3 3" />
+                      <circle cx="170" cy="170" r="78" stroke="#10b981" strokeWidth="1" fill="none" opacity="0.5" />
+
+                      {/* Ticks & Nomor Surat 1..114 di dalam Roda Tengah */}
+                      {(() => {
+                        const step = 360 / 114;
+                        const items = [];
+                        for (let s = 1; s <= 114; s++) {
+                          const ang = (s - 1) * step - 90;
+                          const rad = (ang * Math.PI) / 180;
+                          const isMajor = s === 1 || s % 5 === 0 || s === 114;
+                          const isSelected = s === quickSurahNum;
+                          const isNearActive = Math.abs(s - quickSurahNum) <= 2 || (114 - Math.abs(s - quickSurahNum) <= 2);
+
+                          const tickLen = isMajor ? 5 : 2.5;
+                          const x1 = 170 + 118 * Math.cos(rad);
+                          const y1 = 170 + 118 * Math.sin(rad);
+                          const x2 = 170 + (118 - tickLen) * Math.cos(rad);
+                          const y2 = 170 + (118 - tickLen) * Math.sin(rad);
+
+                          items.push(
+                            <line
+                              key={`st-${s}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={isSelected ? '#fbbf24' : isMajor ? '#f59e0b' : '#047857'}
+                              strokeWidth={isSelected ? '2' : isMajor ? '1.2' : '0.5'}
+                              opacity={isMajor ? 0.9 : 0.4}
+                            />
+                          );
+
+                          // Nomor surat tercetak di dalam roda
+                          if (isMajor || isNearActive) {
+                            const xText = 170 + 99 * Math.cos(rad);
+                            const yText = 170 + 99 * Math.sin(rad);
+                            items.push(
+                              <text
+                                key={`sn-${s}`}
+                                x={xText}
+                                y={yText}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={isSelected ? '9.5' : '7.5'}
+                                fontWeight={isSelected ? '900' : 'bold'}
+                                fill={isSelected ? '#fef08a' : isMajor ? '#fde68a' : '#6ee7b7'}
+                                className="font-mono select-none pointer-events-none"
+                              >
+                                {s}
+                              </text>
+                            );
+                          }
+                        }
+                        return items;
+                      })()}
+                    </g>
+
+                    {/* ======================================================== */}
+                    {/* 3. RODA PALING DALAM: JUZ (Radius 57, tebal 38) */}
+                    {/* ======================================================== */}
+                    <g
+                      transform={`rotate(${juzRotation} 170 170)`}
+                      style={{ transition: isDraggingRing === 'juz' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                    >
+                      {/* Background Track Ring Juz */}
+                      <circle
+                        cx="170"
+                        cy="170"
+                        r="57"
+                        stroke="url(#juzGrad)"
+                        strokeWidth="38"
+                        fill="none"
+                        opacity={isDraggingRing === 'juz' ? '1' : '0.95'}
+                      />
+                      <circle cx="170" cy="170" r="76" stroke={isDraggingRing === 'juz' ? '#fbbf24' : '#fbbf24'} strokeWidth="1" fill="none" opacity="0.6" />
+                      <circle cx="170" cy="170" r="38" stroke="#34d399" strokeWidth="1.2" fill="none" opacity="0.6" />
+
+                      {/* 30 Nomor Juz 1..30 tercetak lengkap di dalam roda */}
+                      {(() => {
+                        const items = [];
+                        for (let j = 1; j <= 30; j++) {
+                          const ang = (j - 1) * 12 - 90;
+                          const rad = (ang * Math.PI) / 180;
+                          const isSelected = j === wheelJuzNum;
+
+                          // Tick
+                          const x1 = 170 + 74 * Math.cos(rad);
+                          const y1 = 170 + 74 * Math.sin(rad);
+                          const x2 = 170 + 70 * Math.cos(rad);
+                          const y2 = 170 + 70 * Math.sin(rad);
+
+                          items.push(
+                            <line
+                              key={`jt-${j}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={isSelected ? '#fbbf24' : '#10b981'}
+                              strokeWidth={isSelected ? '2' : '0.8'}
+                            />
+                          );
+
+                          // Angka Juz 1..30
+                          const xText = 170 + 57 * Math.cos(rad);
+                          const yText = 170 + 57 * Math.sin(rad);
+                          items.push(
+                            <text
+                              key={`jn-${j}`}
+                              x={xText}
+                              y={yText}
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                              fontSize={isSelected ? '9' : '7'}
+                              fontWeight={isSelected ? '900' : 'bold'}
+                              fill={isSelected ? '#fbbf24' : '#ecfdf5'}
+                              className="font-mono select-none pointer-events-none"
+                            >
+                              {j}
+                            </text>
+                          );
+                        }
+                        return items;
+                      })()}
+                    </g>
+
+                    {/* ======================================================== */}
+                    {/* 4. JARUM PENUNJUK EMAS (Puncak Jam 12 / Needle Marker) */}
+                    {/* ======================================================== */}
+                    <g className="pointer-events-none">
+                      {/* Garis lurus penunjuk poros atas */}
+                      <line x1="170" y1="4" x2="170" y2="40" stroke="#f59e0b" strokeWidth="2" strokeDasharray="2 2" opacity="0.85" />
+                      {/* Segitiga Emas Penunjuk Puncak */}
+                      <polygon points="170,18 163,4 177,4" fill="#fbbf24" stroke="#78350f" strokeWidth="1" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.6))" />
+                    </g>
+                  </svg>
+
+                  {/* ======================================================== */}
+                  {/* 5. PUSAT RODA: MEDALLION KALIGRAFI ISLAM & TOMBOL BACA */}
+                  {/* ======================================================== */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenSurah(currentQuickSurah, quickAyatNum);
                     }}
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="47" fill="none" stroke="#fbbf24" strokeWidth="1" strokeDasharray="1 3" />
-                    </svg>
-                  </div>
-
-                  {/* Kontrol Putar Roda Dalam (Juz): ◀ & ▶ dan Teks */}
-                  <button
-                    type="button"
-                    onClick={() => handleRotateJuz(-1)}
-                    title="Juz Sebelumnya"
-                    className="absolute left-[84px] sm:left-[92px] top-1/2 -translate-y-1/2 z-30 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-amber-200 font-bold border border-emerald-300/60 flex items-center justify-center active:scale-90 shadow-xs transition cursor-pointer text-xs"
-                  >
-                    ◀
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRotateJuz(1)}
-                    title="Juz Selanjutnya"
-                    className="absolute right-[84px] sm:right-[92px] top-1/2 -translate-y-1/2 z-30 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-amber-200 font-bold border border-emerald-300/60 flex items-center justify-center active:scale-90 shadow-xs transition cursor-pointer text-xs"
-                  >
-                    ▶
-                  </button>
-                  {/* Teks Juz di Bagian Atas Roda Dalam */}
-                  <span className="absolute top-[66px] sm:top-[72px] z-30 px-2 py-0.2 rounded-full bg-emerald-950/85 border border-emerald-400/40 text-[9px] font-black text-amber-300 uppercase tracking-widest pointer-events-none">
-                    JUZ {wheelJuzNum}
-                  </span>
-
-                  {/* 4. PUSAT RODA: MEDALLION KALIGRAFI ISLAM & TOMBOL BACA */}
-                  <button
-                    type="button"
-                    onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
-                    className="relative z-40 w-15 h-15 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-lg border-2 border-amber-200 hover:scale-105 active:scale-95 transition-transform group cursor-pointer"
+                    className="absolute z-40 w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-2xl border-2 border-amber-200 hover:scale-105 active:scale-95 transition-transform group cursor-pointer"
                     title={`Klik untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
                   >
                     <span className="font-quran-lpmq text-base sm:text-lg leading-none font-bold text-slate-950 drop-shadow-xs group-hover:scale-110 transition-transform">
