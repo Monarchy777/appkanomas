@@ -1259,10 +1259,10 @@ export default function AlQuranModal({ onClose }) {
     document.addEventListener('gesturechange', preventGesture, { passive: false });
 
     try {
-      // Bersihkan cache surah versi lawas (v1 - v11) agar user otomatis mendapat rasm Utsmani dan sukun terbaru
+      // Bersihkan cache surah versi lawas (v1 - v15) agar user otomatis mendapat rasm Utsmani dan sukun terbaru
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('kanomas_surah_') && !key.startsWith('kanomas_surah_v12_')) {
+        if (key && key.startsWith('kanomas_surah_') && !key.startsWith('kanomas_surah_v16_')) {
           localStorage.removeItem(key);
         }
       }
@@ -1648,7 +1648,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v15_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v16_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -1692,7 +1692,7 @@ export default function AlQuranModal({ onClose }) {
                   let mText = normalizeQuranText(m.text_uthmani || '', true);
                   // Quran.com tidak menyisipkan Bismillah kecuali di Surah 1, tapi safeguard jika ada
                   if (ayat.nomorAyat === 1 && selectedSurah.nomor > 1 && selectedSurah.nomor !== 9) {
-                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ\s+ٱللَّهِ\s+ٱلرَّحْمَـ?ٰنِ\s+ٱلرَّحِيمِ\s*/, '');
                   }
                   return {
                     ...ayat,
@@ -1719,7 +1719,7 @@ export default function AlQuranModal({ onClose }) {
                 if (m) {
                   let mText = normalizeQuranText(m.text || '', true);
                   if (ayat.nomorAyat === 1 && selectedSurah.nomor > 1 && selectedSurah.nomor !== 9) {
-                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ\s+ٱللَّهِ\s+ٱلرَّحْمَـ?ٰنِ\s+ٱلرَّحِيمِ\s*/, '');
                   }
                   return {
                     ...ayat,
