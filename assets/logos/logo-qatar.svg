@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Oryx Emblem -->
+  <g transform="translate(10, 8)">
+    <circle cx="27" cy="27" r="25" fill="#5C0632"/>
+    <!-- Stylized Oryx head -->
+    <path d="M22 42 L25 28 L30 14 M25 28 L36 12 M23 35 Q17 32 19 26 Q24 24 28 30 Z" stroke="#FFFFFF" stroke-width="2" fill="#FFFFFF"/>
+  </g>
+  <!-- Typography -->
+  <text x="72" y="34" font-family="'Inter', 'Arial Black', sans-serif" font-size="19" font-weight="900" fill="#5C0632" letter-spacing="0.5">QATAR</text>
+  <text x="73" y="48" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#64748B" letter-spacing="3.5">AIRWAYS</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- AMPHURI Emblem -->
+  <g transform="translate(10, 5)">
+    <circle cx="30" cy="30" r="28" fill="#F0FDF4" stroke="#007A3D" stroke-width="2.5"/>
+    <!-- Crescent & Kaaba -->
+    <path d="M42 22 A16 16 0 1 0 42 42 A12 12 0 1 1 42 22 Z" fill="#C29B38"/>
+    <rect x="23" y="24" width="13" height="13" rx="1.5" fill="#1E293B"/>
+    <rect x="23" y="27" width="13" height="2.5" fill="#C29B38"/>
+    <!-- Star -->
+    <polygon points="38,18 39.5,21.5 43,21.5 40,23.5 41,27 38,25 35,27 36,23.5 33,21.5 36.5,21.5" fill="#007A3D"/>
+  </g>
+  <!-- Typography -->
+  <text x="78" y="38" font-family="'Inter', 'Arial Black', sans-serif" font-size="24" font-weight="900" fill="#007A3D" letter-spacing="1">AMPHURI</text>
+  <text x="79" y="51" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#64748B" letter-spacing="0.4">ASOSIASI MUSLIM PENYELENGGARA</text>
+  <text x="79" y="60" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#C29B38" letter-spacing="0.4">HAJI DAN UMRAH REPUBLIK INDONESIA</text>
+</svg>

@@ -1,13 +1,14 @@
 {
-  "version": "2026.1.5",
-  "versionCode": 2029,
+  "version": "2026.1.6",
+  "versionCode": 2030,
   "releaseDate": "28 September 2026",
-  "title": "Pembaruan Banner Sinematik & Rotasi 10 Detik",
+  "title": "Pembaruan Legalitas PPIU/PIHK, Logo Berjalan & Mitra Rekanan",
   "notes": [
-    "Pembaruan 5 Banner Utama visual murni tanpa teks menumpuk: Agen Resmi Berizin, Direct Flight, Manasik Sunnah, Haji Khusus, dan Tabungan Umrah.",
-    "Interval rotasi banner disetel otomatis setiap 10 detik dengan transisi halus.",
-    "Banner interaktif: sentuh banner untuk langsung membuka fitur terkait (Paket, Tabungan, Bimbingan, atau Cek Izin).",
-    "Bypass CORS native untuk pembaruan instan pada perangkat Android."
+    "Banner ajakan mitra syiar disederhanakan 2-3 baris proporsional dengan tombol slim.",
+    "Teks 'menu layanan & ibadah' serta 'ketuk untuk membuka' dihilangkan untuk tampilan beranda yang lebih bersih.",
+    "Legalitas PPIU (U.310) & PIHK (HK.5008) Kanomas ditata rapi, elegan, dan informatif.",
+    "Logo berjalan resmi (Kemenag, IATA, KAN, AMPHURI, ASITA) tampil bersih tanpa kotak pembungkus.",
+    "Daftar logo perusahaan rekanan resmi (Airlines, Hotel, Bank Syariah, GDS) dikelompokkan sesuai jenis."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
   "apkSize": "19.6 MB"

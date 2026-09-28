@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Saudia Emblem -->
+  <g transform="translate(12, 10)">
+    <!-- Palm tree -->
+    <path d="M26 38 L26 22 M26 22 Q16 14 12 24 M26 22 Q36 14 40 24 M26 19 Q18 10 16 18 M26 19 Q34 10 36 18 M26 16 Q22 8 26 6 Q30 8 26 16" stroke="#006C35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <!-- Crossed swords -->
+    <path d="M12 40 L40 44 M12 44 L40 40" stroke="#C29B38" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- Typography -->
+  <text x="68" y="36" font-family="'Inter', 'Arial Black', sans-serif" font-size="22" font-weight="900" fill="#006C35" letter-spacing="2">SAUDIA</text>
+  <text x="69" y="50" font-family="'Traditional Arabic', 'Amiri', serif" font-size="13" font-weight="700" fill="#C29B38">السعودية</text>
+</svg>

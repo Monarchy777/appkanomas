@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Movenpick Bird -->
+  <g transform="translate(10, 16)">
+    <path d="M4 14 C14 8, 26 8, 38 16 C30 14, 22 17, 16 24 C26 18, 38 18, 48 26 C36 24, 26 30, 20 40 C28 32, 38 32, 46 36 C34 38, 24 44, 18 52 C14 42, 10 32, 4 14 Z" fill="#C41230"/>
+  </g>
+  <!-- Typography -->
+  <text x="68" y="36" font-family="'Inter', 'Arial Black', sans-serif" font-size="18" font-weight="900" fill="#C41230" letter-spacing="1">MÖVENPICK</text>
+  <text x="70" y="49" font-family="'Inter', sans-serif" font-size="8.5" font-weight="700" fill="#64748B" letter-spacing="2.5">HOTELS &amp; RESORTS</text>
+</svg>

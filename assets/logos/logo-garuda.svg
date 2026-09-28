@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Garuda Wing Icon -->
+  <g transform="translate(10, 14)">
+    <path d="M5 24 C15 10, 32 4, 45 6 C35 12, 28 20, 22 28 C16 32, 10 32, 5 24 Z" fill="#137A8C"/>
+    <path d="M12 28 C22 18, 38 12, 50 14 C42 19, 36 26, 30 33 C25 36, 18 36, 12 28 Z" fill="#0C2340"/>
+    <path d="M20 32 C28 24, 42 20, 54 22 C47 26, 42 32, 38 38 C32 40, 26 39, 20 32 Z" fill="#2AB7CA"/>
+  </g>
+  <!-- Typography -->
+  <text x="74" y="38" font-family="'Inter', 'Segoe UI', sans-serif" font-size="19" font-weight="800" fill="#0C2340" letter-spacing="-0.2">Garuda Indonesia</text>
+  <text x="75" y="52" font-family="'Inter', sans-serif" font-size="8" font-weight="600" fill="#137A8C" letter-spacing="1">THE AIRLINE OF INDONESIA</text>
+</svg>

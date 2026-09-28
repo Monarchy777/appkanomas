@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Millennium Monogram M -->
+  <g transform="translate(12, 10)">
+    <rect x="0" y="0" width="48" height="48" rx="6" fill="#1E293B"/>
+    <path d="M12 36 L12 14 L24 28 L36 14 L36 36" stroke="#C5A059" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <!-- Typography -->
+  <text x="70" y="34" font-family="'Trajan Pro', 'Times New Roman', serif" font-size="16" font-weight="800" fill="#1E293B" letter-spacing="2">MILLENNIUM</text>
+  <text x="71" y="47" font-family="'Inter', sans-serif" font-size="8" font-weight="700" fill="#C5A059" letter-spacing="2">HOTELS AND RESORTS</text>
+</svg>

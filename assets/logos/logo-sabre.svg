@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70" fill="none">
+  <!-- Sabre Diamond Polygon -->
+  <g transform="translate(14, 12)">
+    <polygon points="23,3 43,23 23,43 3,23" fill="#E31837"/>
+    <polygon points="23,10 36,23 23,36 10,23" fill="#FFFFFF"/>
+    <polygon points="23,16 30,23 23,30 16,23" fill="#E31837"/>
+  </g>
+  <!-- Typography -->
+  <text x="68" y="38" font-family="'Inter', 'Arial Black', sans-serif" font-size="26" font-weight="900" fill="#E31837" letter-spacing="-0.5">Sabre</text>
+  <text x="70" y="51" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#64748B" letter-spacing="1">TRAVEL NETWORK &amp; GDS</text>
+</svg>
