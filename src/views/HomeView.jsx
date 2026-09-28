@@ -98,48 +98,55 @@ const RUNNING_OFFICIAL_LOGOS = [
   }
 ];
 
-// 2. Logo Perusahaan Rekanan & Kerjasama Resmi (Dikelompokkan Berdasarkan Jenis Perusahaan)
-const PARTNER_GROUPS = [
+// 2. Logo Perusahaan Rekanan & Kerjasama Resmi (Antrian Berjalan Sesuai Jenis Layanan Perusahaannya)
+const PARTNER_MARQUEE_SEQUENCE = [
+  // --- KELOMPOK 1: MASKAPAI PENERBANGAN ---
   {
-    category: 'Maskapai Penerbangan (Airlines)',
+    type: 'badge',
+    id: 'badge-airlines',
+    label: 'Maskapai Penerbangan',
     icon: Plane,
-    description: 'Penerbangan langsung & transit nyaman standar internasional',
-    items: [
-      { id: 'garuda', name: 'Garuda Indonesia', src: '/assets/logos/logo-garuda.svg' },
-      { id: 'saudia', name: 'Saudia Arabia Airlines', src: '/assets/logos/logo-saudia.svg' },
-      { id: 'qatar', name: 'Qatar Airways', src: '/assets/logos/logo-qatar.svg' },
-      { id: 'emirates', name: 'Emirates', src: '/assets/logos/logo-emirates.svg' },
-      { id: 'etihad', name: 'Etihad Airways', src: '/assets/logos/logo-etihad.svg' },
-      { id: 'oman', name: 'Oman Air', src: '/assets/logos/logo-omanair.svg' }
-    ]
+    badgeClass: 'bg-sky-50 text-sky-800 border-sky-200'
   },
+  { id: 'garuda', name: 'Garuda Indonesia', src: '/assets/logos/logo-garuda.svg', category: 'Maskapai Penerbangan' },
+  { id: 'saudia', name: 'Saudia Arabia Airlines', src: '/assets/logos/logo-saudia.svg', category: 'Maskapai Penerbangan' },
+  { id: 'qatar', name: 'Qatar Airways', src: '/assets/logos/logo-qatar.svg', category: 'Maskapai Penerbangan' },
+  { id: 'emirates', name: 'Emirates', src: '/assets/logos/logo-emirates.svg', category: 'Maskapai Penerbangan' },
+  { id: 'etihad', name: 'Etihad Airways', src: '/assets/logos/logo-etihad.svg', category: 'Maskapai Penerbangan' },
+  { id: 'oman', name: 'Oman Air', src: '/assets/logos/logo-omanair.svg', category: 'Maskapai Penerbangan' },
+
+  // --- KELOMPOK 2: HOTEL & AKOMODASI TANAH SUCI ---
   {
-    category: 'Hotel & Akomodasi Tanah Suci',
+    type: 'badge',
+    id: 'badge-hotels',
+    label: 'Hotel & Akomodasi',
     icon: Building2,
-    description: 'Akomodasi bintang lima pelataran Masjidil Haram & Masjid Nabawi',
-    items: [
-      { id: 'movenpick', name: 'Mövenpick Hotels & Resorts', src: '/assets/logos/logo-movenpick.svg' },
-      { id: 'millennium', name: 'Millennium Hotels & Resorts', src: '/assets/logos/logo-millennium.svg' },
-      { id: 'almassa', name: 'Al Massa Hotels Makkah', src: '/assets/logos/logo-almassa.svg' }
-    ]
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200'
   },
+  { id: 'movenpick', name: 'Mövenpick Hotels & Resorts', src: '/assets/logos/logo-movenpick.svg', category: 'Hotel & Akomodasi' },
+  { id: 'millennium', name: 'Millennium Hotels & Resorts', src: '/assets/logos/logo-millennium.svg', category: 'Hotel & Akomodasi' },
+  { id: 'almassa', name: 'Al Massa Hotels Makkah', src: '/assets/logos/logo-almassa.svg', category: 'Hotel & Akomodasi' },
+
+  // --- KELOMPOK 3: PERBANKAN SYARIAH ---
   {
-    category: 'Perbankan Syariah & Keuangan',
+    type: 'badge',
+    id: 'badge-bank',
+    label: 'Perbankan Syariah',
     icon: CreditCard,
-    description: 'Jaminan transaksi aman, transparan, dan tabungan umrah terpercaya',
-    items: [
-      { id: 'bsi', name: 'Bank Syariah Indonesia (BSI)', src: '/assets/logos/logo-bsi.png' }
-    ]
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200'
   },
+  { id: 'bsi', name: 'Bank Syariah Indonesia (BSI)', src: '/assets/logos/logo-bsi.svg', category: 'Perbankan Syariah' },
+
+  // --- KELOMPOK 4: SISTEM TIKET & RESERVASI GLOBAL ---
   {
-    category: 'Sistem Tiket & Reservasi Global (GDS)',
+    type: 'badge',
+    id: 'badge-gds',
+    label: 'Sistem Global GDS',
     icon: Globe2,
-    description: 'Infrastruktur reservasi tiket penerbangan dan inventori dunia real-time',
-    items: [
-      { id: 'amadeus', name: 'Amadeus Global Travel Network', src: '/assets/logos/logo-amadeus.svg' },
-      { id: 'sabre', name: 'Sabre Travel Network & GDS', src: '/assets/logos/logo-sabre.svg' }
-    ]
-  }
+    badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200'
+  },
+  { id: 'amadeus', name: 'Amadeus Global Travel Network', src: '/assets/logos/logo-amadeus.svg', category: 'Sistem Global GDS' },
+  { id: 'sabre', name: 'Sabre Travel Network & GDS', src: '/assets/logos/logo-sabre.svg', category: 'Sistem Global GDS' }
 ];
 
 export default function HomeView({
@@ -547,52 +554,79 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* 5. LOGO PARA PERUSAHAAN YANG SUDAH BEKERJASAMA (DIGRUPKAN SESUAI JENIS PERUSAHAAN) */}
-      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-4">
-        <div className="border-b border-slate-100 pb-3">
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-500" />
-            <span>Mitra &amp; Rekanan Resmi Bekerjasama</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Dukungan resmi maskapai bintang 5, jaringan hotel tanah suci, perbankan syariah, dan sistem teknologi tiket global
-          </p>
+      {/* 5. LOGO PARA PERUSAHAAN YANG SUDAH BEKERJASAMA (BERWARNA, BERJALAN SEPERTI IZIN, ANTRIAN SESUAI JENIS LAYANAN) */}
+      <section className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-3.5 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-3">
+          <div>
+            <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" />
+              <span>Mitra &amp; Rekanan Resmi Bekerjasama</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Antrian resmi maskapai penerbangan, hotel bintang 5 tanah suci, perbankan syariah, dan sistem teknologi tiket global
+            </p>
+          </div>
+          <span className="text-[11px] font-black text-amber-800 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 w-fit">
+            Rekanan Resmi
+          </span>
         </div>
 
-        <div className="space-y-4">
-          {PARTNER_GROUPS.map((group, idx) => {
-            const GroupIcon = group.icon;
-            return (
-              <div key={idx} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-800 uppercase tracking-wide">
-                    <GroupIcon className="w-4 h-4 text-amber-600" />
-                    <span>{group.category}</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
-                    {group.description}
-                  </span>
-                </div>
+        {/* LOGO BERJALAN SEPERTI IZIN: BEBAS KOTAK LUAR, BERWARNA PENUH, BERGILIRAN SESUAI ANTRIAN JENIS LAYANAN */}
+        <div className="relative w-full overflow-hidden py-3">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5">
-                  {group.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="h-14 sm:h-16 px-2.5 py-1.5 rounded-xl bg-slate-50/80 border border-slate-200/70 hover:border-amber-400 hover:bg-white hover:shadow-xs transition-all flex items-center justify-center select-none group"
-                      title={item.name}
-                    >
-                      <img
-                        src={item.src}
-                        alt={item.name}
-                        className="max-h-7 sm:max-h-8 max-w-full object-contain filter grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100 transition-all duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
+          <div className="animate-marquee-partners gap-8 sm:gap-11 flex items-center">
+            {[...PARTNER_MARQUEE_SEQUENCE, ...PARTNER_MARQUEE_SEQUENCE].map((item, index) => {
+              if (item.type === 'badge') {
+                const BadgeIcon = item.icon;
+                return (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-2xs text-xs font-black select-none ${item.badgeClass}`}
+                  >
+                    <BadgeIcon className="w-3.5 h-3.5" />
+                    <span>{item.label}</span>
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  key={`${item.id}-${index}`}
+                  className="flex-shrink-0 flex items-center justify-center select-none py-1 group"
+                  title={`${item.name} (${item.category})`}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.name}
+                    className="h-9 sm:h-11 w-auto max-w-[130px] sm:max-w-[155px] object-contain drop-shadow-2xs transform group-hover:scale-105 transition-transform"
+                    loading="lazy"
+                  />
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Ringkasan Antrian Kategori Layanan Rekanan */}
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-slate-600 font-medium border-t border-slate-100">
+          <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+            <Plane className="w-3 h-3 text-sky-600" />
+            <span>6 Maskapai Penerbangan Bintang 5</span>
+          </span>
+          <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+            <Building2 className="w-3 h-3 text-amber-600" />
+            <span>3 Hotel &amp; Akomodasi Haram</span>
+          </span>
+          <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+            <CreditCard className="w-3 h-3 text-emerald-600" />
+            <span>Bank Syariah Indonesia (BSI)</span>
+          </span>
+          <span className="inline-flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+            <Globe2 className="w-3 h-3 text-indigo-600" />
+            <span>2 Sistem Global GDS</span>
+          </span>
         </div>
       </section>
     </div>

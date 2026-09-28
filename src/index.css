@@ -136,6 +136,16 @@
   animation-play-state: paused;
 }
 
+.animate-marquee-partners {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 42s linear infinite;
+}
+
+.animate-marquee-partners:hover {
+  animation-play-state: paused;
+}
+
 /* Hide scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
