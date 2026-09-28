@@ -218,7 +218,7 @@ export const THEME_PALETTES = {
     name: 'Hijau Kemenag',
     type: 'color',
     bg: '#e8f9eb',
-    arabicColor: '#022c22',
+    arabicColor: '#000000',
     latinColor: '#064e3b',
     translationColor: '#0f172a',
     subHeaderBg: 'bg-[#bbf7d0] text-emerald-950 border-emerald-400',
@@ -851,7 +851,7 @@ export default function AlQuranModal({ onClose }) {
   // Helper font family kaligrafi Arab aktif (Hanya Indonesia, Madinah, Modern)
   const getActiveFontFamily = () => {
     if (mushafType === 'madinah') {
-      return "'Amiri Quran', 'Scheherazade New', serif";
+      return "'KFGQPC Uthman Taha Naskh', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif";
     }
     if (mushafType === 'modern') {
       return "'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif";
@@ -2624,10 +2624,7 @@ export default function AlQuranModal({ onClose }) {
                                 fontSize: `${arabicFontSize}px`,
                                 color: currentTheme.arabicColor,
                                 lineHeight: dynamicArabicLineHeight,
-                                textAlign: 'justify',
-                                textAlignLast: 'right',
-                                textJustify: 'auto',
-                                wordSpacing: '0.04em',
+                                textAlign: 'right',
                                 fontFeatureSettings: '"calt" 1, "liga" 1',
                                 fontWeight: 500,
                                 textRendering: 'geometricPrecision',

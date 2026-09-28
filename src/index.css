@@ -19,6 +19,27 @@
     font-style: normal;
     font-display: swap;
   }
+  @font-face {
+    font-family: 'KFGQPC Uthman Taha Naskh';
+    src: url('/fonts/KFGQPC-Uthman-Taha.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'KFGQPC Uthman Taha Naskh';
+    src: url('/fonts/KFGQPC-Uthman-Taha-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'KFGQPC Uthmanic Script HAFS';
+    src: url('/fonts/KFGQPC-Hafs.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
 
   html {
     font-size: 16px;
@@ -39,17 +60,17 @@
   }
 
   .font-arabic {
-    font-family: 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
+    font-family: 'LPMQ Isep Misbah', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
   }
 }
 
 /* Quranic Typography Fonts: Indonesia, Madinah, Modern */
 .font-quran-lpmq {
-  font-family: 'LPMQ Isep Misbah', 'Scheherazade New', 'Amiri', serif !important;
+  font-family: 'LPMQ Isep Misbah', 'LPMQ', 'Scheherazade New', 'Amiri', serif !important;
 }
 
 .font-quran-madinah {
-  font-family: 'Amiri Quran', 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', serif !important;
+  font-family: 'KFGQPC Uthman Taha Naskh', 'KFGQPC Uthmanic Script HAFS', 'Amiri Quran', 'Scheherazade New', serif !important;
 }
 
 .font-quran-modern {
