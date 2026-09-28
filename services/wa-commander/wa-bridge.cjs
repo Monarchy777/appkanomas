@@ -451,11 +451,8 @@ async function checkTranscriptUpdates() {
 
         const lineStr = typeof line === 'string' ? line : JSON.stringify(line);
         const isExecutionError = (
-          (entry.status === 'ERROR' && entry.source !== 'USER_INPUT') ||
-          (entry.source === 'MODEL' && entry.status === 'ERROR') ||
-          (entry.source === 'SYSTEM' && lineStr.includes('was canceled with result:')) ||
-          (lineStr.includes('Agent execution terminated due to error') && entry.source !== 'USER_INPUT') ||
-          (lineStr.includes('Unknown: Agent execution terminated') && entry.source !== 'USER_INPUT')
+          (entry.status === 'ERROR' && entry.source === 'MODEL') ||
+          (entry.source === 'SYSTEM' && entry.status === 'ERROR' && !lineStr.includes('was canceled with result:'))
         );
 
         if (isExecutionError) {
