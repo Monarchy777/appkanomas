@@ -1,11 +1,11 @@
 import React from 'react';
-import { Home, Grid, Headphones, Award, Briefcase } from 'lucide-react';
+import { Home, Plane, Headphones, Award, Briefcase } from 'lucide-react';
 
 export default function BottomNav({ activeTab, onSelectTab, onOpenWhatsApp, role }) {
   const tabs = [
     { id: 'home', label: 'Beranda', icon: Home, color: 'text-amber-500', activeBg: 'bg-amber-50 text-amber-600' },
     { id: 'whatsapp', label: 'WA Admin', isWhatsApp: true },
-    { id: 'packages', label: 'Paket', icon: Grid, color: 'text-orange-500', activeBg: 'bg-orange-50 text-orange-600' },
+    { id: 'packages', label: 'Paket Umrah', icon: Plane, color: 'text-orange-500', activeBg: 'bg-orange-50 text-orange-600' },
     { id: 'services', label: 'Bantuan', icon: Headphones, color: 'text-emerald-500', activeBg: 'bg-emerald-50 text-emerald-600' },
   ];
 

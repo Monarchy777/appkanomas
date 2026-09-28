@@ -278,6 +278,67 @@ export function Icon3DTabungan({ size = 48, className = "" }) {
   );
 }
 
+// 7A. 3D DZIKIR PAGI & PETANG (Dawn Sun, Crescent Moon & Sacred Prayer Beads)
+export function Icon3DDzikirPagiPetang({ size = 48, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <radialGradient id="dzikirBg" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="35%" stopColor="#f59e0b" />
+          <stop offset="70%" stopColor="#ea580c" />
+          <stop offset="100%" stopColor="#9a3412" />
+        </radialGradient>
+        <linearGradient id="dzikirGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="50%" stopColor="#fef08a" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+        <linearGradient id="dzikirSun" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="50%" stopColor="#fde047" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        <filter id="dzikirShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#9a3412" floodOpacity="0.45" />
+        </filter>
+      </defs>
+      {/* 3D Squircle Base */}
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#dzikirBg)" filter="url(#dzikirShadow)" />
+      {/* Top Gloss */}
+      <rect x="4.5" y="4.5" width="55" height="26" rx="15" fill="white" fillOpacity="0.28" />
+
+      {/* Matahari Fajar (Pagi) dengan Sinar */}
+      <circle cx="25" cy="25" r="9" fill="url(#dzikirSun)" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.25))" />
+      <circle cx="23.5" cy="23.5" r="3" fill="#ffffff" fillOpacity="0.7" />
+      {/* Sinar Matahari */}
+      <line x1="25" y1="12" x2="25" y2="14" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+      <line x1="14" y1="25" x2="16" y2="25" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+      <line x1="17" y1="17" x2="18.5" y2="18.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+      <line x1="33" y1="17" x2="31.5" y2="18.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+
+      {/* Bulan Sabit Anggun (Petang) */}
+      <path
+        d="M44 20C40 20 36 23 35.5 27.5C35 32 38.5 36 43 37C44.5 37.3 46 37 47 36.3C45 39 41.5 40.5 37.5 40C32.5 39.5 28.5 35 29 29.5C29.5 24 34 19.5 39.5 19.5C41 19.5 42.6 20 44 20Z"
+        fill="url(#dzikirGold)"
+        filter="drop-shadow(0 3px 5px rgba(0,0,0,0.3))"
+      />
+      {/* Bintang Petang Berkilau */}
+      <path d="M46 15L47 18L50 19L47 20L46 23L45 20L42 19L45 18Z" fill="#ffffff" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.3))" />
+
+      {/* Untaian Butiran Tasbih Melengkung di Bawah */}
+      <circle cx="16" cy="42" r="2.8" fill="#fef08a" stroke="#d97706" strokeWidth="0.8" />
+      <circle cx="22" cy="45" r="3" fill="#fef08a" stroke="#d97706" strokeWidth="0.8" />
+      <circle cx="29" cy="47" r="3.2" fill="#ffffff" stroke="#d97706" strokeWidth="0.8" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.2))" />
+      <circle cx="36" cy="47" r="3.2" fill="#fef08a" stroke="#d97706" strokeWidth="0.8" />
+      <circle cx="43" cy="45" r="3" fill="#fef08a" stroke="#d97706" strokeWidth="0.8" />
+      <circle cx="49" cy="42" r="2.8" fill="#fef08a" stroke="#d97706" strokeWidth="0.8" />
+      {/* Tali Tasbih */}
+      <path d="M16 42 Q 32 51 49 42" stroke="#fde047" strokeWidth="1" strokeDasharray="1 2" fill="none" opacity="0.6" />
+    </svg>
+  );
+}
+
 // 7. 3D IZIN NUSUK (Royal Amber Gold with Saudi Palm & Verification Shield)
 export function Icon3DNusuk({ size = 48, className = "" }) {
   return (

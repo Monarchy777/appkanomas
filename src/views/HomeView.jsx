@@ -7,16 +7,14 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
-  Award,
-  Sun,
-  Moon
+  Award
 } from 'lucide-react';
 import {
   Icon3DAlQuran,
   Icon3DSholatKiblat,
   Icon3DTawaf,
-  Icon3DNusuk,
-  Icon3DPaket,
+  Icon3DDzikirPagiPetang,
+  Icon3DTasbih,
   Icon3DTabungan,
   Icon3DDoaHarian,
   Icon3DPelayananJamaah
@@ -135,8 +133,6 @@ export default function HomeView({
     setCurrentSlide((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
   };
 
-  const isMorning = new Date().getHours() < 15;
-
   return (
     <div className="space-y-4 sm:space-y-6 pb-24 px-3 sm:px-6 pt-3">
       {/* 1. SLIDER PROMO & KEKUATAN KANOMAS (BERGANTI SETIAP 3 DETIK) */}
@@ -238,41 +234,6 @@ export default function HomeView({
         </button>
       </section>
 
-      {/* 2B. BANNER DZIKIR PAGI & PETANG SESUAI SUNNAH */}
-      <section
-        onClick={onOpenDzikir}
-        className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white cursor-pointer hover:shadow-md transition-all flex items-center justify-between gap-3 active:scale-[0.99] shadow-xs"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 text-white shadow-xs">
-            {isMorning ? <Sun className="w-6 h-6 text-amber-100" /> : <Moon className="w-6 h-6 text-indigo-100" />}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-100">
-              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-              <span>Dzikir Harian Sesuai Sunnah</span>
-            </div>
-            <h3 className="text-sm sm:text-base font-black leading-snug">
-              {isMorning ? '🌅 Waktunya Dzikir Pagi Sesuai Sunnah' : '🌆 Waktunya Dzikir Petang Sesuai Sunnah'}
-            </h3>
-            <p className="text-xs text-amber-100/90 font-medium leading-relaxed">
-              Berdasarkan hadits shahih • Teks Arab jelas, arti & tasbih counter
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onOpenDzikir) onOpenDzikir();
-          }}
-          className="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-amber-50 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition active:scale-95 flex-shrink-0 whitespace-nowrap"
-        >
-          <span>Mulai</span>
-          <ChevronRight className="w-4 h-4 text-amber-600" />
-        </button>
-      </section>
-
       {/* 2C. BANNER DAFTAR MITRA SYIAR DENGAN ID KTP & NPWP */}
       <section
         onClick={onOpenDaftarMitra}
@@ -361,32 +322,32 @@ export default function HomeView({
               </span>
             </button>
 
-            {/* 4. Pelayanan Nusuk */}
+            {/* 4. Dzikir Pagi & Petang (Pengganti Nusuk) */}
             <button
-              onClick={onOpenNusuk}
+              onClick={onOpenDzikir}
               className="px-1.5 py-2.5 sm:px-3 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[104px] sm:min-h-[124px] h-full group active:scale-95 shadow-xs"
             >
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
-                <Icon3DNusuk size={36} className="sm:w-[42px] sm:h-[42px]" />
+                <Icon3DDzikirPagiPetang size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
               <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-amber-600 transition leading-tight tracking-tight text-center mt-auto break-words">
-                Layanan Nusuk
+                Dzikir Pagi Petang
               </span>
             </button>
           </div>
 
-          {/* BARIS 2: 1. Paket Umrah, 2. Tabungan Umrah, 3. Doa Harian, 4. Pelayanan Jamaah */}
+          {/* BARIS 2: 1. Tasbih Digital, 2. Tabungan Umrah, 3. Doa Harian, 4. Pelayanan Jamaah */}
           <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
-            {/* 1. Paket Umrah */}
+            {/* 1. Tasbih Digital */}
             <button
-              onClick={() => onSelectTab('packages')}
-              className="px-1.5 py-2.5 sm:px-3 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-orange-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[104px] sm:min-h-[124px] h-full group active:scale-95 shadow-xs"
+              onClick={onOpenTasbih}
+              className="px-1.5 py-2.5 sm:px-3 sm:py-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-purple-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center min-h-[104px] sm:min-h-[124px] h-full group active:scale-95 shadow-xs"
             >
               <div className="w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center my-auto group-hover:scale-105 transition-transform duration-200">
-                <Icon3DPaket size={36} className="sm:w-[42px] sm:h-[42px]" />
+                <Icon3DTasbih size={36} className="sm:w-[42px] sm:h-[42px]" />
               </div>
-              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-orange-600 transition leading-tight tracking-tight text-center mt-auto break-words">
-                Paket Umrah
+              <span className="w-full text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 group-hover:text-purple-600 transition leading-tight tracking-tight text-center mt-auto break-words">
+                Tasbih Digital
               </span>
             </button>
 
