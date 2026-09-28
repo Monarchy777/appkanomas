@@ -46,6 +46,8 @@ const TARGET_PHONE = '6282112114222';
 const TARGET_PHONE_ALT = '628211211422';
 
 let sock = null;
+let isConnecting = false;
+let reconnectTimer = null;
 let lastProcessedStepIndex = -1;
 let transcriptFileSize = 0;
 const sentMessageIds = new Set();
@@ -108,11 +110,15 @@ function killServerProcesses() {
   });
 }
 
-// Pastikan koneksi socket WhatsApp tetap aktif dan pulihkan jika mati
+// Pastikan koneksi socket WhatsApp tetap aktif dan pulihkan jika benar-benar mati
 function ensureWaSocketHealthy() {
+  if (isConnecting || reconnectTimer) {
+    console.log('[WA-BRIDGE] Socket WhatsApp sedang dalam proses koneksi/reconnect, lewati verifikasi.');
+    return;
+  }
   const isHealthy = sock && sock.ws && sock.ws.readyState === 1;
   if (!isHealthy) {
-    console.log('[WA-BRIDGE] Socket WA terputus atau tidak aktif. Menyalakan ulang bridge WA...');
+    console.log('[WA-BRIDGE] Socket WA terputus, memicu reconnect tunggal...');
     try {
       startWhatsAppBridge();
     } catch (e) {
@@ -632,17 +638,50 @@ function startHttpServer() {
     }
   });
 
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[HTTP-BRIDGE] Port ${BRIDGE_HTTP_PORT} sudah digunakan! Menghentikan proses node liar...`);
+      const cmd = `Get-NetTCPConnection -LocalPort ${BRIDGE_HTTP_PORT} -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -ne ${process.pid} } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }`;
+      require('child_process').exec(`powershell -NoProfile -Command "${cmd}"`, () => {
+        setTimeout(() => {
+          server.listen(BRIDGE_HTTP_PORT, '127.0.0.1');
+        }, 1200);
+      });
+    }
+  });
+
   server.listen(BRIDGE_HTTP_PORT, '127.0.0.1', () => {
     console.log(`[HTTP-BRIDGE] Local API running on http://127.0.0.1:${BRIDGE_HTTP_PORT}`);
   });
 }
 
 async function startWhatsAppBridge() {
+  if (isConnecting) {
+    console.log('[WA-BRIDGE] Proses inisialisasi koneksi sedang berlangsung, lewati panggilan ganda.');
+    return;
+  }
+  isConnecting = true;
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  // Tutup socket lama secara bersih jika masih ada
+  if (sock) {
+    console.log('[WA-BRIDGE] Menutup socket lama secara bersih sebelum membuat koneksi baru...');
+    try {
+      sock.ev.removeAllListeners();
+      if (sock.ws) {
+        sock.ws.removeAllListeners();
+        sock.ws.close();
+      }
+      sock.end(undefined);
+    } catch (e) {}
+    sock = null;
+  }
+
   console.log('[WA-BRIDGE] Menginisialisasi koneksi WhatsApp...');
   updateStatus({ status: 'CONNECTING' });
-
-  initTranscriptMonitoring();
-  setInterval(checkTranscriptUpdates, 1000);
 
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -679,19 +718,41 @@ async function startWhatsAppBridge() {
     }
 
     if (connection === 'close') {
+      isConnecting = false;
+      const errMsg = lastDisconnect?.error?.message || '';
       const statusCode = (lastDisconnect?.error?.output?.statusCode);
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      console.log(`[WA-BRIDGE] Koneksi terputus: ${lastDisconnect?.error?.message}, Reconnect: ${shouldReconnect}`);
+      const isConflict = errMsg.toLowerCase().includes('conflict') || statusCode === 440;
+
+      console.log(`[WA-BRIDGE] Koneksi terputus: ${errMsg || 'Tutup'}, Code: ${statusCode}, Reconnect: ${shouldReconnect}, Conflict: ${isConflict}`);
+
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
 
       if (statusCode === DisconnectReason.loggedOut) {
         try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
         updateStatus({ status: 'LOGGED_OUT' });
-        setTimeout(() => startWhatsAppBridge(), 5000);
-      } else {
+        reconnectTimer = setTimeout(() => startWhatsAppBridge(), 5000);
+      } else if (isConflict) {
+        // Terdeteksi sesi bentrok (conflict): Beri jeda 8 detik agar koneksi sebelumnya benar-benar terlepas di server WA
+        console.warn('[WA-BRIDGE] Terdeteksi bentrok sesi (conflict). Menunggu 8 detik agar koneksi lain terlepas sepenuhnya...');
+        updateStatus({ status: 'SESSION_CONFLICT_WAIT' });
+        reconnectTimer = setTimeout(() => {
+          startWhatsAppBridge();
+        }, 8000);
+      } else if (shouldReconnect) {
         updateStatus({ status: 'RECONNECTING' });
-        setTimeout(() => startWhatsAppBridge(), 3000);
+        reconnectTimer = setTimeout(() => startWhatsAppBridge(), 3500);
       }
     } else if (connection === 'open') {
+      isConnecting = false;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+
       const userJid = sock.user?.id || '';
       const phone = userJid.split(':')[0] || userJid.split('@')[0];
       const name = sock.user?.name || 'Admin Kanomas';
@@ -920,3 +981,8 @@ ensureDevServerRunning();
 setInterval(() => {
   ensureDevServerRunning();
 }, 45000);
+
+// Inisialisasi pemantau transcript satu kali saja saat aplikasi start
+initTranscriptMonitoring();
+setInterval(checkTranscriptUpdates, 1500);
+
