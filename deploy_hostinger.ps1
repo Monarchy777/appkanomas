@@ -20,7 +20,7 @@ if (Test-Path $temp) {
 }
 
 Write-Host "[2/4] Mengambil repository remote (branch main)..." -ForegroundColor Yellow
-git clone --branch main https://github.com/Monarchy777/appkanomas.git $temp
+git clone --depth 1 --branch main https://github.com/Monarchy777/appkanomas.git $temp
 
 Write-Host "[3/4] Menyalin file produksi terkompilasi..." -ForegroundColor Yellow
 Get-ChildItem -Path $temp -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
