@@ -785,9 +785,9 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
               fontSize: `${wbwOptions.arabicFontSize}px`,
               color: wbwOptions.arabicColor,
               lineHeight: wbwOptions.dynamicArabicLineHeight,
-              fontWeight: 400
+              fontWeight: 500
             }}
-            className={`${wbwOptions.arabicFontClass} font-normal select-text`}
+            className={`${wbwOptions.arabicFontClass} font-medium select-text`}
           >
             {wordContent}
           </span>
@@ -811,7 +811,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
 
     // Tampilan ayat biasa saat terjemah per kata tidak aktif
     return (
-      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 400 }}>
+      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 500 }}>
         {wordContent}
         {wordIdx < words.length - 1 ? ' ' : ''}
       </span>
@@ -831,14 +831,6 @@ export default function AlQuranModal({ onClose }) {
   const [targetAyatToScroll, setTargetAyatToScroll] = useState(null);
   const [surahAyatJumpModal, setSurahAyatJumpModal] = useState(null);
 
-  // 1A. Navigasi Cepat: Langsung Pilih Surat & Ayat
-  const [quickSurahNum, setQuickSurahNum] = useState(1);
-  const [quickAyatNum, setQuickAyatNum] = useState(1);
-  const [showSurahPickerModal, setShowSurahPickerModal] = useState(false);
-  const [showAyatGridPicker, setShowAyatGridPicker] = useState(false);
-  const [quickSurahFilter, setQuickSurahFilter] = useState('');
-  const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
-
   // 1B. Penanda Ayat Terakhir & Auto-Save
   const [lastReadPosition, setLastReadPosition] = useState(() => {
     try {
@@ -848,6 +840,71 @@ export default function AlQuranModal({ onClose }) {
       return null;
     }
   });
+
+  // 1A. Navigasi Roda 3 Lapis (Astrolabe): Juz (Dalam), Surat (Tengah), Ayat (Luar)
+  const [wheelJuzNum, setWheelJuzNum] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_last_read');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const s = SURAH_LIST.find((item) => item.nomor === parsed.surahNomor);
+        if (s && s.juz) return s.juz;
+      }
+    } catch {}
+    return 1;
+  });
+  const [quickSurahNum, setQuickSurahNum] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_last_read');
+      if (saved) return JSON.parse(saved).surahNomor || 1;
+    } catch {}
+    return 1;
+  });
+  const [quickAyatNum, setQuickAyatNum] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanomas_quran_last_read');
+      if (saved) return JSON.parse(saved).ayatNomor || 1;
+    } catch {}
+    return 1;
+  });
+  const [showFullSurahList, setShowFullSurahList] = useState(false);
+  const [fullListTab, setFullListTab] = useState('surah'); // 'surah' | 'juz'
+  const [showSurahPickerModal, setShowSurahPickerModal] = useState(false);
+  const [showAyatGridPicker, setShowAyatGridPicker] = useState(false);
+  const [quickSurahFilter, setQuickSurahFilter] = useState('');
+  const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
+
+  // Helper Rotasi Roda Navigasi 3 Lapis
+  const handleRotateJuz = (delta) => {
+    setWheelJuzNum((prev) => {
+      const nextJuz = ((prev - 1 + delta + 30) % 30) + 1;
+      const targetJuzData = JUZ_LIST[nextJuz - 1];
+      if (targetJuzData) {
+        setQuickSurahNum(targetJuzData.surahNomor);
+        setQuickAyatNum(targetJuzData.ayat || 1);
+      }
+      return nextJuz;
+    });
+  };
+
+  const handleRotateSurah = (delta) => {
+    setQuickSurahNum((prev) => {
+      const nextSurah = ((prev - 1 + delta + 114) % 114) + 1;
+      const sObj = SURAH_LIST.find((s) => s.nomor === nextSurah) || SURAH_LIST[0];
+      if (sObj) {
+        setWheelJuzNum(sObj.juz);
+        setQuickAyatNum(1);
+      }
+      return nextSurah;
+    });
+  };
+
+  const handleRotateAyat = (delta) => {
+    setQuickAyatNum((prev) => {
+      const max = currentQuickSurah.jumlahAyat;
+      return ((prev - 1 + delta + max) % max) + 1;
+    });
+  };
 
   // 1C. Multi-Khataman Al-Quran (Bisa banyak khataman tanpa saling menindih)
   const [khatamanSessions, setKhatamanSessions] = useState(() => {
@@ -2088,335 +2145,341 @@ export default function AlQuranModal({ onClose }) {
               </div>
             </div>
 
-            {/* Index Main Scrollable Area */}
-            <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-4">
-              {/* BANNER TERAKHIR DIBACA (JIKA ADA DATA) */}
+            {/* Index Main Scrollable Area (Terkunci dari geser horizontal: overflow-x-hidden touch-pan-y) */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y w-full max-w-full px-3 sm:px-6 py-3.5 space-y-4 select-none">
+              {/* BANNER TERAKHIR DIBACA (COMPACT & SLIM SESUAI INSTRUKSI) */}
               {lastReadPosition && (
-                <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-600 via-[#0a7c29] to-emerald-800 text-white shadow-lg border border-emerald-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-300">
-                  <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-md">
-                      <Pin className="w-5 h-5 fill-current" />
+                <div className="w-full max-w-lg mx-auto px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-[#0a7c29] to-emerald-900 text-white shadow-xs border border-emerald-400/40 flex items-center justify-between gap-2.5 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
+                      <Pin className="w-3.5 h-3.5 fill-current" />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full text-amber-200">
-                          Terakhir Dibaca
-                        </span>
-                        <span className="text-[11px] text-emerald-100 opacity-90">
-                          {lastReadPosition.dateStr}
-                        </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">Terakhir:</span>
+                        <h4 className="text-xs sm:text-sm font-black truncate">
+                          QS. {lastReadPosition.surahName} : {lastReadPosition.ayatNomor}
+                        </h4>
                       </div>
-                      <h3 className="text-base sm:text-lg font-black mt-0.5">
-                        QS. {lastReadPosition.surahName} : Ayat {lastReadPosition.ayatNomor}
-                      </h3>
-                      <p className="text-xs text-amber-200 font-medium">
-                        Arti Surat: "{lastReadPosition.arti}" ({lastReadPosition.surahArabic})
+                      <p className="text-[10px] text-emerald-100/90 truncate">
+                        "{lastReadPosition.arti}" • Juz {lastReadPosition.juz || currentQuickSurah.juz}
                       </p>
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => {
                       const surah = SURAH_LIST.find((s) => s.nomor === lastReadPosition.surahNomor) || SURAH_LIST[0];
                       handleOpenSurah(surah, lastReadPosition.ayatNomor);
                     }}
-                    className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition"
+                    className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-xs active:scale-95 transition shrink-0 cursor-pointer"
+                    title="Lanjut Membaca"
                   >
-                    <span>Lanjut Baca Sekarang</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Lanjut</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
 
-              {/* TABS SWITCHER: DAFTAR SURAT | DAFTAR JUZ | TARGET KHATAMAN | PENANDA */}
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-xs overflow-x-auto no-scrollbar">
-                {[
-                  { id: 'surah', label: '📖 Daftar Surat', count: '114' },
-                  { id: 'juz', label: '📑 Daftar Juz', count: '30' },
-                  { id: 'khatam', label: '🎯 Target Khataman', count: khatamanSessions.length },
-                  { id: 'bookmarks', label: '⭐ Penanda & Catatan', count: bookmarks.length }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setIndexTab(tab.id)}
-                    className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
-                      indexTab === tab.id
-                        ? 'bg-[#0a7c29] text-white shadow-md'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-700/50'
-                    }`}
+              {/* ======================================================== */}
+              {/* NAVIGASI 3 RODA BERPUTAR ISLAMI (ISLAMIC ASTROLABE DIAL)  */}
+              {/* Roda Paling Dalam: Juz | Roda Tengah: Surat | Roda Luar: Ayat */}
+              {/* ======================================================== */}
+              <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-xl relative overflow-hidden backdrop-blur-md">
+                {/* Background Kaligrafi & Ornamen Air Islam */}
+                <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
+                  <span className="text-[260px] font-serif leading-none select-none text-emerald-400">۞</span>
+                </div>
+
+                {/* Header Judul Roda Navigasi */}
+                <div className="text-center relative z-10 mb-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                    <span>۞</span>
+                    <span>Kemudi Roda Al-Qur'an</span>
+                    <span>۞</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-200/80 mt-1">
+                    Putar ◀ ▶ untuk memilih: <strong>Juz (Dalam)</strong> • <strong>Surat (Tengah)</strong> • <strong>Ayat (Luar)</strong>
+                  </p>
+                </div>
+
+                {/* AREA KONSENTRIK 3 RODA DIAL */}
+                <div className="w-[300px] h-[300px] sm:w-[330px] sm:h-[330px] relative mx-auto my-2 flex items-center justify-center select-none">
+                  {/* 1. RODA PALING LUAR: MEMILIH AYAT */}
+                  <div
+                    className="absolute inset-0 rounded-full border-2 border-emerald-500/40 bg-emerald-950/40 shadow-inner flex items-center justify-center"
+                    style={{
+                      transform: `rotate(${((quickAyatNum - 1) / Math.max(1, currentQuickSurah.jumlahAyat)) * 360}deg)`,
+                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                    }}
                   >
-                    <span>{tab.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                      indexTab === tab.id ? 'bg-amber-400 text-slate-950 font-black' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-                    }`}>
-                      {tab.count}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-60" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="48" fill="none" stroke="#10b981" strokeWidth="0.8" strokeDasharray="1.5 3" />
+                      <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" strokeWidth="0.5" strokeDasharray="1 5" />
+                      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                        <circle
+                          key={deg}
+                          cx={50 + 46.5 * Math.cos((deg * Math.PI) / 180)}
+                          cy={50 + 46.5 * Math.sin((deg * Math.PI) / 180)}
+                          r="1.2"
+                          fill="#fbbf24"
+                        />
+                      ))}
+                    </svg>
+                  </div>
+
+                  {/* Kontrol Putar Roda Luar (Ayat): ◀ & ▶ dan Badge */}
+                  <button
+                    type="button"
+                    onClick={() => handleRotateAyat(-1)}
+                    title="Ayat Sebelumnya (-1)"
+                    className="absolute left-1 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-emerald-800/95 hover:bg-emerald-700 text-amber-300 border border-amber-400/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRotateAyat(1)}
+                    title="Ayat Selanjutnya (+1)"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-emerald-800/95 hover:bg-emerald-700 text-amber-300 border border-amber-400/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
+                  >
+                    ▶
+                  </button>
+                  {/* Badge Ayat Terpilih (Puncak Roda Luar) */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAyatGridPicker(true)}
+                    className="absolute top-1 z-30 px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-[11px] font-black border border-amber-500 shadow-md active:scale-95 transition flex items-center gap-1 cursor-pointer"
+                    title="Klik untuk memilih nomor ayat dari grid"
+                  >
+                    <span>Ayat {quickAyatNum}</span>
+                    <span className="opacity-70 font-normal">/ {currentQuickSurah.jumlahAyat}</span>
+                  </button>
+
+                  {/* 2. RODA TENGAH: MEMILIH SURAT */}
+                  <div
+                    className="absolute w-[210px] h-[210px] sm:w-[235px] sm:h-[235px] rounded-full border-2 border-amber-400/70 bg-gradient-to-tr from-emerald-950/80 via-emerald-900/90 to-teal-950/80 shadow-lg flex items-center justify-center"
+                    style={{
+                      transform: `rotate(${((quickSurahNum - 1) / 114) * 360}deg)`,
+                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                    }}
+                  >
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-50" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="48" fill="none" stroke="#fbbf24" strokeWidth="0.8" strokeDasharray="2 2" />
+                      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                        <rect
+                          key={deg}
+                          x="49"
+                          y="2"
+                          width="2"
+                          height="3"
+                          fill="#10b981"
+                          transform={`rotate(${deg} 50 50)`}
+                        />
+                      ))}
+                    </svg>
+                  </div>
+
+                  {/* Kontrol Putar Roda Tengah (Surat): ◀ & ▶ dan Badge */}
+                  <button
+                    type="button"
+                    onClick={() => handleRotateSurah(-1)}
+                    title="Surat Sebelumnya"
+                    className="absolute left-[44px] sm:left-[48px] top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-amber-500/95 hover:bg-amber-400 text-slate-950 font-black border border-white/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRotateSurah(1)}
+                    title="Surat Selanjutnya"
+                    className="absolute right-[44px] sm:right-[48px] top-1/2 -translate-y-1/2 z-30 w-7 h-7 rounded-full bg-amber-500/95 hover:bg-amber-400 text-slate-950 font-black border border-white/50 flex items-center justify-center active:scale-90 shadow-md transition cursor-pointer text-xs"
+                  >
+                    ▶
+                  </button>
+                  {/* Badge Nama Surat Latin di Bagian Atas Roda Tengah */}
+                  <button
+                    type="button"
+                    onClick={() => setShowSurahPickerModal(true)}
+                    className="absolute top-[28px] sm:top-[32px] z-30 max-w-[150px] sm:max-w-[170px] px-2 py-0.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-white text-center border border-emerald-400/50 shadow-xs cursor-pointer group active:scale-95 transition"
+                    title="Klik untuk memilih surat dari daftar 114 surat"
+                  >
+                    <span className="text-[10px] sm:text-[11px] font-black text-amber-300 block truncate group-hover:text-amber-200">
+                      {currentQuickSurah.nomor}. {currentQuickSurah.namaLatin}
                     </span>
                   </button>
-                ))}
+                  {/* Kaligrafi Surat Arab di Bagian Bawah Roda Tengah */}
+                  <div className="absolute bottom-[28px] sm:bottom-[32px] z-30 text-center pointer-events-none">
+                    <span className="font-quran-lpmq text-sm sm:text-base text-amber-300 font-bold drop-shadow-md" dir="rtl">
+                      {currentQuickSurah.nama}
+                    </span>
+                  </div>
+
+                  {/* 3. RODA PALING DALAM: MEMILIH JUZ */}
+                  <div
+                    className="absolute w-[126px] h-[126px] sm:w-[140px] sm:h-[140px] rounded-full border-2 border-emerald-300/80 bg-gradient-to-b from-[#0a7c29] to-emerald-950 shadow-inner flex items-center justify-center"
+                    style={{
+                      transform: `rotate(${((wheelJuzNum - 1) / 30) * 360}deg)`,
+                      transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                    }}
+                  >
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="47" fill="none" stroke="#fbbf24" strokeWidth="1" strokeDasharray="1 3" />
+                    </svg>
+                  </div>
+
+                  {/* Kontrol Putar Roda Dalam (Juz): ◀ & ▶ dan Teks */}
+                  <button
+                    type="button"
+                    onClick={() => handleRotateJuz(-1)}
+                    title="Juz Sebelumnya"
+                    className="absolute left-[84px] sm:left-[92px] top-1/2 -translate-y-1/2 z-30 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-amber-200 font-bold border border-emerald-300/60 flex items-center justify-center active:scale-90 shadow-xs transition cursor-pointer text-xs"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRotateJuz(1)}
+                    title="Juz Selanjutnya"
+                    className="absolute right-[84px] sm:right-[92px] top-1/2 -translate-y-1/2 z-30 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-amber-200 font-bold border border-emerald-300/60 flex items-center justify-center active:scale-90 shadow-xs transition cursor-pointer text-xs"
+                  >
+                    ▶
+                  </button>
+                  {/* Teks Juz di Bagian Atas Roda Dalam */}
+                  <span className="absolute top-[66px] sm:top-[72px] z-30 px-2 py-0.2 rounded-full bg-emerald-950/85 border border-emerald-400/40 text-[9px] font-black text-amber-300 uppercase tracking-widest pointer-events-none">
+                    JUZ {wheelJuzNum}
+                  </span>
+
+                  {/* 4. PUSAT RODA: MEDALLION KALIGRAFI ISLAM & TOMBOL BACA */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
+                    className="relative z-40 w-15 h-15 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-lg border-2 border-amber-200 hover:scale-105 active:scale-95 transition-transform group cursor-pointer"
+                    title={`Klik untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
+                  >
+                    <span className="font-quran-lpmq text-base sm:text-lg leading-none font-bold text-slate-950 drop-shadow-xs group-hover:scale-110 transition-transform">
+                      اقْرَأْ
+                    </span>
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tighter leading-none mt-0.5 text-slate-950">
+                      BACA
+                    </span>
+                  </button>
+                </div>
+
+                {/* TOMBOL UTAMA BUKA SURAT & AYAT DI BAWAH RODA */}
+                <button
+                  type="button"
+                  onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
+                  className="w-full mt-3 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition cursor-pointer"
+                >
+                  <BookOpen className="w-4 h-4 text-slate-950 fill-current" />
+                  <span>Buka QS. {currentQuickSurah.namaLatin} Ayat {quickAyatNum} (Juz {wheelJuzNum})</span>
+                  <ArrowRight className="w-4 h-4 stroke-[3]" />
+                </button>
+              </div>
+
+              {/* ======================================================== */}
+              {/* DIBAWAH RODA NAVIGASI: PILIHAN KHATAMAN & CATATAN USER    */}
+              {/* ======================================================== */}
+              <div className="w-full max-w-lg mx-auto space-y-2.5">
+                {/* 2 KARTU PILIHAN UTAMA: KHATAMAN & CATATAN */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Pilihan 1: Program Khataman */}
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'khatam' ? 'surah' : 'khatam')}
+                    className={`p-3 rounded-2xl border text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
+                      indexTab === 'khatam'
+                        ? 'bg-[#0a7c29] text-white border-emerald-400 ring-2 ring-emerald-300 shadow-md'
+                        : isDark
+                        ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-emerald-500'
+                        : 'bg-white border-slate-200/90 text-slate-800 hover:border-emerald-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1.5">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'khatam' ? 'bg-amber-400 text-slate-950' : 'bg-emerald-100 dark:bg-emerald-950 text-[#0a7c29] dark:text-emerald-400'}`}>
+                        <Target className="w-4 h-4" />
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'khatam' ? 'bg-white/20 text-white' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}`}>
+                        {khatamanSessions.length} Target
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black leading-tight">Target Khataman</h4>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'khatam' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {khatamanSessions.length > 0 ? `${khatamanSessions[0].completedJuz.length}/30 Juz selesai` : 'Atur target baca Al-Qur\'an'}
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Pilihan 2: Catatan User Atas Ayat & Penanda */}
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'bookmarks' ? 'surah' : 'bookmarks')}
+                    className={`p-3 rounded-2xl border text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
+                      indexTab === 'bookmarks'
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-300 shadow-md'
+                        : isDark
+                        ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-amber-500'
+                        : 'bg-white border-slate-200/90 text-slate-800 hover:border-amber-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1.5">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'bookmarks' ? 'bg-slate-950 text-amber-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'}`}>
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'bookmarks' ? 'bg-slate-950/20 text-slate-950' : 'bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'}`}>
+                        {Object.keys(userNotes).length + bookmarks.length} Item
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black leading-tight">Catatan & Penanda</h4>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'bookmarks' ? 'text-slate-900 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {Object.keys(userNotes).length} Catatan • {bookmarks.length} Disimpan
+                      </p>
+                    </div>
+                  </button>
+                </div>
+
+                {/* 2 PILIHAN DAFTAR KLASIK: 114 SURAT & 30 JUZ */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'surah' ? 'none' : 'surah')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs border cursor-pointer ${
+                      indexTab === 'surah'
+                        ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-xs'
+                        : isDark
+                        ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Daftar 114 Surat</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 text-white font-mono">114</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'juz' ? 'none' : 'juz')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs border cursor-pointer ${
+                      indexTab === 'juz'
+                        ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-xs'
+                        : isDark
+                        ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Daftar 30 Juz</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 text-white font-mono">30</span>
+                  </button>
+                </div>
               </div>
 
               {/* TAB 1: DAFTAR SURAT */}
               {indexTab === 'surah' && (
                 <div className="space-y-3">
-                  {/* CARD INTERAKTIF: LOMPAT LANGSUNG KE SURAT & AYAT */}
-                  <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-br from-white via-emerald-50/50 to-emerald-100/30 dark:from-slate-800 dark:via-slate-800/95 dark:to-emerald-950/30 border border-emerald-200/90 dark:border-emerald-800/60 shadow-sm space-y-3.5">
-                    {/* Header Card */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0a7c29] to-emerald-500 text-white flex items-center justify-center shadow-xs">
-                          <Compass className="w-4 h-4 text-amber-300" />
-                        </div>
-                        <div>
-                          <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight">
-                            Navigasi Cepat: Surat & Ayat
-                          </h3>
-                          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
-                            Pilih surat dan nomor ayat berapa saja secara interaktif
-                          </p>
-                        </div>
-                      </div>
-                      <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/70 text-[#0a7c29] dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                        Interaktif
-                      </span>
-                    </div>
-
-                    {/* Kontrol 1: Pemilihan Surat */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-4.5 h-4.5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-bold">1</span>
-                          <span>Pilih Surat ({currentQuickSurah.nomor} dari 114):</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowSurahPickerModal(true)}
-                          className="text-[11px] font-bold text-[#0a7c29] dark:text-emerald-400 hover:underline flex items-center gap-1"
-                        >
-                          <Search className="w-3 h-3" />
-                          <span>Daftar 114 Surat</span>
-                        </button>
-                      </div>
-
-                      {/* Interactive Surah Selector Bar */}
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const prevNum = quickSurahNum > 1 ? quickSurahNum - 1 : 114;
-                            setQuickSurahNum(prevNum);
-                            const nextSurah = SURAH_LIST.find((s) => s.nomor === prevNum);
-                            if (nextSurah && quickAyatNum > nextSurah.jumlahAyat) {
-                              setQuickAyatNum(nextSurah.jumlahAyat);
-                            }
-                          }}
-                          className="w-9 sm:w-10 h-13 rounded-2xl bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center active:scale-95 transition shadow-2xs flex-shrink-0"
-                          title="Surat Sebelumnya"
-                        >
-                          <ChevronLeft className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setShowSurahPickerModal(true)}
-                          className="flex-1 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-700/90 border border-emerald-300/80 dark:border-emerald-700/80 hover:border-emerald-500 shadow-2xs hover:shadow-sm transition text-left flex items-center justify-between gap-2 group"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0">
-                              {currentQuickSurah.nomor}
-                            </span>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-[#0a7c29] transition truncate">
-                                  {currentQuickSurah.namaLatin}
-                                </span>
-                                <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-semibold border border-emerald-200 dark:border-emerald-800 shrink-0">
-                                  {currentQuickSurah.tempatTurun}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                                Arti: "{currentQuickSurah.arti}" • {currentQuickSurah.jumlahAyat} Ayat • Juz {currentQuickSurah.juz}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="font-quran-lpmq text-lg text-[#0a7c29] dark:text-emerald-400 font-bold" dir="rtl">
-                              {currentQuickSurah.nama}
-                            </span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-200 font-bold group-hover:bg-[#0a7c29] group-hover:text-white transition">
-                              Ganti ▾
-                            </span>
-                          </div>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextNum = quickSurahNum < 114 ? quickSurahNum + 1 : 1;
-                            setQuickSurahNum(nextNum);
-                            const nextSurah = SURAH_LIST.find((s) => s.nomor === nextNum);
-                            if (nextSurah && quickAyatNum > nextSurah.jumlahAyat) {
-                              setQuickAyatNum(nextSurah.jumlahAyat);
-                            }
-                          }}
-                          className="w-9 sm:w-10 h-13 rounded-2xl bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center active:scale-95 transition shadow-2xs flex-shrink-0"
-                          title="Surat Selanjutnya"
-                        >
-                          <ChevronRight className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Kontrol 2: Pemilihan Ayat */}
-                    <div className="space-y-2 pt-2 border-t border-emerald-100 dark:border-slate-700/60">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-4.5 h-4.5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-bold">2</span>
-                          <span>Pilih Ayat (1 s/d {currentQuickSurah.jumlahAyat}):</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowAyatGridPicker(true)}
-                          className="text-[11px] font-bold text-[#0a7c29] dark:text-emerald-400 hover:underline flex items-center gap-1"
-                        >
-                          <ListOrdered className="w-3 h-3" />
-                          <span>Grid Semua Ayat</span>
-                        </button>
-                      </div>
-
-                      {/* Stepper + Input */}
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setQuickAyatNum((prev) => Math.max(1, prev - 1))}
-                          className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50 dark:hover:bg-slate-600 font-black text-base text-slate-800 dark:text-white flex items-center justify-center active:scale-95 transition shadow-2xs flex-shrink-0"
-                          title="Ayat Sebelumnya (-1)"
-                        >
-                          -
-                        </button>
-
-                        {currentQuickSurah.jumlahAyat > 10 && (
-                          <button
-                            type="button"
-                            onClick={() => setQuickAyatNum((prev) => Math.max(1, prev - 5))}
-                            className="h-10 px-2 rounded-2xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-300 hidden xs:flex items-center justify-center active:scale-95 transition flex-shrink-0"
-                            title="Mundur 5 Ayat"
-                          >
-                            -5
-                          </button>
-                        )}
-
-                        <div className="flex-1 flex items-center justify-center gap-2 px-3 py-1 rounded-2xl bg-white dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-2xs">
-                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Ayat:</span>
-                          <input
-                            type="number"
-                            min="1"
-                            max={currentQuickSurah.jumlahAyat}
-                            value={quickAyatNum}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value, 10);
-                              if (!isNaN(val)) {
-                                setQuickAyatNum(Math.max(1, Math.min(currentQuickSurah.jumlahAyat, val)));
-                              } else {
-                                setQuickAyatNum(1);
-                              }
-                            }}
-                            className="w-14 py-0.5 text-center font-mono font-black text-base text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-slate-800 rounded-xl border border-emerald-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                          />
-                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                            dari <span className="text-slate-800 dark:text-slate-200 font-mono font-black">{currentQuickSurah.jumlahAyat}</span>
-                          </span>
-                        </div>
-
-                        {currentQuickSurah.jumlahAyat > 10 && (
-                          <button
-                            type="button"
-                            onClick={() => setQuickAyatNum((prev) => Math.min(currentQuickSurah.jumlahAyat, prev + 5))}
-                            className="h-10 px-2 rounded-2xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-300 hidden xs:flex items-center justify-center active:scale-95 transition flex-shrink-0"
-                            title="Maju 5 Ayat"
-                          >
-                            +5
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => setQuickAyatNum((prev) => Math.min(currentQuickSurah.jumlahAyat, prev + 1))}
-                          className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50 dark:hover:bg-slate-600 font-black text-base text-slate-800 dark:text-white flex items-center justify-center active:scale-95 transition shadow-2xs flex-shrink-0"
-                          title="Ayat Selanjutnya (+1)"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Slider Range */}
-                      <div className="space-y-0.5 px-1">
-                        <input
-                          type="range"
-                          min="1"
-                          max={currentQuickSurah.jumlahAyat}
-                          value={quickAyatNum}
-                          onChange={(e) => setQuickAyatNum(parseInt(e.target.value, 10))}
-                          className="w-full accent-[#0a7c29] cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-lg"
-                        />
-                        <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                          <span>Ayat 1</span>
-                          <span>Tengah: Ayat {Math.ceil(currentQuickSurah.jumlahAyat / 2)}</span>
-                          <span>Ayat {currentQuickSurah.jumlahAyat}</span>
-                        </div>
-                      </div>
-
-                      {/* Quick Shortcut Buttons */}
-                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mr-0.5">Lompat:</span>
-                        <button
-                          type="button"
-                          onClick={() => setQuickAyatNum(1)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition active:scale-95 ${
-                            quickAyatNum === 1
-                              ? 'bg-emerald-600 text-white shadow-2xs'
-                              : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50'
-                          }`}
-                        >
-                          Awal (1)
-                        </button>
-                        {currentQuickSurah.jumlahAyat > 2 && (
-                          <button
-                            type="button"
-                            onClick={() => setQuickAyatNum(Math.ceil(currentQuickSurah.jumlahAyat / 2))}
-                            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition active:scale-95 ${
-                              quickAyatNum === Math.ceil(currentQuickSurah.jumlahAyat / 2)
-                                ? 'bg-emerald-600 text-white shadow-2xs'
-                                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50'
-                            }`}
-                          >
-                            Tengah ({Math.ceil(currentQuickSurah.jumlahAyat / 2)})
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => setQuickAyatNum(currentQuickSurah.jumlahAyat)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition active:scale-95 ${
-                            quickAyatNum === currentQuickSurah.jumlahAyat
-                              ? 'bg-emerald-600 text-white shadow-2xs'
-                              : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-emerald-50'
-                          }`}
-                        >
-                          Akhir ({currentQuickSurah.jumlahAyat})
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Tombol Eksekusi Buka Surat & Ayat */}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
-                      className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#0a7c29] via-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 transition"
-                    >
-                      <BookOpen className="w-4 h-4 text-amber-300" />
-                      <span>Buka QS. {currentQuickSurah.namaLatin} Ayat {quickAyatNum}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
                   {/* Search Bar */}
                   <div className="relative">
                     <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
@@ -2691,11 +2754,73 @@ export default function AlQuranModal({ onClose }) {
                 <div className="space-y-4">
                   <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/40 text-xs">
                     <span className="font-bold text-amber-800 dark:text-amber-300 block">
-                      Kumpulan Simpanan Ayat & Catatan Ibadah Anda
+                      Kumpulan Catatan Pribadi & Simpanan Ayat Anda
                     </span>
                     <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                      Ketuk kartu untuk langsung membuka ayat di mushaf.
+                      Ketuk kartu catatan atau ayat untuk langsung membuka ayat di mushaf.
                     </p>
+                  </div>
+
+                  {/* Catatan User Atas Ayat */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Catatan Pribadi Jamaah ({Object.keys(userNotes).length})</span>
+                    </h4>
+                    {Object.keys(userNotes).length === 0 ? (
+                      <div className="p-4 text-center rounded-2xl bg-amber-50/50 dark:bg-slate-800/50 border border-amber-200/60 dark:border-slate-700">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                          Belum ada catatan pada ayat. Anda dapat menambahkan catatan pada ayat saat membaca mushaf.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {Object.entries(userNotes).map(([key, note]) => {
+                          const surah = SURAH_LIST.find((s) => s.nomor === note.surahNomor) || SURAH_LIST[0];
+                          return (
+                            <div
+                              key={key}
+                              className="p-3.5 rounded-2xl border border-amber-300/80 dark:border-slate-700 bg-amber-50/70 dark:bg-slate-800/90 shadow-2xs flex items-start justify-between gap-3"
+                            >
+                              <div
+                                className="min-w-0 cursor-pointer flex-1"
+                                onClick={() => handleOpenSurah(surah, note.ayatNomor)}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-black text-slate-900 dark:text-white">
+                                    QS. {surah.namaLatin} : Ayat {note.ayatNomor}
+                                  </span>
+                                  {note.updatedAt && (
+                                    <span className="text-[10px] text-slate-400 font-mono">({note.updatedAt})</span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-700 dark:text-slate-300 italic mt-1 line-clamp-2">
+                                  "{note.text}"
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenSurah(surah, note.ayatNomor)}
+                                  className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95 transition"
+                                  title="Buka Ayat di Mushaf"
+                                >
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteNote(key)}
+                                  className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                                  title="Hapus Catatan"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Bookmarks */}
@@ -2760,17 +2885,8 @@ export default function AlQuranModal({ onClose }) {
                 <ChevronRight className={`w-3.5 h-3.5 transition-transform shrink-0 ${showSurahPicker ? 'rotate-90' : ''}`} />
               </button>
 
-              {/* Action Buttons: Jump, Theme, Settings, Audio */}
+              {/* Action Buttons: Theme, Tajweed, Settings, Audio */}
               <div className="flex items-center gap-1 sm:gap-1.5">
-                {/* Loncat Ayat */}
-                <button
-                  onClick={() => setShowJumpModal(true)}
-                  className="w-8 h-8 rounded-xl hover:bg-white/20 active:scale-95 flex items-center justify-center transition text-white"
-                  title="Loncat Ayat"
-                >
-                  <Compass className="w-4 h-4" />
-                </button>
-
                 {/* Tema / Suasana */}
                 <button
                   onClick={() => setShowThemePicker(!showThemePicker)}
@@ -3007,18 +3123,18 @@ export default function AlQuranModal({ onClose }) {
                           style={{
                             borderBottomColor: currentTheme.borderDivider
                           }}
-                          className={`space-y-3.5 pb-6 border-b transition-all duration-300 rounded-2xl cursor-pointer relative z-10 ${
+                          className={`space-y-3 pb-5 pt-3 px-3 sm:px-4 border-b rounded-2xl cursor-pointer relative z-10 transition-colors duration-150 ${
                             isHighlighted
-                              ? currentTheme.highlightBg + ' p-4 rounded-3xl'
+                              ? currentTheme.highlightBg
                               : isAudioPlaying
-                              ? currentTheme.activeAudioBg + ' p-4 rounded-3xl'
+                              ? currentTheme.activeAudioBg
                               : isToolbarOpen
                               ? currentTheme.type === 'image'
-                                ? 'p-4 rounded-3xl ring-2 ring-amber-400/80 bg-slate-900/90 backdrop-blur-md'
-                                : 'p-4 rounded-3xl ring-2 ring-emerald-500/60 bg-emerald-500/5'
+                                ? 'bg-black/55'
+                                : 'bg-emerald-500/10 dark:bg-emerald-500/15'
                               : currentTheme.type === 'image'
-                              ? 'p-3.5 rounded-2xl bg-black/35 backdrop-blur-xs hover:bg-black/55 border border-white/5'
-                              : 'p-2 hover:bg-black/5 dark:hover:bg-white/5'
+                              ? 'bg-black/35 hover:bg-black/45'
+                              : 'hover:bg-black/5 dark:hover:bg-white/5'
                           }`}
                         >
                           {/* BADGE PENANDA AYAT TERAKHIR DIBACA */}
@@ -3067,13 +3183,13 @@ export default function AlQuranModal({ onClose }) {
                                   wordSpacing: spaciousMode ? '0.18em' : '0.04em',
                                   textAlign: 'right',
                                   fontFeatureSettings: '"calt" 1, "liga" 1, "mkmk" 1',
-                                  fontWeight: 400,
+                                  fontWeight: 500,
                                   textRendering: 'geometricPrecision',
                                   WebkitFontSmoothing: 'antialiased',
                                   MozOsxFontSmoothing: 'grayscale',
                                   width: '100%'
                                 }}
-                                className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
+                                className={`${getArabicFontClass()} font-medium select-text mb-4 sm:mb-5`}
                               >
                                 {renderArabic(ayat)}
 
@@ -3180,48 +3296,35 @@ export default function AlQuranModal({ onClose }) {
                             </div>
                           )}
 
-                          {/* E. BILAH AKSI AYAT */}
+                          {/* E. BILAH AKSI AYAT (IKON SAJA TANPA TEKS) */}
                           {(isToolbarOpen || !hiddenReadMode) && (
                             <div
                               dir="ltr"
                               onClick={(e) => e.stopPropagation()}
-                              className="pt-2 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-200"
+                              className="pt-2 mt-2 border-t border-dashed border-emerald-500/30 animate-in slide-in-from-top-2 duration-150"
                             >
-                              <div className={`p-1.5 sm:p-2 rounded-2xl border shadow-md flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth ${
+                              <div className={`p-1.5 sm:p-2 rounded-2xl border shadow-sm flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth ${
                                 currentTheme.isDark
-                                  ? 'bg-slate-900/95 border-slate-700 text-white shadow-black/40'
-                                  : 'bg-white border-emerald-300 text-slate-800 shadow-emerald-950/10'
+                                  ? 'bg-slate-900/95 border-slate-700 text-white'
+                                  : 'bg-white border-emerald-300 text-slate-800'
                               }`}>
-                                {/* Badge Loncat Ayat */}
-                                <button
-                                  onClick={() => handleOpenJumpModal(ayat.nomorAyat)}
-                                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-[#0a7c29] to-[#064e1c] text-amber-300 font-mono text-[11px] font-black rounded-xl border border-amber-300/40 shadow-xs hover:scale-105 active:scale-95 transition"
-                                  title={`Ayat ${ayat.nomorAyat} - Loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
-                                >
-                                  <span>Ayat</span>
-                                  <span className="bg-amber-300/20 px-1 rounded">{ayat.nomorAyat}</span>
-                                </button>
-
                                 {/* TOMBOL PENANDA AYAT TERAKHIR */}
                                 <button
                                   onClick={() => saveLastRead(selectedSurah, ayat.nomorAyat)}
-                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0 ${
                                     isLastRead
-                                      ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-xs'
+                                      ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs'
                                       : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                                   }`}
-                                  title="Tandai sebagai ayat terakhir dibaca"
+                                  title={isLastRead ? 'Ditandai Terakhir Dibaca' : 'Tandai Ayat Terakhir Dibaca'}
                                 >
-                                  <Pin className={`w-3.5 h-3.5 ${isLastRead ? 'fill-current text-slate-950' : 'text-amber-500'}`} />
-                                  <span>{isLastRead ? 'Terakhir Dibaca' : 'Tandai Terakhir'}</span>
+                                  <Pin className={`w-4 h-4 ${isLastRead ? 'fill-current text-slate-950' : 'text-amber-500'}`} />
                                 </button>
-
-                                <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 flex-shrink-0 mx-0.5" />
 
                                 {/* AUDIO */}
                                 <button
                                   onClick={() => playAyatAudio(index)}
-                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center transition active:scale-95 shrink-0 ${
                                     isAudioPlaying
                                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                                       : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
@@ -3229,89 +3332,82 @@ export default function AlQuranModal({ onClose }) {
                                   title={isAudioPlaying ? 'Jeda Audio Ayat' : 'Putar Audio Ayat'}
                                 >
                                   {isAudioPlaying ? (
-                                    <Pause className="w-3.5 h-3.5 text-white" />
+                                    <Pause className="w-4 h-4 text-white" />
                                   ) : (
-                                    <Play className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
+                                    <Play className="w-4 h-4 text-[#0a7c29] dark:text-emerald-400" />
                                   )}
-                                  <span>{isAudioPlaying ? 'Jeda' : 'Audio'}</span>
                                 </button>
 
                                 {/* TAFSIR */}
                                 <button
                                   onClick={() => handleOpenRincian(ayat)}
-                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
+                                  className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0"
                                   title="Buka Tafsir & Rincian Ayat"
                                 >
-                                  <BookOpen className="w-3.5 h-3.5 stroke-[2.3]" />
-                                  <span>Tafsir</span>
+                                  <BookOpen className="w-4 h-4 stroke-[2.3]" />
                                 </button>
 
                                 {/* SALIN */}
                                 <button
                                   onClick={() => handleCopyAyat(ayat)}
-                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                                  title="Salin Ayat & Terjemah"
+                                  className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0"
+                                  title={copiedAyatNum === ayat.nomorAyat ? 'Tersalin!' : 'Salin Ayat & Terjemah'}
                                 >
                                   {copiedAyatNum === ayat.nomorAyat ? (
-                                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                   ) : (
-                                    <Copy className="w-3.5 h-3.5" />
+                                    <Copy className="w-4 h-4" />
                                   )}
-                                  <span>{copiedAyatNum === ayat.nomorAyat ? 'Tersalin' : 'Salin'}</span>
                                 </button>
 
                                 {/* SHARE */}
                                 <button
                                   onClick={() => handleOpenShareModal(ayat)}
-                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                                  title="Bagikan Ayat"
+                                  className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-amber-50 text-amber-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0"
+                                  title="Bagikan Kartu Ayat"
                                 >
-                                  <Share2 className="w-3.5 h-3.5" />
-                                  <span>Share</span>
+                                  <Share2 className="w-4 h-4" />
                                 </button>
 
                                 {/* CATATAN */}
                                 <button
                                   onClick={() => handleOpenNoteModal(ayat)}
-                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0 ${
                                     savedNote
                                       ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-400 text-amber-800 dark:text-amber-300'
                                       : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                                   }`}
-                                  title="Tandai Catatan Pribadi"
+                                  title="Catatan Pribadi Ayat"
                                 >
-                                  <FileText className="w-3.5 h-3.5 text-amber-500" />
-                                  <span>Catatan</span>
+                                  <FileText className="w-4 h-4 text-amber-500" />
                                 </button>
 
                                 {/* SIMPAN (BOOKMARK) */}
                                 <button
                                   onClick={() => handleToggleBookmark(ayat)}
-                                  className={`flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border text-xs font-bold transition active:scale-95 shadow-2xs ${
+                                  className={`w-8 h-8 rounded-xl border flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0 ${
                                     isBookmarked
                                       ? 'bg-emerald-600 text-white border-emerald-600'
                                       : 'bg-slate-50 dark:bg-slate-800/90 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                                   }`}
-                                  title={isBookmarked ? 'Hapus dari Simpanan' : 'Simpan Ayat'}
+                                  title={isBookmarked ? 'Hapus Simpanan' : 'Simpan Ayat (Bookmark)'}
                                 >
-                                  <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current text-white' : ''}`} />
-                                  <span>{isBookmarked ? 'Disimpan' : 'Simpan'}</span>
+                                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current text-white' : ''}`} />
                                 </button>
 
                                 {/* TAJWID */}
                                 <button
                                   onClick={() => setShowTajweedGuide(true)}
-                                  className="flex-shrink-0 flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 shadow-2xs"
-                                  title="Panduan Warna Tajwid"
+                                  className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0"
+                                  title="Panduan Kaidah Tajwid"
                                 >
-                                  <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                                  <span>Tajwid</span>
+                                  <HelpCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 </button>
 
                                 {hiddenReadMode && (
                                   <button
                                     onClick={() => setActiveAyatId(null)}
-                                    className="flex-shrink-0 ml-auto p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                    className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition ml-auto shrink-0"
                                     title="Tutup Menu"
                                   >
                                     <X className="w-4 h-4" />

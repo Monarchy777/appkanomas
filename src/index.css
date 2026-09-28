@@ -67,16 +67,23 @@
 /* Quranic Typography Fonts: Indonesia, Madinah, Modern */
 .font-quran-lpmq {
   font-family: 'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', serif !important;
-  font-weight: 400 !important;
+  font-weight: 500 !important;
+  -webkit-text-stroke: 0.25px currentColor;
+  text-rendering: optimizeLegibility;
 }
 
 .font-quran-madinah {
   font-family: 'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif !important;
-  font-weight: 400 !important;
+  font-weight: 500 !important;
+  -webkit-text-stroke: 0.25px currentColor;
+  text-rendering: optimizeLegibility;
 }
 
 .font-quran-modern {
   font-family: 'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 500 !important;
+  -webkit-text-stroke: 0.2px currentColor;
+  text-rendering: optimizeLegibility;
 }
 
 .font-quran-scheherazade {
