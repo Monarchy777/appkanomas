@@ -365,14 +365,12 @@ export function getAyatPageNumber(surahNomor, ayatNomor) {
   return Math.min(604, surah.hal + pageOffset);
 }
 
-// FUNGSI MEMANJANGKAN HURUF ARAB (KASHIDA / TATWEEL \u0640 ASLI)
+// FUNGSI KASHIDA / TATWEEL (MEMPERTAHANKAN KEASLIAN KALIGRAFI TANPA MERUSAK FONT LIGATUR)
+// Penyesuaian kashida & renggang dilakukan via OpenType 'jalt' (Justification Alternates),
+// CSS text-justify, dan word-spacing agar jenis kaligrafi (LPMQ / Amiri) tetap 100% identik.
 export function applyKashidaToArabic(text) {
   if (!text) return '';
-  // Sisipkan tatweel (\u0640) pada huruf yang menyambung secara estetis ke huruf berikutnya
-  return text.replace(
-    /([\u0628\u062A-\u062E\u0633-\u063A\u0641-\u064A])([\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*)(?=[\u0621-\u064A\u0671])/g,
-    (m, letter, marks) => letter + marks + '\u0640'
-  );
+  return text;
 }
 
 // RENDER TAJWID AMAN DENGAN RTL MURNI DAN KAIDAH ILMU TAJWID LENGKAP & AKURAT
@@ -1788,18 +1786,23 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       {/* A. TEKS ARAB DENGAN TAJWID WARNA & NOMOR AYAT LONCAT */}
-                      <div className="text-right" dir="rtl" data-zoom-zone="arabic">
+                      <div className="w-full" dir="rtl" data-zoom-zone="arabic">
                         <p
                           style={{
                             fontFamily: getActiveFontFamily(),
                             fontSize: `${arabicFontSize}px`,
                             color: currentTheme.arabicColor,
                             lineHeight: dynamicArabicLineHeight,
-                            wordSpacing: isKashidaLong ? '0.22em' : 'normal',
+                            textAlign: 'justify',
+                            textAlignLast: 'right',
+                            textJustify: 'auto',
+                            wordSpacing: isKashidaLong ? '0.34em' : '0.04em',
+                            fontFeatureSettings: isKashidaLong ? '"jalt" 1, "calt" 1, "liga" 1' : '"calt" 1, "liga" 1',
                             fontWeight: 400,
                             textRendering: 'optimizeLegibility',
                             WebkitFontSmoothing: 'antialiased',
-                            MozOsxFontSmoothing: 'grayscale'
+                            MozOsxFontSmoothing: 'grayscale',
+                            width: '100%'
                           }}
                           className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
                         >
@@ -1824,12 +1827,17 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* B. TRANSLITERASI LATIN */}
                       {showLatin && ayat.teksLatin && (
-                        <div className="mt-3.5 sm:mt-4 pt-1" data-zoom-zone="latin">
+                        <div className="mt-3.5 sm:mt-4 pt-1 w-full" data-zoom-zone="latin">
                           <p
                             style={{
                               fontSize: `${latinFontSize}px`,
                               color: currentTheme.latinColor,
-                              lineHeight: '1.75'
+                              lineHeight: '1.75',
+                              textAlign: 'justify',
+                              textAlignLast: 'left',
+                              textJustify: 'inter-word',
+                              hyphens: 'auto',
+                              width: '100%'
                             }}
                             className="font-medium select-text"
                           >
@@ -1840,12 +1848,17 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* C. TERJEMAHAN BAHASA INDONESIA */}
                       {showTranslation && ayat.teksIndonesia && (
-                        <div className="mt-2.5 sm:mt-3" data-zoom-zone="translation">
+                        <div className="mt-2.5 sm:mt-3 w-full" data-zoom-zone="translation">
                           <p
                             style={{
                               fontSize: `${latinFontSize}px`,
                               color: currentTheme.translationColor,
-                              lineHeight: '1.75'
+                              lineHeight: '1.75',
+                              textAlign: 'justify',
+                              textAlignLast: 'left',
+                              textJustify: 'inter-word',
+                              hyphens: 'auto',
+                              width: '100%'
                             }}
                             className="font-normal select-text opacity-95"
                           >
@@ -2324,7 +2337,7 @@ export default function AlQuranModal({ onClose }) {
                   }`}>
                     <div>
                       <span className="block text-xs font-black">Huruf Panjang & Renggang (Kashida)</span>
-                      <span className="text-[10px] opacity-75 block">Menyisipkan tatweel kaligrafi klasik antar huruf</span>
+                      <span className="text-[10px] opacity-75 block">Kaligrafi tetap asli, diperpanjang & diperenggang anggun</span>
                     </div>
                     <button
                       onClick={() => handleToggleKashida(!isKashidaLong)}

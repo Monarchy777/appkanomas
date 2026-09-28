@@ -81,13 +81,40 @@ function isPortActive(port) {
   });
 }
 
-async function ensureDevServerRunning(forceRestart = false) {
-  if (forceRestart && devServerProcess) {
+// Mematikan paksa seluruh fungsi server lama pada port 3000
+function killServerProcesses() {
+  return new Promise((resolve) => {
+    console.log('[DEV-SERVER] Mematikan seluruh proses yang mendengarkan port ' + devServerPort + '...');
+    if (devServerProcess) {
+      try { devServerProcess.kill(); } catch (e) {}
+      devServerProcess = null;
+    }
+    // Hentikan proses yang memegang port 3000 via PowerShell
+    const cmd = `Get-NetTCPConnection -LocalPort ${devServerPort} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }`;
+    require('child_process').exec(`powershell -NoProfile -Command "${cmd}"`, () => {
+      setTimeout(resolve, 800);
+    });
+  });
+}
+
+// Pastikan koneksi socket WhatsApp tetap aktif dan pulihkan jika mati
+function ensureWaSocketHealthy() {
+  const isHealthy = sock && sock.ws && sock.ws.readyState === 1;
+  if (!isHealthy) {
+    console.log('[WA-BRIDGE] Socket WA terputus atau tidak aktif. Menyalakan ulang bridge WA...');
     try {
-      console.log('[DEV-SERVER] Mematikan proses dev server lama...');
-      devServerProcess.kill();
-    } catch (e) {}
-    devServerProcess = null;
+      startWhatsAppBridge();
+    } catch (e) {
+      console.error('[WA-RECONNECT-ERR]', e.message);
+    }
+  } else {
+    console.log('[WA-BRIDGE] Bridge WhatsApp aktif & terverifikasi (CONNECTED).');
+  }
+}
+
+async function ensureDevServerRunning(forceRestart = false) {
+  if (forceRestart) {
+    await killServerProcesses();
   }
 
   const active = await isPortActive(devServerPort);
@@ -278,7 +305,7 @@ function initTranscriptMonitoring() {
 }
 
 // Cek pembaruan transcript untuk menangkap jawaban selesai dari AI
-function checkTranscriptUpdates() {
+async function checkTranscriptUpdates() {
   try {
     if (!fs.existsSync(TRANSCRIPT_PATH)) return;
     const stats = fs.statSync(TRANSCRIPT_PATH);
@@ -300,19 +327,36 @@ function checkTranscriptUpdates() {
         if (entry.step_index <= lastProcessedStepIndex) continue;
         lastProcessedStepIndex = entry.step_index;
 
-        if (entry.status === 'ERROR' || (entry.source === 'MODEL' && entry.status === 'ERROR')) {
-          console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index}! Mereset antrian dan restart server...`);
-          const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
-          sendWhatsAppMessage(
-            targetJid,
-            `⚠️ *Pemberitahuan Kendala Eksekusi AI:*\nPerintah tidak dapat diselesaikan atau terjadi kesalahan internal.\n\n🔄 *Tindakan Otomatis:* \n• Antrian perintah dihentikan/direset.\n• Vite Dev Server (Port 3000) dipastikan aktif.\n• WhatsApp Bridge tetap online & siap menerima perintah baru.`
-          );
+        const lineStr = typeof line === 'string' ? line : JSON.stringify(line);
+        const isExecutionError = (
+          (entry.status === 'ERROR' && entry.source !== 'USER_INPUT') ||
+          (entry.source === 'MODEL' && entry.status === 'ERROR') ||
+          (entry.source === 'SYSTEM' && lineStr.includes('was canceled with result:')) ||
+          (lineStr.includes('Agent execution terminated due to error') && entry.source !== 'USER_INPUT') ||
+          (lineStr.includes('Unknown: Agent execution terminated') && entry.source !== 'USER_INPUT')
+        );
+
+        if (isExecutionError) {
+          console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index} ("Agent execution terminated due to error")!`);
+          console.log('[RECOVERY] Mematikan fungsi server yang berjalan dan menyalakan kembali dev server & bridge WA...');
 
           if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
           isBusyExecuting = false;
           commandQueue.length = 0;
           updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
-          ensureDevServerRunning(true);
+
+          // 1. Matikan fungsi server lama yang berjalan & jalankan ulang dev server secara bersih
+          await ensureDevServerRunning(true);
+
+          // 2. Pastikan bridge WA tetap menyala & sehat
+          ensureWaSocketHealthy();
+
+          // 3. Kirim notifikasi konfirmasi tindakan ke WhatsApp
+          const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
+          await sendWhatsAppMessage(
+            targetJid,
+            `⚠️ *Pemberitahuan Sistem (Pemulihan Kendala AI):*\nTerdeteksi gangguan: *Agent execution terminated due to error*.\n\n🔄 *Tindakan Otomatis Dilaksanakan:*\n• Fungsi server yang berjalan telah dimatikan dan direstart ulang (Port 3000).\n• WhatsApp Bridge dipastikan ON & online.\n• Antrian perintah direset agar siap menerima instruksi baru.`
+          );
         } else if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
           const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
           if (entry.content && !hasToolCalls) {
