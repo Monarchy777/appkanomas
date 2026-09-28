@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+  font-family: 'KFGQPC Uthmanic Script HAFS';
+  src: url('/fonts/KFGQPC-Hafs.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LPMQ Isep Misbah';
+  src: url('/fonts/LPMQ.woff2') format('woff2');
+}
+body { background: #e8f9eb; padding: 40px; font-size: 48px; line-height: 2.4; color: black; }
+.card { background: white; padding: 25px; margin-bottom: 25px; border-radius: 16px; border: 1px solid #c2e5c8; }
+.hafs { font-family: 'KFGQPC Uthmanic Script HAFS', serif; }
+.lpmq { font-family: 'LPMQ Isep Misbah', serif; }
+.spacious { word-spacing: 0.2em; text-align: justify; text-justify: inter-word; text-align-last: right; }
+.kashida { font-feature-settings: "calt" 1, "liga" 1; }
+h3 { font-family: sans-serif; font-size: 16px; color: #0a7c29; direction: ltr; margin: 0 0 10px 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h3>1. LPMQ Isep Misbah (Stacking / Bertumpuk pada Ta+Ha/Jim):</h3>
+  <div class="lpmq">فَتَحْنَا تَجْرِي مِنْ تَحْتِهَا الْاَنْهَارُ</div>
+</div>
+<div class="card">
+  <h3>2. KFGQPC Hafs (Penyambungan Horizontal Lebar & Jelas):</h3>
+  <div class="hafs">فَتَحْنَا تَجْرِي مِنْ تَحْتِهَا الْاَنْهَارُ</div>
+</div>
+<div class="card">
+  <h3>3. KFGQPC Hafs + Tatweel / Kashida Spacing (Persis MyQuran):</h3>
+  <div class="hafs spacious kashida">فَتَحْنَا تَجْـرِي مِنْ تَحْتِهَا الْاَنْهَارُ</div>
+</div>
+</body>
+</html>
