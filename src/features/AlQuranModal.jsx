@@ -523,6 +523,122 @@ export function normalizeQuranText(text, isMadinah = false) {
   return cleaned.trim();
 }
 
+// KONVERSI PARIPURNA KE RASM UTSMANI MADINAH (STANDAR KOMPLEKS RAJA FAHD MADINAH MUNAWWARAH)
+export function convertToUthmaniMadinah(text) {
+  if (!text) return '';
+  let res = text
+    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
+    .replace(/\u06D5/g, '')
+    .replace(/\u08D6/g, '')
+    // Konversi tanda sukun bulat Kemenag ke kepala Kha' Utsmani (\u06E1)
+    .replace(/\u0652/g, '\u06E1')
+    // Dhommah terbalik Kemenag (U+0657) -> Dhammah biasa + Wawu kecil Utsmani (ُۥ / \u064F\u06E5)
+    .replace(/\u0657/g, '\u064F\u06E5')
+    // Kasrah berdiri Kemenag (U+0656) -> Kasrah biasa + Ya kecil Utsmani (ِۦ / \u0650\u06E6)
+    .replace(/\u0656/g, '\u0650\u06E6')
+    // Small madda Tanzil/Kemenag -> Madda standar Utsmani
+    .replace(/\u06E4/g, '\u0653')
+    // Meem iqlab Tanzil -> Small high meem Utsmani
+    .replace(/\u06ED/g, '\u06E2')
+    // Alif washal pada alif lam ta'rif: اَلْـ -> ٱلْـ dan اَلـ -> ٱلـ
+    .replace(/(^|\s)ا([َُِ]?)ل([\u06E1\u0651])/g, '$1ٱل$3')
+    // Alif washal pada nama Allah: اللّٰه -> ٱللَّه
+    .replace(/(^|\s)الل[ّٰ]+هِ/g, '$1ٱللَّهِ')
+    .replace(/(^|\s)الل[ّٰ]+هُ/g, '$1ٱللَّهُ')
+    .replace(/(^|\s)الل[ّٰ]+هَ/g, '$1ٱللَّهَ')
+    // Ar-Rahman di Madinah: الرَّحْمٰنِ -> ٱلرَّحْمَـٰنِ
+    .replace(/الرَّحْم[َٰ]*نِ/g, 'ٱلرَّحْمَـٰنِ')
+    // Ar-Rahim di Madinah: الرَّحِيْمِ -> ٱلرَّحِيمِ
+    .replace(/الرَّحِي[ِْ]*مِ/g, 'ٱلرَّحِيمِ');
+
+  return normalizeQuranText(res, true);
+}
+
+// FORMAT TRANSLITERASI LATIN SESUAI 3 STANDAR MUSHAF (KEMENAG RI, MADINAH UTSMANI, & MODERN POPULER)
+export function formatAyatLatin(rawLatin, mushafType = 'indonesia') {
+  if (!rawLatin) return '';
+  // 1. Bersihkan tanda kurung harakat waqaf keliru dari API (misal "(i).", "(a).", "(u),", "(in).")
+  let cleaned = rawLatin
+    .replace(/\s*\(([aiueoAIUEO]|an|in|un)\)\s*([.,;])?/g, (m, v, punct) => punct || '.')
+    .replace(/\s*,\s*$/, '.')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // 2. Mode Modern: Ejaan Populer Indonesia tanpa huruf bertitik rumit (sangat mudah dibaca orang awam & lansia)
+  if (mushafType === 'modern') {
+    let mod = cleaned
+      .replace(/ā/g, 'a').replace(/Ā/g, 'A')
+      .replace(/ī/g, 'i').replace(/Ī/g, 'I')
+      .replace(/ū/g, 'u').replace(/Ū/g, 'U')
+      .replace(/ḥ/g, 'h').replace(/Ḥ/g, 'H')
+      .replace(/ṣ/g, 'sh').replace(/Ṣ/g, 'Sh')
+      .replace(/ḍ/g, 'dh').replace(/Ḍ/g, 'Dh')
+      .replace(/ṭ/g, 'th').replace(/Ṭ/g, 'Th')
+      .replace(/ẓ/g, 'zh').replace(/Ẓ/g, 'Zh')
+      .replace(/ż/g, 'dz').replace(/Ż/g, 'Dz')
+      .replace(/ṡ/g, 'ts').replace(/Ṡ/g, 'Ts')
+      .replace(/\bgair/gi, 'ghair')
+      .replace(/magḍ/gi, 'maghd')
+      .replace(/laḍ-ḍāll/gi, 'ladh-dhall')
+      .replace(/laḍ-ḍall/gi, 'ladh-dhall')
+      .replace(/[‘`]/g, "'")
+      .replace(/bismillāhir-raḥmānir-raḥīm/gi, 'Bismillahir-rahmanir-rahim')
+      .replace(/al-ḥamdu/gi, 'Alhamdulillahi')
+      .replace(/rabbil-‘ālamīn/gi, "rabbil 'alamin");
+
+    if (!/[.!?]$/.test(mod)) mod += '.';
+    return mod;
+  }
+
+  // 3. Mode Madinah: Transliterasi Standar Utsmani Internasional (KFGQPC / Qur'an Enc)
+  if (mushafType === 'madinah') {
+    let mad = cleaned
+      .replace(/\byaum/gi, 'yawm')
+      .replace(/alaihim/gi, 'alayhim')
+      .replace(/\bgair/gi, 'ghayr')
+      .replace(/magḍ/gi, 'maghḍ')
+      .replace(/\bbismillāh/gi, 'Bismillāh')
+      .replace(/\bal-ḥamdu/gi, 'Al-ḥamdu')
+      .replace(/\bar-raḥmān/gi, 'Ar-Raḥmān')
+      .replace(/\brabb/gi, 'Rabb')
+      .replace(/\bmāliki/gi, 'Māliki')
+      .replace(/\bihdinaṣ/gi, 'Ihdinaṣ')
+      .replace(/\bṣirāṭ/gi, 'Ṣirāṭ')
+      .replace(/\blaḍ-ḍāll/gi, 'laḍ-ḍāll');
+
+    if (!/[.!?]$/.test(mad)) mad += '.';
+    return mad;
+  }
+
+  // 4. Mode Indonesia (Kemenag RI): SKB Menteri Agama & Mendikbud resmi, bersih dari tanda kurung waqaf
+  if (!/[.!?]$/.test(cleaned)) cleaned += '.';
+  return cleaned;
+}
+
+// FORMAT TERJEMAHAN BAHASA INDONESIA SESUAI STANDAR MUSHAF (RAPI, BEBAS KOMA GANTUNG)
+export function formatAyatTranslation(rawText, mushafType = 'indonesia') {
+  if (!rawText) return '';
+  let cleaned = rawText
+    // Ganti koma menggantung di akhir ayat menjadi titik
+    .replace(/\s*,\s*$/, '.')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!/[.!?]$/.test(cleaned)) {
+    cleaned += '.';
+  }
+
+  if (mushafType === 'modern') {
+    // Mode Modern: redaksi mengalir jernih tanpa tanda kurung berulang yang kaku
+    cleaned = cleaned
+      .replace(/\(yaitu\)\s*/gi, 'Yaitu ')
+      .replace(/\(pula jalan\)\s*/gi, 'pula ')
+      .replace(/\(jalan\)\s*/gi, 'jalan ');
+  }
+
+  return cleaned;
+}
+
 // RENDER TAJWID AMAN DENGAN RTL MURNI, KAIDAH ILMU TAJWID PERSIS MYQURAN, & TANPA ZWJ (ANTI-MENUMPUK)
 function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOptions = null, tajweedFilters = null) {
   if (!text) return null;
@@ -1401,7 +1517,17 @@ export default function AlQuranModal({ onClose }) {
   const getAyatArabText = (ayat) => {
     if (!ayat) return '';
     const isMadinah = (mushafType === 'madinah' || mushafType === 'modern');
-    const raw = (isMadinah && ayat.teksArabMadinah) ? ayat.teksArabMadinah : (ayat.teksArab || '');
+    let raw = '';
+    if (isMadinah) {
+      if (ayat.teksArabMadinah && ayat.teksArabMadinah.trim().length > 0) {
+        raw = ayat.teksArabMadinah;
+      } else {
+        // Fallback otomatis 100% konsisten ke Rasm Utsmani Madinah
+        raw = convertToUthmaniMadinah(ayat.teksArab || '');
+      }
+    } else {
+      raw = ayat.teksArab || '';
+    }
     const normalized = normalizeQuranText(raw, isMadinah);
     return applyKashidaToArabic(normalized, kashidaMode);
   };
@@ -1684,12 +1810,18 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v16_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v17_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed.ayat && parsed.ayat[0]?.teksArabMadinah) {
+          if (parsed && parsed.ayat && parsed.ayat.length > 0) {
+            // Pastikan setiap ayat di cache memiliki teksArabMadinah lengkap
+            parsed.ayat = parsed.ayat.map((a) => ({
+              ...a,
+              teksArab: a.teksArab || '',
+              teksArabMadinah: a.teksArabMadinah || convertToUthmaniMadinah(a.teksArab || '')
+            }));
             if (!isCancelled) {
               setSurahDetail(parsed);
               setLoadingSurah(false);
@@ -1740,7 +1872,8 @@ export default function AlQuranModal({ onClose }) {
                 }
                 return {
                   ...ayat,
-                  teksArab: normalizeQuranText(ayat.teksArab || '', false)
+                  teksArab: normalizeQuranText(ayat.teksArab || '', false),
+                  teksArabMadinah: convertToUthmaniMadinah(ayat.teksArab || '')
                 };
               });
             } else if (jsonMadinah && jsonMadinah.data && jsonMadinah.data.ayahs) {
@@ -1767,13 +1900,23 @@ export default function AlQuranModal({ onClose }) {
                 }
                 return {
                   ...ayat,
-                  teksArab: normalizeQuranText(ayat.teksArab || '', false)
+                  teksArab: normalizeQuranText(ayat.teksArab || '', false),
+                  teksArabMadinah: convertToUthmaniMadinah(ayat.teksArab || '')
                 };
               });
             }
           } catch (e) {
             console.warn('Gagal parsing teks Madinah:', e);
           }
+        }
+
+        // Safeguard mutlak: pastikan SETIAP AYAT memiliki teksArabMadinah terisi
+        if (data && data.ayat) {
+          data.ayat = data.ayat.map((ayat) => ({
+            ...ayat,
+            teksArab: normalizeQuranText(ayat.teksArab || '', false),
+            teksArabMadinah: ayat.teksArabMadinah || convertToUthmaniMadinah(ayat.teksArab || '')
+          }));
         }
 
         if (data && !isCancelled) {
@@ -1948,7 +2091,9 @@ export default function AlQuranModal({ onClose }) {
   const handleShareCardImage = async (ayat) => {
     if (!ayat) return;
     const arabText = getAyatArabText(ayat);
-    const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
+    const latinText = formatAyatLatin(ayat.teksLatin, mushafType);
+    const indoText = formatAyatTranslation(ayat.teksIndonesia, mushafType);
+    const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
 
     const canvas = await generateCardCanvas();
     if (!canvas) {
@@ -2081,7 +2226,9 @@ export default function AlQuranModal({ onClose }) {
 
   const handleQuickShareWA = (ayat) => {
     const arabText = getAyatArabText(ayat);
-    const text = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${ayat.teksLatin}_\n\n"${ayat.teksIndonesia}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
+    const latinText = formatAyatLatin(ayat.teksLatin, mushafType);
+    const indoText = formatAyatTranslation(ayat.teksIndonesia, mushafType);
+    const text = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
     if (navigator.share) {
       navigator.share({
         title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
@@ -2096,7 +2243,9 @@ export default function AlQuranModal({ onClose }) {
 
   const handleCopyAyat = (ayat) => {
     const arabText = getAyatArabText(ayat);
-    const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat}\n\n${arabText}\n\n${ayat.teksLatin}\n\n"${ayat.teksIndonesia}"\n\n(Aplikasi Kanomas Tour & Travel)`;
+    const latinText = formatAyatLatin(ayat.teksLatin, mushafType);
+    const indoText = formatAyatTranslation(ayat.teksIndonesia, mushafType);
+    const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat}\n\n${arabText}\n\n${latinText}\n\n"${indoText}"\n\n(Aplikasi Kanomas Tour & Travel)`;
     navigator.clipboard?.writeText(text);
     setCopiedAyatNum(ayat.nomorAyat);
     setTimeout(() => setCopiedAyatNum(null), 2000);
@@ -2199,11 +2348,25 @@ export default function AlQuranModal({ onClose }) {
   // Rasio tinggi baris proporsional agar huruf Arab dan harakat tidak tumpang tindih
   const dynamicArabicLineHeight = Math.max(2.4, 2.2 + ((arabicFontSize - 20) * 0.035));
 
+  // Helper fallback kata per kata cerdas jika API quran.com belum selesai load agar layout 100% konsisten serentak
+  const getAyatFallbackWbw = (ayat) => {
+    if (!ayat) return null;
+    const raw = getAyatArabText(ayat);
+    const tokens = raw.trim().split(/\s+/).filter(w => !/^[\u06D5-\u06ED\u08D0-\u08FF]+$/.test(w));
+    return tokens.map((token, idx) => ({
+      id: `${ayat.nomorAyat}-${idx}`,
+      position: idx + 1,
+      arab: token,
+      latin: '',
+      arti: ''
+    }));
+  };
+
   // Render Arab dengan dukungan Mushaf Madinah vs Indonesia / Modern, & Tajwid Warna
   const renderArabic = (ayat) => {
     if (!ayat) return null;
     const rawText = getAyatArabText(ayat);
-    const wbwWords = showWordByWord ? wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] : null;
+    const wbwWords = showWordByWord ? (wordByWordData[selectedSurah?.nomor]?.[ayat.nomorAyat] || getAyatFallbackWbw(ayat)) : null;
 
     const wbwOptions = wbwWords ? {
       wbwWords,
@@ -3584,13 +3747,19 @@ export default function AlQuranModal({ onClose }) {
                           fontFamily: getActiveFontFamily(),
                           color: currentTheme.bismillahColor
                         }}
-                        className="text-2xl sm:text-3xl tracking-wide inline-block select-text font-bold drop-shadow-sm"
+                        className={`${getArabicFontClass()} text-2xl sm:text-3xl tracking-wide inline-block select-text font-bold drop-shadow-sm`}
                         dir="rtl"
                       >
-                        بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+                        {mushafType === 'madinah'
+                          ? 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'
+                          : mushafType === 'modern'
+                          ? 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
+                          : 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ'}
                       </span>
                       <p style={{ color: currentTheme.translationColor }} className="text-[11px] sm:text-xs font-medium opacity-80 italic">
-                        "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang"
+                        {mushafType === 'indonesia'
+                          ? '"Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang."'
+                          : '"Dengan nama Allah Yang Maha Pengasih, Maha Penyayang."'}
                       </p>
                     </div>
                   </div>
@@ -3689,7 +3858,7 @@ export default function AlQuranModal({ onClose }) {
 
                           {/* A. TEKS ARAB DENGAN TAJWID WARNA & TERJEMAH PER KATA TERINTEGRASI */}
                           <div className="w-full" dir="rtl" data-zoom-zone="arabic">
-                            {showWordByWord && wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] ? (
+                            {showWordByWord ? (
                               <div
                                 className="flex flex-wrap items-start justify-start gap-y-4 gap-x-2.5 w-full select-text mb-4 sm:mb-5"
                                 dir="rtl"
@@ -3753,10 +3922,10 @@ export default function AlQuranModal({ onClose }) {
                               </p>
                             )}
 
-                            {showWordByWord && loadingWordByWord && !wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] && (
+                            {showWordByWord && loadingWordByWord && index === 0 && !wordByWordData[selectedSurah.nomor] && (
                               <div className="py-1 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 opacity-80 mb-2" dir="ltr">
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                <span>Memuat terjemahan kata per kata...</span>
+                                <span>Menyinkronkan detail terjemahan kata per kata...</span>
                               </div>
                             )}
                           </div>
@@ -3777,7 +3946,7 @@ export default function AlQuranModal({ onClose }) {
                                 }}
                                 className="font-medium select-text"
                               >
-                                {ayat.teksLatin}
+                                {formatAyatLatin(ayat.teksLatin, mushafType)}
                               </p>
                             </div>
                           )}
@@ -3798,7 +3967,7 @@ export default function AlQuranModal({ onClose }) {
                                 }}
                                 className="font-normal select-text opacity-95"
                               >
-                                {ayat.teksIndonesia}
+                                {formatAyatTranslation(ayat.teksIndonesia, mushafType)}
                               </p>
                             </div>
                           )}
@@ -4748,7 +4917,7 @@ export default function AlQuranModal({ onClose }) {
                       <p className={`text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm px-2 ${
                         isShareDark ? 'text-slate-100' : 'text-slate-800'
                       }`}>
-                        "{showShareModal.teksIndonesia}"
+                        "{formatAyatTranslation(showShareModal.teksIndonesia, mushafType)}"
                       </p>
                     </div>
 
