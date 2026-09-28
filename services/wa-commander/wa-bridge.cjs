@@ -55,6 +55,13 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const commandQueue = [];
 let isBusyExecuting = false;
 let executionTimeoutTimer = null;
+let currentExecutingCommand = null;
+let lastExecutionResult = {
+  status: 'IDLE',
+  command: null,
+  error: null,
+  timestamp: null
+};
 
 // Dev Server Manager
 let devServerProcess = null;
@@ -161,6 +168,8 @@ function updateStatus(statusObj) {
     ...statusObj,
     queueLength: commandQueue.length,
     isBusyExecuting,
+    currentCommand: currentExecutingCommand,
+    lastExecutionResult,
     updatedAt: new Date().toISOString()
   };
   fs.writeFileSync(STATUS_FILE, JSON.stringify(updated, null, 2), 'utf8');
@@ -243,6 +252,13 @@ async function processNextInQueue() {
 
   const nextItem = commandQueue.shift();
   isBusyExecuting = true;
+  currentExecutingCommand = nextItem.text;
+  lastExecutionResult = {
+    status: 'RUNNING',
+    command: currentExecutingCommand,
+    error: null,
+    timestamp: new Date().toISOString()
+  };
   updateStatus({ isBusyExecuting: true, currentCommand: nextItem.text });
 
   console.log(`[QUEUE] Memulai eksekusi antrian: "${nextItem.text}" (${commandQueue.length} tersisa di antrian)`);
@@ -257,12 +273,20 @@ async function processNextInQueue() {
   if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
   executionTimeoutTimer = setTimeout(async () => {
     console.warn('[QUEUE] Batas waktu eksekusi terlampaui (timeout 4 menit). Melepaskan antrian...');
+    const failedCmd = currentExecutingCommand || nextItem.text;
+    lastExecutionResult = {
+      status: 'ERROR',
+      command: failedCmd,
+      error: 'Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit)',
+      timestamp: new Date().toISOString()
+    };
     const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
     await sendWhatsAppMessage(
       targetJid,
-      `⚠️ *Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit):*\nPerintah sebelumnya dihentikan demi stabilitas.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan.\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
+      `❌ *STATUS: ERROR (Batas Waktu Terlampaui)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* Eksekusi melebihi batas waktu 4 menit dan tidak terselesaikan.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan (0 pending).\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
     );
     isBusyExecuting = false;
+    currentExecutingCommand = null;
     commandQueue.length = 0;
     updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
     ensureDevServerRunning(true);
@@ -272,10 +296,22 @@ async function processNextInQueue() {
     await forwardToAntigravity(nextItem.text);
   } catch (err) {
     console.error('[QUEUE-ERR]', err.message);
+    const failedCmd = nextItem.text;
+    lastExecutionResult = {
+      status: 'ERROR',
+      command: failedCmd,
+      error: err.message,
+      timestamp: new Date().toISOString()
+    };
     isBusyExecuting = false;
+    currentExecutingCommand = null;
     commandQueue.length = 0;
     updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
     ensureDevServerRunning(true);
+    await sendWhatsAppMessage(
+      nextItem.remoteJid,
+      `❌ *STATUS: ERROR (Gagal Menjalankan Perintah)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* ${err.message}\n\n🔄 Dev Server direstart & Bridge WA siap menerima perintah baru.`
+    );
   }
 }
 
@@ -337,11 +373,20 @@ async function checkTranscriptUpdates() {
         );
 
         if (isExecutionError) {
-          console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index} ("Agent execution terminated due to error")!`);
+          const failedCmd = currentExecutingCommand || 'Perintah yang sedang diproses';
+          console.log(`[TRANSCRIPT] Terdeteksi Error pada step ${entry.step_index} ("Agent execution terminated due to error")! Perintah: "${failedCmd}"`);
           console.log('[RECOVERY] Mematikan fungsi server yang berjalan dan menyalakan kembali dev server & bridge WA...');
+
+          lastExecutionResult = {
+            status: 'ERROR',
+            command: failedCmd,
+            error: 'Unknown: Agent execution terminated due to error.',
+            timestamp: new Date().toISOString()
+          };
 
           if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
           isBusyExecuting = false;
+          currentExecutingCommand = null;
           commandQueue.length = 0;
           updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
 
@@ -351,17 +396,24 @@ async function checkTranscriptUpdates() {
           // 2. Pastikan bridge WA tetap menyala & sehat
           ensureWaSocketHealthy();
 
-          // 3. Kirim notifikasi konfirmasi tindakan ke WhatsApp
+          // 3. Kirim notifikasi status ERROR eksplisit ke WhatsApp
           const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
           await sendWhatsAppMessage(
             targetJid,
-            `⚠️ *Pemberitahuan Sistem (Pemulihan Kendala AI):*\nTerdeteksi gangguan: *Agent execution terminated due to error*.\n\n🔄 *Tindakan Otomatis Dilaksanakan:*\n• Fungsi server yang berjalan telah dimatikan dan direstart ulang (Port 3000).\n• WhatsApp Bridge dipastikan ON & online.\n• Antrian perintah direset agar siap menerima instruksi baru.`
+            `❌ *STATUS: ERROR (Perintah Gagal Dijalankan)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* Unknown: Agent execution terminated due to error.\n\nPerintah tidak dapat diselesaikan oleh sistem AI Agent.\n\n🔄 *Tindakan Otomatis Dilaksanakan:*\n• Fungsi server yang berjalan telah dimatikan dan direstart ulang (Port 3000).\n• WhatsApp Bridge dipastikan ON & online.\n• Antrian dibersihkan (0 pending). Silakan kirimkan kembali perintah Anda jika diperlukan.`
           );
         } else if (entry.source === 'MODEL' && entry.type === 'PLANNER_RESPONSE' && entry.status === 'DONE') {
           const hasToolCalls = Array.isArray(entry.tool_calls) && entry.tool_calls.length > 0;
           if (entry.content && !hasToolCalls) {
             console.log(`[TRANSCRIPT] Terdeteksi jawaban final AI (step ${entry.step_index})! Mengirim ke WhatsApp...`);
-            
+
+            lastExecutionResult = {
+              status: 'SUCCESS',
+              command: currentExecutingCommand || 'Perintah selesai',
+              error: null,
+              timestamp: new Date().toISOString()
+            };
+
             const waResponse = `🤖 *Jawaban Antigravity AI:*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${entry.content}\n━━━━━━━━━━━━━━━━━━━━━━━━\n✅ *Status: Selesai.*`;
             
             const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
@@ -370,6 +422,7 @@ async function checkTranscriptUpdates() {
             // Perintah selesai! Bersihkan timer timeout
             if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
             isBusyExecuting = false;
+            currentExecutingCommand = null;
             updateStatus({ isBusyExecuting: false, currentCommand: null });
             ensureDevServerRunning(false);
 
@@ -580,13 +633,23 @@ async function startWhatsAppBridge() {
         const queueInfo = commandQueue.length > 0 
           ? `⏳ Sedang mengantri: ${commandQueue.length} perintah.` 
           : '✨ Tidak ada antrian pending.';
-        const execInfo = isBusyExecuting 
-          ? '⚙️ Status AI: Sedang aktif memproses tugas.' 
-          : '💤 Status AI: Siap menerima instruksi baru.';
+
+        let execInfo = '💤 *Status AI: Siap Menerima Instruksi Baru.*';
+        if (isBusyExecuting) {
+          execInfo = `⚙️ *Status AI: Sedang Aktif Memproses*\n📝 *Perintah:* "${currentExecutingCommand || '-'}"`;
+        } else if (lastExecutionResult.status === 'ERROR') {
+          const timeStr = lastExecutionResult.timestamp 
+            ? new Date(lastExecutionResult.timestamp).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB'
+            : '';
+          execInfo = `❌ *Status AI: ERROR (Perintah Terakhir Gagal)*\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* ${lastExecutionResult.error || 'Unknown: Agent execution terminated due to error.'}\n📝 *Perintah yang gagal:* "${lastExecutionResult.command || '-'}"\n🕒 *Waktu Kejadian:* ${timeStr}\n💡 Dev server telah direstart bersih & sistem siap menerima instruksi ulang.`;
+        } else if (lastExecutionResult.status === 'SUCCESS') {
+          execInfo = `✅ *Status AI: Selesai Normal*\n📝 *Perintah terakhir:* "${lastExecutionResult.command || '-'}"\n💤 Saat ini siap menerima instruksi baru.`;
+        }
+
         const devActive = await isPortActive(devServerPort);
         const devInfo = devActive ? '🟢 Aktif (Port 3000)' : '🔴 Tidak Aktif';
         
-        await sendWhatsAppMessage(remoteJid, `📊 *STATUS WHATSAPP COMMANDER*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${execInfo}\n${queueInfo}\n💻 Dev Server: ${devInfo}\n🌐 WA Bridge: Online (Port ${BRIDGE_HTTP_PORT})\n🕒 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
+        await sendWhatsAppMessage(remoteJid, `📊 *STATUS WHATSAPP COMMANDER*\n━━━━━━━━━━━━━━━━━━━━━━━━\n${execInfo}\n\n${queueInfo}\n💻 Dev Server: ${devInfo}\n🌐 WA Bridge: Online (Port ${BRIDGE_HTTP_PORT})\n🕒 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`, msg);
         return;
       }
 
@@ -620,6 +683,13 @@ async function startWhatsAppBridge() {
 
       // Jika AI sedang idle, langsung jalankan!
       isBusyExecuting = true;
+      currentExecutingCommand = text;
+      lastExecutionResult = {
+        status: 'RUNNING',
+        command: text,
+        error: null,
+        timestamp: new Date().toISOString()
+      };
       updateStatus({ isBusyExecuting: true, currentCommand: text });
 
       await sendWhatsAppMessage(remoteJid, `⏳ *Instruksi Diterima & Sedang Diproses:*\n"${text}"\n\n🤖 Sedang diproses langsung oleh AI Antigravity... Mohon tunggu sebentar.`, msg);
@@ -627,18 +697,46 @@ async function startWhatsAppBridge() {
       if (executionTimeoutTimer) clearTimeout(executionTimeoutTimer);
       executionTimeoutTimer = setTimeout(async () => {
         console.warn('[QUEUE] Timeout 4 menit terlampaui. Melepaskan status busy...');
+        const failedCmd = currentExecutingCommand || text;
+        lastExecutionResult = {
+          status: 'ERROR',
+          command: failedCmd,
+          error: 'Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit)',
+          timestamp: new Date().toISOString()
+        };
         const targetJid = `${TARGET_PHONE}@s.whatsapp.net`;
         await sendWhatsAppMessage(
           targetJid,
-          `⚠️ *Batas Waktu Eksekusi Terlampaui (Timeout 4 Menit):*\nPerintah dihentikan demi stabilitas.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan.\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
+          `❌ *STATUS: ERROR (Batas Waktu Terlampaui)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* Eksekusi melebihi batas waktu 4 menit dan tidak terselesaikan.\n\n🔄 *Sistem Otomatis:*\n• Antrian dibersihkan (0 pending).\n• Dev Server (Port 3000) dan WhatsApp Bridge dipastikan tetap aktif.`
         );
         isBusyExecuting = false;
+        currentExecutingCommand = null;
         commandQueue.length = 0;
         updateStatus({ isBusyExecuting: false, currentCommand: null, queueLength: 0 });
         ensureDevServerRunning(true);
       }, 240000);
 
-      await forwardToAntigravity(text);
+      try {
+        await forwardToAntigravity(text);
+      } catch (err) {
+        console.error('[WA-FWD-ERR]', err);
+        const failedCmd = text;
+        lastExecutionResult = {
+          status: 'ERROR',
+          command: failedCmd,
+          error: err.message,
+          timestamp: new Date().toISOString()
+        };
+        isBusyExecuting = false;
+        currentExecutingCommand = null;
+        updateStatus({ isBusyExecuting: false, currentCommand: null });
+        ensureDevServerRunning(true);
+        await sendWhatsAppMessage(
+          remoteJid,
+          `❌ *STATUS: ERROR (Gagal Menjalankan Perintah)*\n━━━━━━━━━━━━━━━━━━━━━━━━\n📝 *Perintah:* "${failedCmd}"\n🛑 *Status:* *ERROR*\n⚠️ *Kendala:* ${err.message}\n\n🔄 Dev Server direstart & Bridge WA siap menerima perintah baru.`,
+          msg
+        );
+      }
 
     } catch (err) {
       console.error('[WA-MSG-ERR]', err);
