@@ -889,58 +889,12 @@ export default function AlQuranModal({ onClose }) {
   const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
 
   // Navigasi Tata Surya Al-Qur'an: Planet Juz (Dalam), Planet Surat (Tengah), Planet Ayat (Luar)
-  // Sudut drag bebas saat disentuh (continuous 60fps tracking)
-  const [dragAngles, setDragAngles] = useState({ juz: null, surah: null, ayat: null });
+  // Pergeseran sudut rotasi saat disentuh & diputar dengan 1 jari (continuous 60fps tracking)
+  const [dragOffsets, setDragOffsets] = useState({ juz: 0, surah: 0, ayat: 0 });
   const [isDraggingRing, setIsDraggingRing] = useState(null); // 'juz' | 'surah' | 'ayat' | null
 
   const wheelContainerRef = useRef(null);
   const dragStateRef = useRef(null);
-
-  // Helper kalkulasi posisi planet & pemilihan nomor (natural polar tracking)
-  const updatePlanetPosition = (ringType, dx, dy) => {
-    // Sudut polar dari titik jam 12 (-90 deg), dihitung searah jarum jam (0..360)
-    const angleRad = Math.atan2(dy, dx);
-    const angleDeg = angleRad * (180 / Math.PI);
-    setDragAngles((prev) => ({ ...prev, [ringType]: angleDeg }));
-
-    const clockwiseAngle = ((angleDeg + 90) % 360 + 360) % 360;
-
-    if (ringType === 'juz') {
-      const rawIdx = Math.round(clockwiseAngle / 12) % 30;
-      const newJuz = rawIdx + 1;
-      if (newJuz !== wheelJuzNum) {
-        setWheelJuzNum(newJuz);
-        const targetJuzData = JUZ_LIST[newJuz - 1];
-        if (targetJuzData && targetJuzData.surahNomor !== quickSurahNum) {
-          setQuickSurahNum(targetJuzData.surahNomor);
-          setQuickAyatNum(targetJuzData.ayat || 1);
-        }
-        if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
-      }
-    } else if (ringType === 'surah') {
-      const step = 360 / 114;
-      const rawIdx = Math.round(clockwiseAngle / step) % 114;
-      const newSurah = rawIdx + 1;
-      if (newSurah !== quickSurahNum) {
-        setQuickSurahNum(newSurah);
-        const sObj = SURAH_LIST.find((s) => s.nomor === newSurah);
-        if (sObj && sObj.juz !== wheelJuzNum) {
-          setWheelJuzNum(sObj.juz);
-        }
-        setQuickAyatNum(1);
-        if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
-      }
-    } else if (ringType === 'ayat') {
-      const max = Math.max(1, currentQuickSurah.jumlahAyat);
-      const step = 360 / max;
-      const rawIdx = Math.round(clockwiseAngle / step) % max;
-      const newAyat = rawIdx + 1;
-      if (newAyat !== quickAyatNum) {
-        setQuickAyatNum(newAyat);
-        if (navigator.vibrate) try { navigator.vibrate(5); } catch {}
-      }
-    }
-  };
 
   // Handler Putar Planet dengan 1 Jari (1-Finger Solar Orbit Drag)
   const handleWheelPointerDown = (e) => {
@@ -959,9 +913,9 @@ export default function AlQuranModal({ onClose }) {
     if (svgR < 36) {
       // Pusat roda: Matahari (Iqra / BACA)
       return;
-    } else if (svgR >= 36 && svgR < 82) {
+    } else if (svgR >= 36 && svgR < 86) {
       ringType = 'juz';
-    } else if (svgR >= 82 && svgR < 126) {
+    } else if (svgR >= 86 && svgR < 126) {
       ringType = 'surah';
     } else if (svgR >= 126) {
       ringType = 'ayat';
@@ -974,22 +928,62 @@ export default function AlQuranModal({ onClose }) {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
 
+    const startAngle = Math.atan2(dy, dx) * (180 / Math.PI);
     dragStateRef.current = {
       ringType,
       pointerId: e.pointerId,
       centerX,
-      centerY
+      centerY,
+      lastAngle: startAngle,
+      accumulatedAngle: 0
     };
     setIsDraggingRing(ringType);
-    updatePlanetPosition(ringType, dx, dy);
   };
 
   const handleWheelPointerMove = (e) => {
     if (!dragStateRef.current) return;
-    const { ringType, centerX, centerY } = dragStateRef.current;
+    const { ringType, centerX, centerY, lastAngle } = dragStateRef.current;
     const dx = e.clientX - centerX;
     const dy = e.clientY - centerY;
-    updatePlanetPosition(ringType, dx, dy);
+    const currentAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    let delta = currentAngle - lastAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+
+    dragStateRef.current.lastAngle = currentAngle;
+    dragStateRef.current.accumulatedAngle += delta;
+
+    const stepAngle = ringType === 'ayat' ? 24 : ringType === 'surah' ? 28 : 32;
+
+    if (dragStateRef.current.accumulatedAngle >= stepAngle) {
+      const steps = Math.floor(dragStateRef.current.accumulatedAngle / stepAngle);
+      dragStateRef.current.accumulatedAngle -= steps * stepAngle;
+      if (ringType === 'ayat') {
+        handleRotateAyat(steps);
+      } else if (ringType === 'surah') {
+        handleRotateSurah(steps);
+      } else if (ringType === 'juz') {
+        handleRotateJuz(steps);
+      }
+      if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
+    } else if (dragStateRef.current.accumulatedAngle <= -stepAngle) {
+      const steps = Math.ceil(dragStateRef.current.accumulatedAngle / stepAngle);
+      dragStateRef.current.accumulatedAngle -= steps * stepAngle;
+      if (ringType === 'ayat') {
+        handleRotateAyat(steps);
+      } else if (ringType === 'surah') {
+        handleRotateSurah(steps);
+      } else if (ringType === 'juz') {
+        handleRotateJuz(steps);
+      }
+      if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
+    }
+
+    setDragOffsets((prev) => ({
+      ...prev,
+      [ringType]: dragStateRef.current ? dragStateRef.current.accumulatedAngle : 0
+    }));
   };
 
   const handleWheelPointerUp = (e) => {
@@ -1001,7 +995,7 @@ export default function AlQuranModal({ onClose }) {
     } catch {}
     dragStateRef.current = null;
     setIsDraggingRing(null);
-    setDragAngles({ juz: null, surah: null, ayat: null });
+    setDragOffsets({ juz: 0, surah: 0, ayat: 0 });
   };
 
   // Helper Rotasi Roda Navigasi 3 Lapis
@@ -2314,30 +2308,24 @@ export default function AlQuranModal({ onClose }) {
               {/* ======================================================== */}
               {/* ======================================================== */}
               {/* NAVIGASI TATA SURYA AL-QUR'AN (SOLAR CELESTIAL ASTROLABE) */}
-              {/* Matahari di Pusat | 3 Planet Mengitari Porosnya: Juz, Surat, Ayat */}
+              {/* Full Lingkaran • Matahari di Pusat • Planet-Planet Mengorbit Berdekatan */}
               {/* ======================================================== */}
               {(() => {
                 const totalAyat = Math.max(1, currentQuickSurah.jumlahAyat);
-                const activeJuzAngle = dragAngles.juz !== null ? dragAngles.juz : (wheelJuzNum - 1) * 12 - 90;
-                const activeSurahAngle = dragAngles.surah !== null ? dragAngles.surah : (quickSurahNum - 1) * (360 / 114) - 90;
-                const activeAyatAngle = dragAngles.ayat !== null ? dragAngles.ayat : (quickAyatNum - 1) * (360 / totalAyat) - 90;
 
-                const juzRad = (activeJuzAngle * Math.PI) / 180;
-                const surahRad = (activeSurahAngle * Math.PI) / 180;
-                const ayatRad = (activeAyatAngle * Math.PI) / 180;
+                // 3 Surat Berdampingan untuk Reel Tengah (Persis MyQuran di screenshot)
+                const prevSurahNum = ((quickSurahNum - 2 + 114) % 114) + 1;
+                const nextSurahNum = (quickSurahNum % 114) + 1;
+                const prevSurahObj = SURAH_LIST.find((s) => s.nomor === prevSurahNum) || SURAH_LIST[0];
+                const nextSurahObj = SURAH_LIST.find((s) => s.nomor === nextSurahNum) || SURAH_LIST[0];
 
-                // Koordinat Planet (Center 170, 170)
-                // Orbit 1 (Juz): R = 62
-                const xJuz = 170 + 62 * Math.cos(juzRad);
-                const yJuz = 170 + 62 * Math.sin(juzRad);
-
-                // Orbit 2 (Surat): R = 104
-                const xSurah = 170 + 104 * Math.cos(surahRad);
-                const ySurah = 170 + 104 * Math.sin(surahRad);
-
-                // Orbit 3 (Ayat): R = 146
-                const xAyat = 170 + 146 * Math.cos(ayatRad);
-                const yAyat = 170 + 146 * Math.sin(ayatRad);
+                // Konfigurasi Planet-Planet yang Muncul (Hanya yang Berdekatan dengan Pilihannya)
+                // 1. Orbit Ayat (Luar, R = 146, step = 24 deg): Offsets [-3, -2, -1, 0, 1, 2, 3]
+                const ayatOffsets = [-3, -2, -1, 0, 1, 2, 3];
+                // 2. Orbit Surat (Tengah, R = 106, step = 26 deg): Offsets [-3, -2, -1, 0, 1, 2, 3]
+                const surahOffsets = [-3, -2, -1, 0, 1, 2, 3];
+                // 3. Orbit Juz (Dalam, R = 66, step = 30 deg): Offsets [-2, -1, 0, 1, 2]
+                const juzOffsets = [-2, -1, 0, 1, 2];
 
                 return (
                   <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-2xl relative overflow-hidden backdrop-blur-md">
@@ -2347,49 +2335,83 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Header Judul Tata Surya */}
-                    <div className="text-center relative z-10 mb-2">
+                    <div className="text-center relative z-10 mb-1.5">
                       <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                         <span>☀️</span>
                         <span>Sistem Tata Surya Al-Qur'an</span>
                         <span>۞</span>
                       </div>
                       <p className="text-[11px] text-emerald-200/90 mt-1 font-medium">
-                        Putar 3 planet pada poros orbitnya: <strong>Planet Juz</strong> (Dalam) • <strong>Planet Surat</strong> (Tengah) • <strong>Planet Ayat</strong> (Luar)
+                        Sentuh & putar planet dengan 1 jari • Angka yang muncul fokus pada pilihan terdekat
                       </p>
                     </div>
 
-                    {/* 3 KAPSUL PLANET DENGAN STEPPER [-] DAN [+] (PERMUDAH & PERINGAN) */}
+                    {/* REEL PILIHAN SURAT 3 TINGKAT PERSIS MYQURAN */}
+                    <div className="flex items-center justify-center gap-2 sm:gap-3 my-2 text-center relative z-20">
+                      {/* Surat Sebelumnya */}
+                      <button
+                        type="button"
+                        onClick={() => handleRotateSurah(-1)}
+                        className="text-[11px] sm:text-xs text-emerald-300/60 hover:text-emerald-200 transition cursor-pointer truncate max-w-[100px] font-bold"
+                        title={`Pindah ke QS. ${prevSurahObj.namaLatin}`}
+                      >
+                        {prevSurahObj.nomor}. {prevSurahObj.namaLatin}
+                      </button>
+
+                      {/* Surat Aktif (Pill Utama Bercahaya Persis MyQuran) */}
+                      <button
+                        type="button"
+                        onClick={() => setShowSurahPickerModal(true)}
+                        className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 border border-emerald-400/80 hover:border-amber-400 text-white font-black text-xs sm:text-sm shadow-lg flex items-center gap-2 cursor-pointer active:scale-95 transition"
+                        title="Klik untuk memilih dari 114 Surat"
+                      >
+                        <span className="text-amber-300">{currentQuickSurah.nomor}. {currentQuickSurah.namaLatin}</span>
+                        <span className="font-quran-lpmq text-amber-200 text-sm font-bold" dir="rtl">{currentQuickSurah.nama}</span>
+                      </button>
+
+                      {/* Surat Berikutnya */}
+                      <button
+                        type="button"
+                        onClick={() => handleRotateSurah(1)}
+                        className="text-[11px] sm:text-xs text-emerald-300/60 hover:text-emerald-200 transition cursor-pointer truncate max-w-[100px] font-bold"
+                        title={`Pindah ke QS. ${nextSurahObj.namaLatin}`}
+                      >
+                        {nextSurahObj.nomor}. {nextSurahObj.namaLatin}
+                      </button>
+                    </div>
+
+                    {/* 3 KAPSUL STEPPER CEPAT [-] DAN [+] (PERMUDAH & PERINGAN) */}
                     <div className="grid grid-cols-3 gap-1.5 sm:gap-2 relative z-20 mb-2">
-                      {/* Kapsul Planet Juz */}
-                      <div className="flex items-center justify-between bg-slate-950/80 border border-emerald-500/40 rounded-xl px-1 py-1 shadow-xs">
+                      {/* Kapsul Juz */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-emerald-500/40 rounded-xl px-1.5 py-1 shadow-xs">
                         <button
                           type="button"
                           onClick={() => handleRotateJuz(-1)}
-                          className="w-6 h-6 rounded-lg bg-emerald-900/40 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-emerald-900/50 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Juz Sebelumnya"
                         >
                           -
                         </button>
-                        <div className="text-center px-1 overflow-hidden">
+                        <div className="text-center px-1">
                           <span className="text-[9px] uppercase tracking-wider text-emerald-400 font-bold block leading-none">Juz</span>
                           <span className="text-xs sm:text-sm font-black text-white leading-tight font-mono">{wheelJuzNum}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRotateJuz(1)}
-                          className="w-6 h-6 rounded-lg bg-emerald-900/40 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-emerald-900/50 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Juz Berikutnya"
                         >
                           +
                         </button>
                       </div>
 
-                      {/* Kapsul Planet Surat */}
-                      <div className="flex items-center justify-between bg-slate-950/80 border border-sky-500/40 rounded-xl px-1 py-1 shadow-xs">
+                      {/* Kapsul Surat */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-sky-500/40 rounded-xl px-1.5 py-1 shadow-xs">
                         <button
                           type="button"
                           onClick={() => handleRotateSurah(-1)}
-                          className="w-6 h-6 rounded-lg bg-sky-900/40 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-sky-900/50 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Surat Sebelumnya"
                         >
                           -
@@ -2397,30 +2419,30 @@ export default function AlQuranModal({ onClose }) {
                         <button
                           type="button"
                           onClick={() => setShowSurahPickerModal(true)}
-                          className="text-center px-1 overflow-hidden cursor-pointer hover:opacity-90 flex-1 min-w-0"
-                          title="Klik untuk memilih dari 114 Surat"
+                          className="text-center px-1 truncate flex-1 min-w-0 hover:opacity-90 cursor-pointer"
+                          title="Pilih Surat"
                         >
                           <span className="text-[9px] uppercase tracking-wider text-sky-400 font-bold block leading-none">Surat</span>
-                          <span className="text-[11px] sm:text-xs font-black text-white leading-tight block truncate">
+                          <span className="text-[11px] sm:text-xs font-black text-white leading-tight truncate block">
                             {quickSurahNum}. {currentQuickSurah.namaLatin}
                           </span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRotateSurah(1)}
-                          className="w-6 h-6 rounded-lg bg-sky-900/40 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-sky-900/50 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Surat Berikutnya"
                         >
                           +
                         </button>
                       </div>
 
-                      {/* Kapsul Planet Ayat */}
-                      <div className="flex items-center justify-between bg-slate-950/80 border border-amber-500/40 rounded-xl px-1 py-1 shadow-xs">
+                      {/* Kapsul Ayat */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-amber-500/40 rounded-xl px-1.5 py-1 shadow-xs">
                         <button
                           type="button"
                           onClick={() => handleRotateAyat(-1)}
-                          className="w-6 h-6 rounded-lg bg-amber-900/40 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-amber-900/50 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Ayat Sebelumnya"
                         >
                           -
@@ -2428,8 +2450,8 @@ export default function AlQuranModal({ onClose }) {
                         <button
                           type="button"
                           onClick={() => setShowAyatGridPicker(true)}
-                          className="text-center px-1 overflow-hidden cursor-pointer hover:opacity-90 flex-1 min-w-0"
-                          title="Klik untuk memilih nomor ayat dari grid"
+                          className="text-center px-1 truncate flex-1 min-w-0 hover:opacity-90 cursor-pointer"
+                          title="Pilih Ayat dari Grid"
                         >
                           <span className="text-[9px] uppercase tracking-wider text-amber-400 font-bold block leading-none">Ayat</span>
                           <span className="text-xs sm:text-sm font-black text-amber-300 leading-tight block font-mono">
@@ -2439,7 +2461,7 @@ export default function AlQuranModal({ onClose }) {
                         <button
                           type="button"
                           onClick={() => handleRotateAyat(1)}
-                          className="w-6 h-6 rounded-lg bg-amber-900/40 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          className="w-6 h-6 rounded-lg bg-amber-900/50 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
                           title="Ayat Berikutnya"
                         >
                           +
@@ -2452,12 +2474,15 @@ export default function AlQuranModal({ onClose }) {
                       <div className="text-center mb-1">
                         <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider animate-pulse shadow-md">
                           <span>🪐</span>
-                          <span>Mengorbitkan {isDraggingRing === 'ayat' ? 'Planet Ayat' : isDraggingRing === 'surah' ? 'Planet Surat' : 'Planet Juz'}...</span>
+                          <span>Memutar {isDraggingRing === 'ayat' ? 'Planet Ayat' : isDraggingRing === 'surah' ? 'Planet Surat' : 'Planet Juz'}...</span>
                         </span>
                       </div>
                     )}
 
-                    {/* AREA SVG TATA SURYA AL-QUR'AN (1-FINGER GLIDE ORBIT TRACKING) */}
+                    {/* ======================================================== */}
+                    {/* SVG FULL LINGKARAN TATA SURYA AL-QUR'AN                    */}
+                    {/* Matahari di Pusat • Planet-Planet Mengorbit Berdekatan     */}
+                    {/* ======================================================== */}
                     <div
                       ref={wheelContainerRef}
                       onPointerDown={handleWheelPointerDown}
@@ -2474,66 +2499,67 @@ export default function AlQuranModal({ onClose }) {
                         style={{ overflow: 'visible' }}
                       >
                         <defs>
-                          {/* Gradien Langit Kosmos */}
+                          {/* Gradien Langit Kosmos Deep Islamic Green */}
                           <radialGradient id="solarSpaceGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="#042f2e" stopOpacity="0.5" />
-                            <stop offset="65%" stopColor="#021c14" stopOpacity="0.85" />
+                            <stop offset="0%" stopColor="#042f2e" stopOpacity="0.65" />
+                            <stop offset="65%" stopColor="#021c14" stopOpacity="0.88" />
                             <stop offset="100%" stopColor="#01100b" stopOpacity="0.98" />
                           </radialGradient>
 
-                          {/* Gradien Matahari (Sun) */}
+                          {/* Gradien Bola Matahari (Sun) */}
                           <radialGradient id="sunSphereGrad" cx="35%" cy="35%" r="65%">
-                            <stop offset="0%" stopColor="#fffbeb" />
+                            <stop offset="0%" stopColor="#ffffff" />
                             <stop offset="25%" stopColor="#fef08a" />
                             <stop offset="60%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#b45309" />
+                            <stop offset="90%" stopColor="#d97706" />
+                            <stop offset="100%" stopColor="#78350f" />
                           </radialGradient>
 
-                          {/* Gradien Planet Juz (Emerald) */}
-                          <radialGradient id="planetJuzGrad" cx="35%" cy="35%" r="65%">
-                            <stop offset="0%" stopColor="#a7f3d0" />
-                            <stop offset="50%" stopColor="#10b981" />
+                          {/* Gradien Planet Juz Aktif (Emerald Hijau Bercahaya Persis MyQuran) */}
+                          <radialGradient id="planetJuzActiveGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#d1fae5" />
+                            <stop offset="45%" stopColor="#10b981" />
                             <stop offset="100%" stopColor="#064e3b" />
                           </radialGradient>
 
-                          {/* Gradien Planet Surat (Sky / Sapphire) */}
-                          <radialGradient id="planetSurahGrad" cx="35%" cy="35%" r="65%">
-                            <stop offset="0%" stopColor="#bae6fd" />
-                            <stop offset="50%" stopColor="#0ea5e9" />
-                            <stop offset="100%" stopColor="#075985" />
+                          {/* Gradien Planet Surat Aktif (Sapphire / Cyan) */}
+                          <radialGradient id="planetSurahActiveGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#e0f2fe" />
+                            <stop offset="45%" stopColor="#0ea5e9" />
+                            <stop offset="100%" stopColor="#0369a1" />
                           </radialGradient>
 
-                          {/* Gradien Planet Ayat (Amber / Gold) */}
-                          <radialGradient id="planetAyatGrad" cx="35%" cy="35%" r="65%">
-                            <stop offset="0%" stopColor="#fef08a" />
-                            <stop offset="50%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#92400e" />
+                          {/* Gradien Planet Ayat Aktif (Gold / Amber) */}
+                          <radialGradient id="planetAyatActiveGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#fef9c3" />
+                            <stop offset="45%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#b45309" />
                           </radialGradient>
 
                           {/* Filter Glow Atmosfer */}
                           <filter id="solarGlow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="6" result="blur" />
+                            <feGaussianBlur stdDeviation="5" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                           </filter>
                           <filter id="planetGlow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feGaussianBlur stdDeviation="3.5" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                           </filter>
                         </defs>
 
-                        {/* Background Disk Langit Kosmik */}
+                        {/* Background Disk Langit Kosmik Penuh (Full Lingkaran 360) */}
                         <circle cx="170" cy="170" r="169" fill="url(#solarSpaceGrad)" />
-                        <circle cx="170" cy="170" r="168" stroke="#10b981" strokeWidth="1" opacity="0.3" fill="none" />
-                        <circle cx="170" cy="170" r="165" stroke="#f59e0b" strokeWidth="0.6" opacity="0.25" strokeDasharray="3 3" fill="none" />
+                        <circle cx="170" cy="170" r="168" stroke="#10b981" strokeWidth="1.2" opacity="0.35" fill="none" />
+                        <circle cx="170" cy="170" r="165" stroke="#f59e0b" strokeWidth="0.8" opacity="0.25" strokeDasharray="3 3" fill="none" />
 
-                        {/* Bintang-bintang Kosmis Statis */}
-                        <text x="45" y="60" fontSize="8" fill="#34d399" opacity="0.5" textAnchor="middle">✦</text>
-                        <text x="295" y="70" fontSize="8" fill="#f59e0b" opacity="0.5" textAnchor="middle">✦</text>
-                        <text x="50" y="275" fontSize="7" fill="#38bdf8" opacity="0.4" textAnchor="middle">✧</text>
-                        <text x="290" y="270" fontSize="7" fill="#34d399" opacity="0.4" textAnchor="middle">✧</text>
+                        {/* Bintang-Bintang Kosmis Statis */}
+                        <text x="45" y="60" fontSize="8" fill="#34d399" opacity="0.45" textAnchor="middle">✦</text>
+                        <text x="295" y="70" fontSize="8" fill="#f59e0b" opacity="0.45" textAnchor="middle">✦</text>
+                        <text x="50" y="275" fontSize="7" fill="#38bdf8" opacity="0.35" textAnchor="middle">✧</text>
+                        <text x="290" y="270" fontSize="7" fill="#34d399" opacity="0.35" textAnchor="middle">✧</text>
 
                         {/* ======================================================== */}
-                        {/* LINTASAN ORBIT 3 (AYAT - POROS LUAR, R = 146)            */}
+                        {/* 1. LINTASAN ORBIT 3 (AYAT - POROS LUAR, R = 146)         */}
                         {/* ======================================================== */}
                         <circle
                           cx="170"
@@ -2542,235 +2568,270 @@ export default function AlQuranModal({ onClose }) {
                           fill="none"
                           stroke={isDraggingRing === 'ayat' ? '#fbbf24' : '#f59e0b'}
                           strokeWidth={isDraggingRing === 'ayat' ? '2' : '1.2'}
-                          strokeDasharray="4 4"
-                          opacity={isDraggingRing === 'ayat' ? 0.9 : 0.45}
+                          strokeDasharray="3 3"
+                          opacity={isDraggingRing === 'ayat' ? 0.9 : 0.4}
                         />
-                        {/* Waypoints Orbit Ayat */}
-                        {(() => {
-                          const dots = [];
-                          const step = 360 / totalAyat;
-                          for (let a = 1; a <= totalAyat; a++) {
-                            if (totalAyat <= 30 || a === 1 || a % 5 === 0 || a === totalAyat) {
-                              const ang = (a - 1) * step - 90;
-                              const rad = (ang * Math.PI) / 180;
-                              const wx = 170 + 146 * Math.cos(rad);
-                              const wy = 170 + 146 * Math.sin(rad);
-                              const isSelected = a === quickAyatNum;
-                              dots.push(
-                                <circle
-                                  key={`aw-${a}`}
-                                  cx={wx}
-                                  cy={wy}
-                                  r={isSelected ? 3 : 1.5}
-                                  fill={isSelected ? '#fbbf24' : '#a16207'}
-                                  opacity={isSelected ? 1 : 0.6}
-                                />
-                              );
-                            }
-                          }
-                          return dots;
-                        })()}
 
                         {/* ======================================================== */}
-                        {/* LINTASAN ORBIT 2 (SURAT - POROS TENGAH, R = 104)          */}
+                        {/* 2. LINTASAN ORBIT 2 (SURAT - POROS TENGAH, R = 106)       */}
                         {/* ======================================================== */}
                         <circle
                           cx="170"
                           cy="170"
-                          r="104"
+                          r="106"
                           fill="none"
                           stroke={isDraggingRing === 'surah' ? '#38bdf8' : '#0ea5e9'}
                           strokeWidth={isDraggingRing === 'surah' ? '2' : '1.2'}
-                          strokeDasharray="4 4"
-                          opacity={isDraggingRing === 'surah' ? 0.9 : 0.45}
+                          strokeDasharray="3 3"
+                          opacity={isDraggingRing === 'surah' ? 0.9 : 0.4}
                         />
-                        {/* Waypoints Orbit Surat (114 Surah) */}
-                        {(() => {
-                          const dots = [];
-                          const step = 360 / 114;
-                          for (let s = 1; s <= 114; s++) {
-                            if (s === 1 || s % 10 === 0 || s === 36 || s === 67 || s === 114) {
-                              const ang = (s - 1) * step - 90;
-                              const rad = (ang * Math.PI) / 180;
-                              const wx = 170 + 104 * Math.cos(rad);
-                              const wy = 170 + 104 * Math.sin(rad);
-                              const isSelected = s === quickSurahNum;
-                              dots.push(
-                                <circle
-                                  key={`sw-${s}`}
-                                  cx={wx}
-                                  cy={wy}
-                                  r={isSelected ? 3 : 1.5}
-                                  fill={isSelected ? '#38bdf8' : '#0369a1'}
-                                  opacity={isSelected ? 1 : 0.6}
-                                />
-                              );
-                            }
-                          }
-                          return dots;
-                        })()}
 
                         {/* ======================================================== */}
-                        {/* LINTASAN ORBIT 1 (JUZ - POROS DALAM, R = 62)              */}
+                        {/* 3. LINTASAN ORBIT 1 (JUZ - POROS DALAM, R = 66)           */}
                         {/* ======================================================== */}
                         <circle
                           cx="170"
                           cy="170"
-                          r="62"
+                          r="66"
                           fill="none"
                           stroke={isDraggingRing === 'juz' ? '#34d399' : '#10b981'}
                           strokeWidth={isDraggingRing === 'juz' ? '2' : '1.2'}
                           strokeDasharray="3 3"
-                          opacity={isDraggingRing === 'juz' ? 0.9 : 0.5}
+                          opacity={isDraggingRing === 'juz' ? 0.9 : 0.45}
                         />
-                        {/* Waypoints Orbit Juz (30 Juz) */}
-                        {(() => {
-                          const dots = [];
-                          for (let j = 1; j <= 30; j++) {
-                            const ang = (j - 1) * 12 - 90;
-                            const rad = (ang * Math.PI) / 180;
-                            const wx = 170 + 62 * Math.cos(rad);
-                            const wy = 170 + 62 * Math.sin(rad);
-                            const isSelected = j === wheelJuzNum;
-                            const isMajor = j === 1 || j % 5 === 0 || j === 30;
-                            dots.push(
+
+                        {/* GARIS PENUNJUK POROS PUNCAK JAM 12 (SYZYGY ALIGNMENT) */}
+                        <line x1="170" y1="22" x2="170" y2="138" stroke="#fbbf24" strokeWidth="1" strokeDasharray="3 3" opacity="0.35" />
+                        {/* Segitiga Emas Penunjuk Puncak Jam 12 */}
+                        <polygon
+                          points="170,22 163,8 177,8"
+                          fill="#fbbf24"
+                          stroke="#78350f"
+                          strokeWidth="1"
+                          filter="url(#solarGlow)"
+                        />
+
+                        {/* ======================================================== */}
+                        {/* PLANET-PLANET JUZ (POROS DALAM, R = 66)                  */}
+                        {/* Hanya yang Berdekatan dengan Pilihannya yang Muncul      */}
+                        {/* ======================================================== */}
+                        {juzOffsets.map((k) => {
+                          const jVal = ((wheelJuzNum - 1 + k) % 30 + 30) % 30 + 1;
+                          const ang = -90 + k * 30 + (dragOffsets.juz || 0);
+                          const rad = (ang * Math.PI) / 180;
+                          const x = 170 + 66 * Math.cos(rad);
+                          const y = 170 + 66 * Math.sin(rad);
+
+                          const isCenter = k === 0;
+                          const rPlanet = isCenter ? 14 : Math.abs(k) === 1 ? 11 : 9;
+                          const opacity = isCenter ? 1 : Math.abs(k) === 1 ? 0.85 : 0.55;
+
+                          return (
+                            <g
+                              key={`pj-${k}-${jVal}`}
+                              className="cursor-pointer transition-transform"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (k !== 0) handleRotateJuz(k);
+                              }}
+                            >
+                              {/* Halo Atmosfer Planet Juz */}
+                              {isCenter && (
+                                <circle
+                                  cx={x}
+                                  cy={y}
+                                  r="17"
+                                  fill="none"
+                                  stroke="#6ee7b7"
+                                  strokeWidth="1.2"
+                                  opacity="0.8"
+                                  filter="url(#planetGlow)"
+                                />
+                              )}
+                              {/* Bola Planet Juz */}
                               <circle
-                                key={`jw-${j}`}
-                                cx={wx}
-                                cy={wy}
-                                r={isSelected ? 3 : isMajor ? 2 : 1.2}
-                                fill={isSelected ? '#34d399' : '#065f46'}
-                                opacity={isSelected ? 1 : 0.6}
+                                cx={x}
+                                cy={y}
+                                r={rPlanet}
+                                fill={isCenter ? 'url(#planetJuzActiveGrad)' : '#064e3b'}
+                                stroke={isCenter ? '#34d399' : '#059669'}
+                                strokeWidth={isCenter ? '1.8' : '1'}
+                                opacity={opacity}
                               />
-                            );
-                          }
-                          return dots;
-                        })()}
-
-                        {/* Garis Penunjuk Jam 12 (Puncak Sumbu Utama) */}
-                        <line x1="170" y1="6" x2="170" y2="28" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 2" opacity="0.6" />
-
-                        {/* ======================================================== */}
-                        {/* PLANET 1: JUZ (Orbit Dalam, R = 62)                       */}
-                        {/* ======================================================== */}
-                        <g>
-                          {/* Halo Atmosfer Planet Juz */}
-                          <circle
-                            cx={xJuz}
-                            cy={yJuz}
-                            r="17"
-                            fill="none"
-                            stroke="#6ee7b7"
-                            strokeWidth="1.2"
-                            opacity="0.7"
-                            filter="url(#planetGlow)"
-                          />
-                          {/* Bola Planet Juz */}
-                          <circle
-                            cx={xJuz}
-                            cy={yJuz}
-                            r="13.5"
-                            fill="url(#planetJuzGrad)"
-                            stroke="#34d399"
-                            strokeWidth="1.5"
-                          />
-                          {/* Angka Juz di Dalam Planet (Tegak Lurus & Natural) */}
-                          <text
-                            x={xJuz}
-                            y={yJuz}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize="9"
-                            fontWeight="900"
-                            fill="#ffffff"
-                            className="font-mono select-none pointer-events-none"
-                          >
-                            {wheelJuzNum}
-                          </text>
-                        </g>
+                              {/* Nomor Juz di Dalam Planet (Tegak Lurus & Natural) */}
+                              <text
+                                x={x}
+                                y={y}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={isCenter ? '9.5' : Math.abs(k) === 1 ? '7.5' : '6.5'}
+                                fontWeight="900"
+                                fill="#ffffff"
+                                opacity={opacity}
+                                className="font-mono select-none pointer-events-none"
+                              >
+                                {jVal}
+                              </text>
+                            </g>
+                          );
+                        })}
 
                         {/* ======================================================== */}
-                        {/* PLANET 2: SURAT (Orbit Tengah, R = 104)                   */}
+                        {/* PLANET-PLANET SURAT (POROS TENGAH, R = 106)              */}
+                        {/* Hanya yang Berdekatan dengan Pilihannya yang Muncul      */}
                         {/* ======================================================== */}
-                        <g>
-                          {/* Halo Atmosfer Planet Surat */}
-                          <circle
-                            cx={xSurah}
-                            cy={ySurah}
-                            r="19"
-                            fill="none"
-                            stroke="#7dd3fc"
-                            strokeWidth="1.2"
-                            opacity="0.75"
-                            filter="url(#planetGlow)"
-                          />
-                          {/* Bola Planet Surat */}
-                          <circle
-                            cx={xSurah}
-                            cy={ySurah}
-                            r="15"
-                            fill="url(#planetSurahGrad)"
-                            stroke="#38bdf8"
-                            strokeWidth="1.5"
-                          />
-                          {/* Angka Surat di Dalam Planet (Tegak Lurus & Natural) */}
-                          <text
-                            x={xSurah}
-                            y={ySurah}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize="9.5"
-                            fontWeight="900"
-                            fill="#ffffff"
-                            className="font-mono select-none pointer-events-none"
-                          >
-                            {quickSurahNum}
-                          </text>
-                        </g>
+                        {surahOffsets.map((k) => {
+                          const sVal = ((quickSurahNum - 1 + k) % 114 + 114) % 114 + 1;
+                          const ang = -90 + k * 26 + (dragOffsets.surah || 0);
+                          const rad = (ang * Math.PI) / 180;
+                          const x = 170 + 106 * Math.cos(rad);
+                          const y = 170 + 106 * Math.sin(rad);
+
+                          const isCenter = k === 0;
+                          const rPlanet = isCenter ? 16 : Math.abs(k) === 1 ? 12.5 : Math.abs(k) === 2 ? 9.5 : 7.5;
+                          const opacity = isCenter ? 1 : Math.abs(k) === 1 ? 0.85 : Math.abs(k) === 2 ? 0.6 : 0.35;
+
+                          return (
+                            <g
+                              key={`ps-${k}-${sVal}`}
+                              className="cursor-pointer transition-transform"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (k !== 0) handleRotateSurah(k);
+                              }}
+                            >
+                              {/* Halo Atmosfer Planet Surat */}
+                              {isCenter && (
+                                <circle
+                                  cx={x}
+                                  cy={y}
+                                  r="19.5"
+                                  fill="none"
+                                  stroke="#7dd3fc"
+                                  strokeWidth="1.2"
+                                  opacity="0.8"
+                                  filter="url(#planetGlow)"
+                                />
+                              )}
+                              {/* Bola Planet Surat */}
+                              <circle
+                                cx={x}
+                                cy={y}
+                                r={rPlanet}
+                                fill={isCenter ? 'url(#planetSurahActiveGrad)' : '#075985'}
+                                stroke={isCenter ? '#38bdf8' : '#0284c7'}
+                                strokeWidth={isCenter ? '1.8' : '1'}
+                                opacity={opacity}
+                              />
+                              {/* Nomor Surat di Dalam Planet (Tegak Lurus & Natural) */}
+                              <text
+                                x={x}
+                                y={y}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={isCenter ? '10' : Math.abs(k) === 1 ? '8' : Math.abs(k) === 2 ? '7' : '6'}
+                                fontWeight="900"
+                                fill="#ffffff"
+                                opacity={opacity}
+                                className="font-mono select-none pointer-events-none"
+                              >
+                                {sVal}
+                              </text>
+                            </g>
+                          );
+                        })}
 
                         {/* ======================================================== */}
-                        {/* PLANET 3: AYAT (Orbit Luar, R = 146)                      */}
+                        {/* PLANET-PLANET AYAT (POROS LUAR, R = 146)                 */}
+                        {/* Hanya yang Berdekatan dengan Pilihannya yang Muncul      */}
                         {/* ======================================================== */}
-                        <g>
-                          {/* Halo Atmosfer Planet Ayat */}
-                          <circle
-                            cx={xAyat}
-                            cy={yAyat}
-                            r="20.5"
-                            fill="none"
-                            stroke="#fde047"
-                            strokeWidth="1.5"
-                            opacity="0.8"
-                            filter="url(#planetGlow)"
-                          />
-                          {/* Bola Planet Ayat */}
-                          <circle
-                            cx={xAyat}
-                            cy={yAyat}
-                            r="16.5"
-                            fill="url(#planetAyatGrad)"
-                            stroke="#fbbf24"
-                            strokeWidth="1.8"
-                          />
-                          {/* Angka Ayat di Dalam Planet (Tegak Lurus & Natural) */}
-                          <text
-                            x={xAyat}
-                            y={yAyat}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize="10"
-                            fontWeight="900"
-                            fill="#0f172a"
-                            className="font-mono select-none pointer-events-none"
-                          >
-                            {quickAyatNum}
-                          </text>
-                        </g>
+                        {ayatOffsets.map((k) => {
+                          const aVal = ((quickAyatNum - 1 + k) % totalAyat + totalAyat) % totalAyat + 1;
+                          const ang = -90 + k * 24 + (dragOffsets.ayat || 0);
+                          const rad = (ang * Math.PI) / 180;
+                          const x = 170 + 146 * Math.cos(rad);
+                          const y = 170 + 146 * Math.sin(rad);
+
+                          const isCenter = k === 0;
+                          const rPlanet = isCenter ? 18 : Math.abs(k) === 1 ? 14 : Math.abs(k) === 2 ? 11 : 8.5;
+                          const opacity = isCenter ? 1 : Math.abs(k) === 1 ? 0.88 : Math.abs(k) === 2 ? 0.62 : 0.35;
+
+                          return (
+                            <g
+                              key={`pa-${k}-${aVal}`}
+                              className="cursor-pointer transition-transform"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (k !== 0) handleRotateAyat(k);
+                              }}
+                            >
+                              {/* Halo Atmosfer Planet Ayat */}
+                              {isCenter && (
+                                <circle
+                                  cx={x}
+                                  cy={y}
+                                  r="21.5"
+                                  fill="none"
+                                  stroke="#fde047"
+                                  strokeWidth="1.5"
+                                  opacity="0.85"
+                                  filter="url(#planetGlow)"
+                                />
+                              )}
+                              {/* Bola Planet Ayat */}
+                              <circle
+                                cx={x}
+                                cy={y}
+                                r={rPlanet}
+                                fill={isCenter ? 'url(#planetAyatActiveGrad)' : '#78350f'}
+                                stroke={isCenter ? '#fde047' : '#d97706'}
+                                strokeWidth={isCenter ? '2' : '1'}
+                                opacity={opacity}
+                              />
+                              {/* Nomor Ayat di Dalam Planet (Tegak Lurus & Natural) */}
+                              <text
+                                x={x}
+                                y={y}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={isCenter ? '11' : Math.abs(k) === 1 ? '8.5' : Math.abs(k) === 2 ? '7' : '6'}
+                                fontWeight="900"
+                                fill={isCenter ? '#0f172a' : '#ffffff'}
+                                opacity={opacity}
+                                className="font-mono select-none pointer-events-none"
+                              >
+                                {aVal}
+                              </text>
+                            </g>
+                          );
+                        })}
 
                         {/* ======================================================== */}
-                        {/* MATAHARI DI PUSAT TATA SURYA (SUN CORONA & MEDALLION)     */}
+                        {/* GAMBAR MATAHARI DI PUSAT TATA SURYA                      */}
                         {/* ======================================================== */}
-                        {/* Piringan Korona Matahari Luar */}
+                        {/* 12 Sinar Pancaran Surya (Solar Flare Rays) */}
+                        {Array.from({ length: 12 }).map((_, i) => {
+                          const rayAngle = (i * 30 * Math.PI) / 180;
+                          const x1 = 170 + 32 * Math.cos(rayAngle);
+                          const y1 = 170 + 32 * Math.sin(rayAngle);
+                          const x2 = 170 + 41 * Math.cos(rayAngle);
+                          const y2 = 170 + 41 * Math.sin(rayAngle);
+                          return (
+                            <line
+                              key={`sun-ray-${i}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke="#fbbf24"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              opacity="0.85"
+                            />
+                          );
+                        })}
+
+                        {/* Piringan Korona Luar Surya */}
                         <circle
                           cx="170"
                           cy="170"
@@ -2779,16 +2840,16 @@ export default function AlQuranModal({ onClose }) {
                           stroke="#f59e0b"
                           strokeWidth="1.5"
                           strokeDasharray="4 2"
-                          opacity="0.6"
+                          opacity="0.7"
                         />
-                        {/* Bola Surya Bercahaya */}
+                        {/* Bola Surya Bercahaya (Sun Sphere) */}
                         <circle
                           cx="170"
                           cy="170"
                           r="30"
                           fill="url(#sunSphereGrad)"
                           stroke="#fde047"
-                          strokeWidth="1.8"
+                          strokeWidth="2"
                           filter="url(#solarGlow)"
                         />
                       </svg>
@@ -2801,7 +2862,7 @@ export default function AlQuranModal({ onClose }) {
                           handleOpenSurah(currentQuickSurah, quickAyatNum);
                         }}
                         className="absolute z-40 w-15 h-15 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-2xl border-2 border-amber-100 hover:scale-108 active:scale-95 transition-transform group cursor-pointer"
-                        title={`Klik untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
+                        title={`Klik Matahari untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
                       >
                         <span className="font-quran-lpmq text-base sm:text-lg leading-none font-bold text-slate-950 drop-shadow-xs group-hover:scale-110 transition-transform">
                           اقْرَأْ
@@ -2812,15 +2873,26 @@ export default function AlQuranModal({ onClose }) {
                       </button>
                     </div>
 
-                    {/* TOMBOL UTAMA BUKA SURAT & AYAT DI BAWAH TATA SURYA */}
+                    {/* ======================================================== */}
+                    {/* TOMBOL BACA UTAMA PERSIS MYQURAN DI BAWAH RODA           */}
+                    {/* ======================================================== */}
                     <button
                       type="button"
                       onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
-                      className="w-full mt-3 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition cursor-pointer"
+                      className="w-full mt-3 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-[#0a7c29] to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-black text-xs sm:text-sm flex items-center justify-between shadow-xl active:scale-98 transition cursor-pointer border border-emerald-400/40"
                     >
-                      <BookOpen className="w-4 h-4 text-slate-950 fill-current" />
-                      <span>Buka QS. {currentQuickSurah.namaLatin} Ayat {quickAyatNum} (Juz {wheelJuzNum})</span>
-                      <ArrowRight className="w-4 h-4 stroke-[3]" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-amber-300 text-sm sm:text-base font-black">Baca</span>
+                        <span className="text-white font-bold">{currentQuickSurah.namaLatin}</span>
+                        <span className="text-emerald-200 font-normal">ayat {quickAyatNum}</span>
+                        <span className="text-[11px] text-emerald-300/80 font-mono">(Juz {wheelJuzNum})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="w-4 h-4 text-amber-300 stroke-[3]" />
+                        <div className="w-8 h-8 rounded-xl bg-emerald-800/90 border border-emerald-400/50 flex items-center justify-center shadow-xs">
+                          <BookOpen className="w-4 h-4 text-amber-300 fill-current" />
+                        </div>
+                      </div>
                     </button>
                   </div>
                 );
