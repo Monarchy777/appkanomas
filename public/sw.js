@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanomas-cache-v5-astrolabe';
+const CACHE_NAME = 'kanomas-cache-v6-semicircle-drum';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
