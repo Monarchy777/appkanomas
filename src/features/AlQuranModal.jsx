@@ -420,129 +420,147 @@ export function applyKashidaToArabic(text) {
   return text;
 }
 
-// RENDER TAJWID AMAN DENGAN RTL MURNI DAN KAIDAH ILMU TAJWID LENGKAP & AKURAT
-function renderSafeTajweed(text, themeMode = 'mushaf') {
+// RENDER TAJWID AMAN DENGAN RTL MURNI, KAIDAH ILMU TAJWID, & DUKUNGAN TERJEMAH PER KATA UNIFIED
+function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOptions = null) {
   if (!text) return null;
   const palette = TAJWEED_THEME_RULES[themeMode] || TAJWEED_THEME_RULES.mushaf;
 
-  // 1. Ekstrak seluruh grapheme cluster dari teks ayat lengkap
-  // Konsonan dasar (selain \u0640) beserta SEMUA tanda harakat/waqaf/kashida/tatweel yang menempel
-  const GRAPHEME_REGEX = /([\u0621-\u063F\u0641-\u064A\u0671-\u06D3])([\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
-  const graphemes = [];
-  let match;
-
-  while ((match = GRAPHEME_REGEX.exec(text)) !== null) {
-    graphemes.push({
-      base: match[1],
-      marks: match[2] || '',
-      full: match[0],
-      start: match.index,
-      end: GRAPHEME_REGEX.lastIndex
-    });
-  }
-
-  // 2. Petakan aturan tajwid ke setiap grapheme dengan analisis lookahead konsonan berikutnya
   const annotations = new Map();
 
-  for (let i = 0; i < graphemes.length; i++) {
-    const g = graphemes[i];
-    const base = g.base;
-    const marks = g.marks;
+  if (showTajweed) {
+    // 1. Ekstrak seluruh grapheme cluster dari teks ayat lengkap
+    const GRAPHEME_REGEX = /([\u0621-\u063F\u0641-\u064A\u0671-\u06D3])([\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED]*)/g;
+    const graphemes = [];
+    let match;
 
-    // Cari konsonan berikutnya (skip alif madd/maqsurah/washl tanpa harakat)
-    let nextGrapheme = null;
-    for (let j = i + 1; j < graphemes.length; j++) {
-      const nb = graphemes[j].base;
-      // Skip alif (ا) atau alif maqsurah (ى) atau alif washl (ٱ) yang tidak berharakat
-      if ((nb === 'ا' || nb === 'ى' || nb === 'ٱ') && !/[\u064B-\u0652]/.test(graphemes[j].marks)) {
-        continue;
-      }
-      nextGrapheme = graphemes[j];
-      break;
+    while ((match = GRAPHEME_REGEX.exec(text)) !== null) {
+      graphemes.push({
+        base: match[1],
+        marks: match[2] || '',
+        full: match[0],
+        start: match.index,
+        end: GRAPHEME_REGEX.lastIndex
+      });
     }
 
-    const nextBase = nextGrapheme ? nextGrapheme.base : null;
-    const nextMarks = nextGrapheme ? nextGrapheme.marks : '';
+    // 2. Petakan aturan tajwid ke setiap grapheme dengan analisis huruf yang saling terikat
+    for (let i = 0; i < graphemes.length; i++) {
+      const g = graphemes[i];
+      const base = g.base;
+      const marks = g.marks;
 
-    const isTanwin = marks.includes('\u064B') || marks.includes('\u064C') || marks.includes('\u064D');
-    const isNunSakinah = (base === 'ن') && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null));
-    const hasSmallMeem = marks.includes('\u06E2') || marks.includes('\u06ED');
+      let nextGrapheme = null;
+      for (let j = i + 1; j < graphemes.length; j++) {
+        const nb = graphemes[j].base;
+        if ((nb === 'ا' || nb === 'ى' || nb === 'ٱ') && !/[\u064B-\u0652]/.test(graphemes[j].marks)) {
+          continue;
+        }
+        nextGrapheme = graphemes[j];
+        break;
+      }
 
-    let color = null;
-    let title = '';
+      const nextBase = nextGrapheme ? nextGrapheme.base : null;
+      const nextMarks = nextGrapheme ? nextGrapheme.marks : '';
 
-    // A. Hukum Nun Sakinah & Tanwin
-    if (isTanwin || isNunSakinah || hasSmallMeem) {
-      if (hasSmallMeem || nextBase === 'ب') {
-        color = palette.iqlab;
-        title = 'Iqlab (Nun/Tanwin menjadi Mim & Dengung)';
-      } else if (nextBase && 'ينمو'.includes(nextBase)) {
+      const isTanwin = marks.includes('\u064B') || marks.includes('\u064C') || marks.includes('\u064D');
+      const isNunSakinah = (base === 'ن') && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null));
+      const hasSmallMeem = marks.includes('\u06E2') || marks.includes('\u06ED');
+
+      let color = null;
+      let title = '';
+
+      // A. Hukum Nun Sakinah & Tanwin (Kedua huruf yang saling terikat diwarnai bersama)
+      if (isTanwin || isNunSakinah || hasSmallMeem) {
+        if (hasSmallMeem || nextBase === 'ب') {
+          color = palette.iqlab;
+          title = 'Iqlab (Nun/Tanwin menjadi Mim & Dengung saat bertemu Ba)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.iqlab, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else if (nextBase && 'ينمو'.includes(nextBase)) {
+          color = palette.ghunnah;
+          title = 'Idgham Bighunnah (Melebur dengan Dengung 2 Harakat)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.ghunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else if (nextBase && 'لر'.includes(nextBase)) {
+          color = palette.idghamBila;
+          title = 'Idgham Bilaghunnah (Melebur Tanpa Dengung)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.idghamBila, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else if (nextBase && 'ءأإهعحغخ'.includes(nextBase)) {
+          color = null; // Idzhar Halqi: Dibaca jelas tanpa warna
+        } else if (nextBase && 'تثجدذزسشصضطظفقك'.includes(nextBase)) {
+          color = palette.ikhfa;
+          title = 'Ikhfa Haqiqi (Samar-samar dengan Dengung)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.ikhfa, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        }
+      }
+      // B. Ghunnah Musyaddadah (Nun bertasydid / Mim bertasydid)
+      else if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
         color = palette.ghunnah;
-        title = 'Idgham Bighunnah (Melebur dengan Dengung 2 Harakat)';
-      } else if (nextBase && 'لر'.includes(nextBase)) {
-        color = palette.idghamBila;
-        title = 'Idgham Bilaghunnah (Melebur Tanpa Dengung)';
-      } else if (nextBase && 'ءأإهعحغخ'.includes(nextBase)) {
-        // Idzhar Halqi: Dibaca jelas, TIDAK diwarnai hijau ikhfa!
-        color = null;
-        title = 'Idzhar Halqi (Dibaca Jelas Tanpa Dengung)';
-      } else if (nextBase && 'تثجدذزسشصضطظفقك'.includes(nextBase)) {
-        color = palette.ikhfa;
-        title = 'Ikhfa Haqiqi (Samar-samar dengan Dengung)';
-      } else if (isTanwin && marks.includes('\u064B') && !nextBase) {
-        color = palette.madd;
-        title = "Madd 'Iwadh (Panjang 2 Harakat Saat Waqaf)";
+        title = 'Ghunnah Musyaddadah (Dengung 2 Harakat)';
       }
-    }
-    // B. Ghunnah Musyaddadah (Nun bertasydid / Mim bertasydid)
-    else if ((base === 'ن' || base === 'م') && marks.includes('\u0651')) {
-      color = palette.ghunnah;
-      title = 'Ghunnah Musyaddadah (Dengung 2 Harakat)';
-    }
-    // C. Hukum Mim Sakinah
-    else if (base === 'م' && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null))) {
-      if (nextBase === 'ب') {
-        color = palette.ikhfa;
-        title = 'Ikhfa Syafawi (Mim Sukun bertemu Ba, Samar dengan Dengung)';
-      } else if (nextBase === 'م') {
-        color = palette.ghunnah;
-        title = 'Idgham Mimi / Mutamatsilain (Dengung 2 Harakat)';
+      // C. Hukum Mim Sakinah (Kedua huruf yang saling berinteraksi diwarnai bersama)
+      else if (base === 'م' && (marks.includes('\u0652') || marks.includes('\u06E1') || (!/[\u064E\u064F\u0650\u0651]/.test(marks) && nextBase !== null))) {
+        if (nextBase === 'ب') {
+          color = palette.ikhfa;
+          title = 'Ikhfa Syafawi (Mim Sukun bertemu Ba, Samar dengan Dengung)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.ikhfa, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else if (nextBase === 'م') {
+          color = palette.ghunnah;
+          title = 'Idgham Mimi / Mutamatsilain (Dengung 2 Harakat)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.ghunnah, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        }
       }
-    }
-    // D. Qalqalah (Baju Di Thoko: ب ج د ط ق)
-    else if ('قطبجد'.includes(base) && (marks.includes('\u0652') || marks.includes('\u06E1') || (!nextBase && !/[\u064E\u064F\u0650\u0651]/.test(marks)))) {
-      color = palette.qalqalah;
-      title = 'Qalqalah (Memantul)';
-    }
-    // E. Madd Wajib / Jaiz / Lazim (Tanda Layar ~ / \u0653)
-    else if (marks.includes('\u0653') || marks.includes('~')) {
-      if (nextMarks.includes('\u0651')) {
-        color = palette.maddLazim;
-        title = 'Madd Lazim (Panjang 6 Harakat)';
-      } else if (nextBase && 'ءأإ'.includes(nextBase)) {
-        color = palette.madd;
-        title = 'Madd Wajib / Jaiz (Panjang 4-5 Harakat)';
-      } else {
-        color = palette.madd;
-        title = 'Madd (Panjang 4-5 Harakat)';
+      // D. Qalqalah (Baju Di Thoko: ب ج د ط ق)
+      else if ('قطبجد'.includes(base) && (marks.includes('\u0652') || marks.includes('\u06E1') || (!nextBase && !/[\u064E\u064F\u0650\u0651]/.test(marks)))) {
+        color = palette.qalqalah;
+        title = 'Qalqalah (Pantulan Suara)';
       }
-    }
-    // F. Tafkhim Lam Jalalah (Lafazh Allah dibaca tebal setelah fathah / dhammah)
-    else if (base === 'ل' && marks.includes('\u0651') && (marks.includes('\u0670') || marks.includes('\u064E')) && nextBase === 'ه') {
-      const prevGrapheme = i > 0 ? graphemes[i - 1] : null;
-      const prevMarks = prevGrapheme ? prevGrapheme.marks : '';
-      if (!prevMarks.includes('\u0650')) {
-        color = palette.tafkhim || '#d97706';
-        title = 'Tafkhim Lam Jalalah (Dibaca Tebal)';
+      // E. Madd Wajib / Jaiz / Lazim (Tanda Layar ~ / \u0653)
+      else if (marks.includes('\u0653') || marks.includes('~')) {
+        if (nextMarks.includes('\u0651')) {
+          color = palette.maddLazim;
+          title = 'Madd Lazim (Panjang 6 Harakat)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.maddLazim, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else if (nextBase && 'ءأإئؤ'.includes(nextBase)) {
+          color = palette.madd;
+          title = 'Madd Wajib / Jaiz (Panjang 4-5 Harakat)';
+          if (nextGrapheme) {
+            annotations.set(nextGrapheme.start, { color: palette.madd, title, full: nextGrapheme.full, end: nextGrapheme.end, base: nextGrapheme.base });
+          }
+        } else {
+          color = palette.madd;
+          title = 'Madd (Panjang 4-5 Harakat)';
+        }
       }
-    }
+      // F. Tafkhim Lam Jalalah (Lafazh Allah dibaca tebal setelah fathah / dhammah)
+      else if (base === 'ل' && marks.includes('\u0651') && (marks.includes('\u0670') || marks.includes('\u064E')) && nextBase === 'ه') {
+        const prevGrapheme = i > 0 ? graphemes[i - 1] : null;
+        const prevMarks = prevGrapheme ? prevGrapheme.marks : '';
+        if (!prevMarks.includes('\u0650')) {
+          color = palette.tafkhim || '#d97706';
+          title = 'Tafkhim Lam Jalalah (Dibaca Tebal)';
+        }
+      }
 
-    if (color) {
-      annotations.set(g.start, { color, title, full: g.full, end: g.end, base: g.base });
+      if (color && !annotations.has(g.start)) {
+        annotations.set(g.start, { color, title, full: g.full, end: g.end, base: g.base });
+      }
     }
   }
 
-  // 3. Render tajwid hanya pada huruf yang terkena hukumnya saja dengan ZWJ pelindung ligatur & harakat
+  // 3. Render per-kata dengan proteksi ZWJ & tata letak arti perkata terintegrasi
   const CONNECTS_LEFT = new Set('بتثجحخسشصضطظعغفقكلمنهيىئ'.split(''));
   const cleanText = text.trim();
   const words = cleanText.split(/\s+/);
@@ -551,12 +569,20 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
   const getBareChar = (str) => str.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D0-\u08FF\u200D]/g, '').slice(-1);
   const getFirstBareChar = (str) => str.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D0-\u08FF\u200D]/g, '').charAt(0);
 
+  let wbwCounter = 0;
+
   return words.map((word, wordIdx) => {
     const wordStart = text.indexOf(word, charCursor);
     const wordEnd = wordStart + word.length;
     charCursor = wordEnd;
 
-    // Cek apakah ada huruf dalam kata ini yang terkena hukum tajwid
+    const isWaqfToken = /^[\u06D5-\u06ED\u08D0-\u08FF]+$/.test(word.trim());
+    let currentWbwItem = null;
+    if (wbwOptions && wbwOptions.wbwWords && !isWaqfToken) {
+      currentWbwItem = wbwOptions.wbwWords[wbwCounter] || null;
+      wbwCounter++;
+    }
+
     let hasAnnotation = false;
     for (let c = 0; c < word.length; c++) {
       if (annotations.has(wordStart + c)) {
@@ -565,77 +591,127 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
       }
     }
 
+    let wordContent;
     if (!hasAnnotation) {
+      wordContent = word;
+    } else {
+      const parts = [];
+      let localIdx = 0;
+
+      for (let c = 0; c < word.length; ) {
+        const globalPos = wordStart + c;
+        if (annotations.has(globalPos)) {
+          const item = annotations.get(globalPos);
+          if (c > localIdx) {
+            let beforeStr = word.substring(localIdx, c);
+            const lastChar = getBareChar(beforeStr);
+            if (CONNECTS_LEFT.has(lastChar)) {
+              beforeStr += '\u200D';
+            }
+            parts.push(beforeStr);
+          }
+
+          let spanContent = item.full;
+          const prevChar = getBareChar(word.substring(0, c));
+          if (CONNECTS_LEFT.has(prevChar)) {
+            spanContent = '\u200D' + spanContent;
+          }
+
+          const nextRemainder = word.substring(c + item.full.length);
+          const nextChar = getFirstBareChar(nextRemainder);
+          if (CONNECTS_LEFT.has(item.base) && nextChar) {
+            spanContent = spanContent + '\u200D';
+          }
+
+          parts.push(
+            <span
+              key={`g-${globalPos}`}
+              style={{
+                color: item.color,
+                display: 'inline',
+                fontWeight: 400,
+                fontSize: 'inherit',
+                lineHeight: 'inherit'
+              }}
+              className="select-text transition-colors duration-150"
+              title={item.title}
+            >
+              {spanContent}
+            </span>
+          );
+          c += item.full.length;
+          localIdx = c;
+        } else {
+          c++;
+        }
+      }
+
+      if (localIdx < word.length) {
+        let afterStr = word.substring(localIdx);
+        const prevChar = getBareChar(word.substring(0, localIdx));
+        if (CONNECTS_LEFT.has(prevChar)) {
+          afterStr = '\u200D' + afterStr;
+        }
+        parts.push(afterStr);
+      }
+      wordContent = parts;
+    }
+
+    // Jika mode terjemah per kata aktif:
+    if (wbwOptions && wbwOptions.wbwWords) {
+      if (isWaqfToken) {
+        return (
+          <span
+            key={`w-${wordIdx}`}
+            className="inline-flex items-center px-1 self-center text-slate-500 opacity-70"
+            style={{ direction: 'rtl' }}
+          >
+            {wordContent}
+          </span>
+        );
+      }
+
       return (
-        <span key={`w-${wordIdx}`} style={{ display: 'inline', fontWeight: 400 }}>
-          {word}{wordIdx < words.length - 1 ? ' ' : ''}
-        </span>
+        <div
+          key={`wbw-${wordIdx}`}
+          className="inline-flex flex-col items-center justify-start text-center px-1.5 py-0.5"
+          style={{ direction: 'rtl', verticalAlign: 'top' }}
+        >
+          {/* Huruf Arab perkata */}
+          <span
+            style={{
+              fontFamily: wbwOptions.activeFontFamily,
+              fontSize: `${wbwOptions.arabicFontSize}px`,
+              color: wbwOptions.arabicColor,
+              lineHeight: wbwOptions.dynamicArabicLineHeight,
+              fontWeight: 400
+            }}
+            className={`${wbwOptions.arabicFontClass} font-normal select-text`}
+          >
+            {wordContent}
+          </span>
+
+          {/* Arti perkata di bawah huruf Arab, bersih biasa saja tanpa blok hitam */}
+          {currentWbwItem && (
+            <span
+              style={{
+                color: wbwOptions.isDark ? '#94a3b8' : '#475569',
+                maxWidth: '140px'
+              }}
+              className="text-[11px] sm:text-xs font-normal leading-tight text-center select-text mt-1 break-words opacity-90"
+              dir="ltr"
+            >
+              {currentWbwItem.arti || '-'}
+            </span>
+          )}
+        </div>
       );
     }
 
-    const parts = [];
-    let localIdx = 0;
-
-    for (let c = 0; c < word.length; ) {
-      const globalPos = wordStart + c;
-      if (annotations.has(globalPos)) {
-        const item = annotations.get(globalPos);
-        if (c > localIdx) {
-          let beforeStr = word.substring(localIdx, c);
-          const lastChar = getBareChar(beforeStr);
-          if (CONNECTS_LEFT.has(lastChar)) {
-            beforeStr += '\u200D';
-          }
-          parts.push(beforeStr);
-        }
-
-        let spanContent = item.full;
-        const prevChar = getBareChar(word.substring(0, c));
-        if (CONNECTS_LEFT.has(prevChar)) {
-          spanContent = '\u200D' + spanContent;
-        }
-
-        const nextRemainder = word.substring(c + item.full.length);
-        const nextChar = getFirstBareChar(nextRemainder);
-        if (CONNECTS_LEFT.has(item.base) && nextChar) {
-          spanContent = spanContent + '\u200D';
-        }
-
-        parts.push(
-          <span
-            key={`g-${globalPos}`}
-            style={{
-              color: item.color,
-              display: 'inline',
-              fontWeight: 400,
-              fontSize: 'inherit',
-              lineHeight: 'inherit'
-            }}
-            className="select-text transition-colors duration-150"
-            title={item.title}
-          >
-            {spanContent}
-          </span>
-        );
-        c += item.full.length;
-        localIdx = c;
-      } else {
-        c++;
-      }
-    }
-
-    if (localIdx < word.length) {
-      let afterStr = word.substring(localIdx);
-      const prevChar = getBareChar(word.substring(0, localIdx));
-      if (CONNECTS_LEFT.has(prevChar)) {
-        afterStr = '\u200D' + afterStr;
-      }
-      parts.push(afterStr);
-    }
-
+    // Tampilan paragraf biasa saat terjemah per kata tidak aktif
     return (
-      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate' }}>
-        {parts}
+      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 400 }}>
+        {wordContent}
         {wordIdx < words.length - 1 ? ' ' : ''}
       </span>
     );
@@ -1697,11 +1773,19 @@ export default function AlQuranModal({ onClose }) {
   const renderArabic = (ayat) => {
     if (!ayat) return null;
     const rawText = getAyatArabText(ayat);
+    const wbwWords = showWordByWord ? wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] : null;
 
-    if (!showTajweed) {
-      return rawText;
-    }
-    return renderSafeTajweed(rawText, themeMode);
+    const wbwOptions = wbwWords ? {
+      wbwWords,
+      isDark,
+      arabicFontSize,
+      dynamicArabicLineHeight,
+      activeFontFamily: getActiveFontFamily(),
+      arabicFontClass: getArabicFontClass(),
+      arabicColor: currentTheme.arabicColor
+    } : null;
+
+    return renderSafeTajweed(rawText, themeMode, showTajweed, wbwOptions);
   };
 
   // Hitung perkiraan nomor halaman berdasarkan urutan ayat
@@ -2702,103 +2786,77 @@ export default function AlQuranModal({ onClose }) {
                             </div>
                           )}
 
-                          {/* A. TEKS ARAB DENGAN TAJWID WARNA & NOMOR AYAT LONCAT */}
+                          {/* A. TEKS ARAB DENGAN TAJWID WARNA & TERJEMAH PER KATA TERINTEGRASI */}
                           <div className="w-full" dir="rtl" data-zoom-zone="arabic">
-                            <p
-                              style={{
-                                fontFamily: getActiveFontFamily(),
-                                fontSize: `${arabicFontSize}px`,
-                                color: currentTheme.arabicColor,
-                                lineHeight: dynamicArabicLineHeight,
-                                textAlign: 'right',
-                                fontFeatureSettings: '"calt" 1, "liga" 1',
-                                fontWeight: 400,
-                                textRendering: 'geometricPrecision',
-                                WebkitFontSmoothing: 'antialiased',
-                                MozOsxFontSmoothing: 'grayscale',
-                                width: '100%'
-                              }}
-                              className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
-                            >
-                              {renderArabic(ayat)}
-
-                              {/* BINGKAI NOMOR AYAT */}
-                              <span
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenJumpModal(ayat.nomorAyat);
+                            {showWordByWord && wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] ? (
+                              <div
+                                className="flex flex-wrap items-start justify-start gap-y-4 gap-x-2.5 w-full select-text mb-4 sm:mb-5"
+                                dir="rtl"
+                                style={{
+                                  direction: 'rtl',
+                                  textAlign: 'right'
                                 }}
-                                className="inline-flex items-center justify-center align-middle mx-2 my-1 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
-                                style={{ verticalAlign: 'middle', lineHeight: 1 }}
-                                title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
                               >
-                                <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
-                                  {ayat.nomorAyat}
-                                </span>
-                              </span>
-                            </p>
-                          </div>
+                                {renderArabic(ayat)}
 
-                          {/* WORD-BY-WORD TRANSLATION (ARTI PER KATA) */}
-                          {showWordByWord && (
-                            <div className="mt-3 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-400/40 select-text" dir="rtl">
-                              <div className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300 tracking-wider mb-2 flex items-center gap-1.5" dir="ltr">
-                                <Languages className="w-3.5 h-3.5" />
-                                <span>Arti Per Kata (Kosakata Ayat {ayat.nomorAyat}):</span>
-                              </div>
-                              {wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] ? (
-                                <div
-                                  className="flex flex-wrap gap-2.5 items-stretch"
-                                  dir="rtl"
-                                  style={{ direction: 'rtl', textAlign: 'right' }}
+                                {/* BINGKAI NOMOR AYAT DI AKHIR KATA AYAT */}
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenJumpModal(ayat.nomorAyat);
+                                  }}
+                                  className="inline-flex items-center justify-center align-middle mx-2 self-center select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                                  style={{ verticalAlign: 'middle', lineHeight: 1 }}
+                                  title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
                                 >
-                                  {(() => {
-                                    // Ekstrak kata-kata asli ayat yang cocok dengan mushaf aktif (filter tanda waqaf standalone)
-                                    const rawVerseWords = (getAyatArabText(ayat) || '').trim().split(/\s+/).filter((word) => !/^[\u06D5-\u06ED\u08D0-\u08FF]+$/.test(word.trim()));
-                                    const wordsList = wordByWordData[selectedSurah.nomor][ayat.nomorAyat];
+                                  <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
+                                    {ayat.nomorAyat}
+                                  </span>
+                                </span>
+                              </div>
+                            ) : (
+                              <p
+                                style={{
+                                  fontFamily: getActiveFontFamily(),
+                                  fontSize: `${arabicFontSize}px`,
+                                  color: currentTheme.arabicColor,
+                                  lineHeight: dynamicArabicLineHeight,
+                                  textAlign: 'right',
+                                  fontFeatureSettings: '"calt" 1, "liga" 1',
+                                  fontWeight: 400,
+                                  textRendering: 'geometricPrecision',
+                                  WebkitFontSmoothing: 'antialiased',
+                                  MozOsxFontSmoothing: 'grayscale',
+                                  width: '100%'
+                                }}
+                                className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
+                              >
+                                {renderArabic(ayat)}
 
-                                    return wordsList.map((w, wIdx) => {
-                                      if (!w.arab || w.arab === 'End of Ayah' || w.char_type === 'end' || w.arab === '') return null;
-                                      // Samakan kata Arab dengan teks ayat di atasnya agar susunannya 100% identik
-                                      const displayArab = rawVerseWords[wIdx] || w.arab;
+                                {/* BINGKAI NOMOR AYAT */}
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenJumpModal(ayat.nomorAyat);
+                                  }}
+                                  className="inline-flex items-center justify-center align-middle mx-2 my-1 select-none cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+                                  style={{ verticalAlign: 'middle', lineHeight: 1 }}
+                                  title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
+                                >
+                                  <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
+                                    {ayat.nomorAyat}
+                                  </span>
+                                </span>
+                              </p>
+                            )}
 
-                                      return (
-                                        <div
-                                          key={w.id || wIdx}
-                                          style={{ direction: 'rtl' }}
-                                          className="inline-flex flex-col items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-800/95 border border-emerald-300/80 dark:border-emerald-700/60 shadow-2xs min-w-[70px] max-w-[160px] text-center"
-                                        >
-                                          <span
-                                            style={{
-                                              fontFamily: getActiveFontFamily(),
-                                              color: currentTheme.arabicColor,
-                                              direction: 'rtl'
-                                            }}
-                                            className={`${getArabicFontClass()} text-lg sm:text-xl font-bold leading-normal mb-1.5`}
-                                          >
-                                            {displayArab}
-                                          </span>
-                                          {w.latin && (
-                                            <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono italic block leading-tight mb-1" dir="ltr">
-                                              {w.latin}
-                                            </span>
-                                          )}
-                                          <span className="text-[11px] text-slate-800 dark:text-slate-200 font-medium block leading-tight border-t border-slate-100 dark:border-slate-700/60 pt-1.5 w-full" dir="ltr">
-                                            {w.arti || '-'}
-                                          </span>
-                                        </div>
-                                      );
-                                    });
-                                  })()}
-                                </div>
-                              ) : (
-                                <div className="py-2 text-center text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-2" dir="ltr">
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  <span>Memuat terjemahan kata per kata...</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                            {showWordByWord && loadingWordByWord && !wordByWordData[selectedSurah.nomor]?.[ayat.nomorAyat] && (
+                              <div className="py-1 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 opacity-80 mb-2" dir="ltr">
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Memuat terjemahan kata per kata...</span>
+                              </div>
+                            )}
+                          </div>
 
                           {/* B. TRANSLITERASI LATIN */}
                           {showLatin && ayat.teksLatin && (
