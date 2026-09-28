@@ -938,6 +938,23 @@ export default function AlQuranModal({ onClose }) {
       return true;
     }
   });
+
+  // Spasi Lapang & Anti-Menumpuk (Spacious Mode): Memberi jarak luas & sambungan datar yang nyaman dibaca
+  const [spaciousMode, setSpaciousMode] = useState(() => {
+    try {
+      return localStorage.getItem('kanomas_quran_spacious') !== 'false'; // Default TRUE (Lega & Jelas)
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleSpaciousMode = (val) => {
+    setSpaciousMode(val);
+    try {
+      localStorage.setItem('kanomas_quran_spacious', val ? 'true' : 'false');
+    } catch {}
+  };
+
   const [activeAyatId, setActiveAyatId] = useState(null); // Ayat yang sedang aktif dibuka toolbar-nya
 
   const [latinType, setLatinType] = useState('kemenag'); // 'kemenag' | 'english'
@@ -1077,15 +1094,13 @@ export default function AlQuranModal({ onClose }) {
     }
   };
 
-  // Helper font family kaligrafi Arab aktif (Indonesia: LPMQ, Madinah: KFGQPC Hafs, Modern: Noto Naskh)
+  // Helper font family kaligrafi Arab aktif (Menggunakan font KFGQPC Hafs/Uthman Taha dengan penyambungan horizontal luas & anti-stacking)
   const getActiveFontFamily = () => {
     if (mushafType === 'modern') {
       return "'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif";
     }
-    if (mushafType === 'indonesia') {
-      return "'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', serif";
-    }
-    return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif";
+    // Baik Mushaf Madinah maupun Mushaf Indonesia menggunakan font kaligrafi horizontal luas KFGQPC (persis MyQuran)
+    return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
@@ -2962,9 +2977,10 @@ export default function AlQuranModal({ onClose }) {
                                   fontFamily: getActiveFontFamily(),
                                   fontSize: `${arabicFontSize}px`,
                                   color: currentTheme.arabicColor,
-                                  lineHeight: dynamicArabicLineHeight,
+                                  lineHeight: dynamicArabicLineHeight + (spaciousMode ? 0.15 : 0),
+                                  wordSpacing: spaciousMode ? '0.18em' : '0.04em',
                                   textAlign: 'right',
-                                  fontFeatureSettings: '"calt" 1, "liga" 1',
+                                  fontFeatureSettings: '"calt" 1, "liga" 1, "mkmk" 1',
                                   fontWeight: 400,
                                   textRendering: 'geometricPrecision',
                                   WebkitFontSmoothing: 'antialiased',
@@ -3730,6 +3746,26 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className={`w-2.5 h-2.5 rounded-full ${hiddenReadMode ? 'bg-slate-950' : 'bg-transparent'}`} />
+                    </button>
+                  </div>
+
+                  {/* Spasi Lapang / Spacious Reading */}
+                  <div className={`flex items-center justify-between p-3 rounded-2xl border transition ${
+                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
+                  }`}>
+                    <div className="space-y-0.5 max-w-[80%]">
+                      <span className="block text-xs font-black">Spasi Lapang & Anti-Menumpuk</span>
+                      <span className="text-[10px] opacity-75 block leading-normal">
+                        Memberi jarak lega antarkata dan sambungan horizontal lapang agar huruf seperti <span className="font-bold">تَجْرِي</span> dan <span className="font-bold">فَتَحْنَا</span> sangat jelas dan nyaman dibaca.
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleToggleSpaciousMode(!spaciousMode)}
+                      className={`w-7 h-7 rounded-full border-2 border-slate-700 flex items-center justify-center transition active:scale-95 ${
+                        spaciousMode ? 'bg-amber-400' : 'bg-emerald-800'
+                      }`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full ${spaciousMode ? 'bg-slate-950' : 'bg-transparent'}`} />
                     </button>
                   </div>
                 </div>
