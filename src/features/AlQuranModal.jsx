@@ -888,36 +888,61 @@ export default function AlQuranModal({ onClose }) {
   const [quickSurahFilter, setQuickSurahFilter] = useState('');
   const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
 
-  // Sudut rotasi independen untuk putaran roda dengan 1 jari (1-finger touch rotary drag)
-  const [juzRotation, setJuzRotation] = useState(() => -(wheelJuzNum - 1) * 12);
-  const [surahRotation, setSurahRotation] = useState(() => -(quickSurahNum - 1) * (360 / 114));
-  const [ayatRotation, setAyatRotation] = useState(() => -(quickAyatNum - 1) * (360 / Math.max(1, currentQuickSurah.jumlahAyat)));
+  // Navigasi Tata Surya Al-Qur'an: Planet Juz (Dalam), Planet Surat (Tengah), Planet Ayat (Luar)
+  // Sudut drag bebas saat disentuh (continuous 60fps tracking)
+  const [dragAngles, setDragAngles] = useState({ juz: null, surah: null, ayat: null });
   const [isDraggingRing, setIsDraggingRing] = useState(null); // 'juz' | 'surah' | 'ayat' | null
 
   const wheelContainerRef = useRef(null);
   const dragStateRef = useRef(null);
 
-  // Sinkronisasi sudut rotasi saat nomor berubah dari luar (misal picker modal / tap)
-  useEffect(() => {
-    if (!isDraggingRing) {
-      setJuzRotation(-(wheelJuzNum - 1) * 12);
-    }
-  }, [wheelJuzNum, isDraggingRing]);
+  // Helper kalkulasi posisi planet & pemilihan nomor (natural polar tracking)
+  const updatePlanetPosition = (ringType, dx, dy) => {
+    // Sudut polar dari titik jam 12 (-90 deg), dihitung searah jarum jam (0..360)
+    const angleRad = Math.atan2(dy, dx);
+    const angleDeg = angleRad * (180 / Math.PI);
+    setDragAngles((prev) => ({ ...prev, [ringType]: angleDeg }));
 
-  useEffect(() => {
-    if (!isDraggingRing) {
-      setSurahRotation(-(quickSurahNum - 1) * (360 / 114));
-    }
-  }, [quickSurahNum, isDraggingRing]);
+    const clockwiseAngle = ((angleDeg + 90) % 360 + 360) % 360;
 
-  useEffect(() => {
-    if (!isDraggingRing) {
-      const max = currentQuickSurah.jumlahAyat;
-      setAyatRotation(-(quickAyatNum - 1) * (360 / Math.max(1, max)));
+    if (ringType === 'juz') {
+      const rawIdx = Math.round(clockwiseAngle / 12) % 30;
+      const newJuz = rawIdx + 1;
+      if (newJuz !== wheelJuzNum) {
+        setWheelJuzNum(newJuz);
+        const targetJuzData = JUZ_LIST[newJuz - 1];
+        if (targetJuzData && targetJuzData.surahNomor !== quickSurahNum) {
+          setQuickSurahNum(targetJuzData.surahNomor);
+          setQuickAyatNum(targetJuzData.ayat || 1);
+        }
+        if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
+      }
+    } else if (ringType === 'surah') {
+      const step = 360 / 114;
+      const rawIdx = Math.round(clockwiseAngle / step) % 114;
+      const newSurah = rawIdx + 1;
+      if (newSurah !== quickSurahNum) {
+        setQuickSurahNum(newSurah);
+        const sObj = SURAH_LIST.find((s) => s.nomor === newSurah);
+        if (sObj && sObj.juz !== wheelJuzNum) {
+          setWheelJuzNum(sObj.juz);
+        }
+        setQuickAyatNum(1);
+        if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
+      }
+    } else if (ringType === 'ayat') {
+      const max = Math.max(1, currentQuickSurah.jumlahAyat);
+      const step = 360 / max;
+      const rawIdx = Math.round(clockwiseAngle / step) % max;
+      const newAyat = rawIdx + 1;
+      if (newAyat !== quickAyatNum) {
+        setQuickAyatNum(newAyat);
+        if (navigator.vibrate) try { navigator.vibrate(5); } catch {}
+      }
     }
-  }, [quickAyatNum, currentQuickSurah.jumlahAyat, isDraggingRing]);
+  };
 
-  // Handler Putar Roda dengan 1 Jari (1-Finger Rotary Touch & Drag)
+  // Handler Putar Planet dengan 1 Jari (1-Finger Solar Orbit Drag)
   const handleWheelPointerDown = (e) => {
     if (!wheelContainerRef.current) return;
     const rect = wheelContainerRef.current.getBoundingClientRect();
@@ -931,14 +956,14 @@ export default function AlQuranModal({ onClose }) {
     const svgR = radius * scale;
 
     let ringType = null;
-    if (svgR < 38) {
-      // Pusat roda: Medallion BACA / Iqra' (tidak putar, ditangani onClick)
+    if (svgR < 36) {
+      // Pusat roda: Matahari (Iqra / BACA)
       return;
-    } else if (svgR >= 38 && svgR < 78) {
+    } else if (svgR >= 36 && svgR < 82) {
       ringType = 'juz';
-    } else if (svgR >= 78 && svgR < 122) {
+    } else if (svgR >= 82 && svgR < 126) {
       ringType = 'surah';
-    } else if (svgR >= 122) {
+    } else if (svgR >= 126) {
       ringType = 'ayat';
     }
 
@@ -949,99 +974,34 @@ export default function AlQuranModal({ onClose }) {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
 
-    const startAngle = Math.atan2(dy, dx) * (180 / Math.PI);
     dragStateRef.current = {
       ringType,
       pointerId: e.pointerId,
       centerX,
-      centerY,
-      lastAngle: startAngle,
-      totalDelta: 0
+      centerY
     };
     setIsDraggingRing(ringType);
+    updatePlanetPosition(ringType, dx, dy);
   };
 
   const handleWheelPointerMove = (e) => {
     if (!dragStateRef.current) return;
-    const { ringType, centerX, centerY, lastAngle } = dragStateRef.current;
+    const { ringType, centerX, centerY } = dragStateRef.current;
     const dx = e.clientX - centerX;
     const dy = e.clientY - centerY;
-    const currentAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-    let delta = currentAngle - lastAngle;
-    if (delta > 180) delta -= 360;
-    if (delta < -180) delta += 360;
-
-    dragStateRef.current.totalDelta += Math.abs(delta);
-    dragStateRef.current.lastAngle = currentAngle;
-
-    if (ringType === 'ayat') {
-      setAyatRotation((prev) => {
-        const next = prev + delta;
-        const max = currentQuickSurah.jumlahAyat;
-        const step = 360 / Math.max(1, max);
-        let rawIdx = Math.round((-next) / step) % max;
-        if (rawIdx < 0) rawIdx += max;
-        const newAyat = rawIdx + 1;
-        if (newAyat !== quickAyatNum) {
-          setQuickAyatNum(newAyat);
-          if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
-        }
-        return next;
-      });
-    } else if (ringType === 'surah') {
-      setSurahRotation((prev) => {
-        const next = prev + delta;
-        const step = 360 / 114;
-        let rawIdx = Math.round((-next) / step) % 114;
-        if (rawIdx < 0) rawIdx += 114;
-        const newSurah = rawIdx + 1;
-        if (newSurah !== quickSurahNum) {
-          setQuickSurahNum(newSurah);
-          const sObj = SURAH_LIST.find((s) => s.nomor === newSurah);
-          if (sObj && sObj.juz !== wheelJuzNum) {
-            setWheelJuzNum(sObj.juz);
-          }
-          if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
-        }
-        return next;
-      });
-    } else if (ringType === 'juz') {
-      setJuzRotation((prev) => {
-        const next = prev + delta;
-        const step = 12; // 360 / 30
-        let rawIdx = Math.round((-next) / step) % 30;
-        if (rawIdx < 0) rawIdx += 30;
-        const newJuz = rawIdx + 1;
-        if (newJuz !== wheelJuzNum) {
-          setWheelJuzNum(newJuz);
-          const targetJuzData = JUZ_LIST[newJuz - 1];
-          if (targetJuzData && targetJuzData.surahNomor !== quickSurahNum) {
-            setQuickSurahNum(targetJuzData.surahNomor);
-            setQuickAyatNum(targetJuzData.ayat || 1);
-          }
-          if (navigator.vibrate) try { navigator.vibrate(10); } catch {}
-        }
-        return next;
-      });
-    }
+    updatePlanetPosition(ringType, dx, dy);
   };
 
   const handleWheelPointerUp = (e) => {
     if (!dragStateRef.current) return;
-    const { ringType } = dragStateRef.current;
+    try {
+      if (e && e.currentTarget && e.pointerId) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {}
     dragStateRef.current = null;
     setIsDraggingRing(null);
-
-    // Snap rotasi ke posisi terdekat agar lurus sejajar jarum penunjuk
-    if (ringType === 'ayat') {
-      const max = currentQuickSurah.jumlahAyat;
-      setAyatRotation(-(quickAyatNum - 1) * (360 / Math.max(1, max)));
-    } else if (ringType === 'surah') {
-      setSurahRotation(-(quickSurahNum - 1) * (360 / 114));
-    } else if (ringType === 'juz') {
-      setJuzRotation(-(wheelJuzNum - 1) * 12);
-    }
+    setDragAngles({ juz: null, surah: null, ayat: null });
   };
 
   // Helper Rotasi Roda Navigasi 3 Lapis
@@ -2353,363 +2313,518 @@ export default function AlQuranModal({ onClose }) {
 
               {/* ======================================================== */}
               {/* ======================================================== */}
-              {/* NAVIGASI 3 RODA BERPUTAR ISLAMI (1-FINGER ROTARY ASTROLABE) */}
-              {/* Roda Paling Dalam: Juz | Roda Tengah: Surat | Roda Luar: Ayat */}
+              {/* NAVIGASI TATA SURYA AL-QUR'AN (SOLAR CELESTIAL ASTROLABE) */}
+              {/* Matahari di Pusat | 3 Planet Mengitari Porosnya: Juz, Surat, Ayat */}
               {/* ======================================================== */}
-              <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-2xl relative overflow-hidden backdrop-blur-md">
-                {/* Background Kaligrafi & Ornamen Air Islam */}
-                <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
-                  <span className="text-[260px] font-serif leading-none select-none text-emerald-400">۞</span>
-                </div>
+              {(() => {
+                const totalAyat = Math.max(1, currentQuickSurah.jumlahAyat);
+                const activeJuzAngle = dragAngles.juz !== null ? dragAngles.juz : (wheelJuzNum - 1) * 12 - 90;
+                const activeSurahAngle = dragAngles.surah !== null ? dragAngles.surah : (quickSurahNum - 1) * (360 / 114) - 90;
+                const activeAyatAngle = dragAngles.ayat !== null ? dragAngles.ayat : (quickAyatNum - 1) * (360 / totalAyat) - 90;
 
-                {/* Header Judul Roda Navigasi */}
-                <div className="text-center relative z-10 mb-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                    <span>۞</span>
-                    <span>Kemudi Roda Al-Qur'an (Putar 1 Jari)</span>
-                    <span>۞</span>
-                  </div>
-                  <p className="text-[11px] text-emerald-200/90 mt-1 font-medium">
-                    👆 <strong>Sentuh & putar roda dengan 1 jari:</strong> Roda Luar (Ayat) • Roda Tengah (Surat) • Roda Dalam (Juz)
-                  </p>
-                </div>
+                const juzRad = (activeJuzAngle * Math.PI) / 180;
+                const surahRad = (activeSurahAngle * Math.PI) / 180;
+                const ayatRad = (activeAyatAngle * Math.PI) / 180;
 
-                {/* BADGE PILIHAN AKTIF DI ATAS RODA (KLIK UNTUK AKSES CEPAT) */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2 relative z-20 mb-2 flex-wrap">
-                  {/* Badge Juz */}
-                  <div className="px-2.5 py-1 rounded-xl bg-emerald-900/90 border border-emerald-400/50 text-amber-300 text-[11px] sm:text-xs font-black shadow-xs">
-                    JUZ {wheelJuzNum}
-                  </div>
-                  {/* Badge Surat */}
-                  <button
-                    type="button"
-                    onClick={() => setShowSurahPickerModal(true)}
-                    className="px-3 py-1 rounded-xl bg-slate-950/90 hover:bg-slate-900 border border-amber-400/60 text-white text-[11px] sm:text-xs font-black shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
-                    title="Klik untuk memilih surat dari daftar 114 surat"
-                  >
-                    <span className="text-amber-300">{currentQuickSurah.nomor}. {currentQuickSurah.namaLatin}</span>
-                    <span className="font-quran-lpmq text-amber-200 font-bold" dir="rtl">{currentQuickSurah.nama}</span>
-                  </button>
-                  {/* Badge Ayat */}
-                  <button
-                    type="button"
-                    onClick={() => setShowAyatGridPicker(true)}
-                    className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-500 text-slate-950 text-[11px] sm:text-xs font-black shadow-xs flex items-center gap-1 cursor-pointer active:scale-95 transition"
-                    title="Klik untuk memilih nomor ayat dari grid"
-                  >
-                    <span>Ayat {quickAyatNum}</span>
-                    <span className="opacity-70 font-normal">/ {currentQuickSurah.jumlahAyat}</span>
-                  </button>
-                </div>
+                // Koordinat Planet (Center 170, 170)
+                // Orbit 1 (Juz): R = 62
+                const xJuz = 170 + 62 * Math.cos(juzRad);
+                const yJuz = 170 + 62 * Math.sin(juzRad);
 
-                {/* STATUS DRAG AKTIF INDIKATOR */}
-                {isDraggingRing && (
-                  <div className="text-center mb-1">
-                    <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider animate-pulse shadow-md">
-                      <span>🔄</span>
-                      <span>Memutar Roda {isDraggingRing === 'ayat' ? 'Ayat' : isDraggingRing === 'surah' ? 'Surat' : 'Juz'}...</span>
-                    </span>
-                  </div>
-                )}
+                // Orbit 2 (Surat): R = 104
+                const xSurah = 170 + 104 * Math.cos(surahRad);
+                const ySurah = 170 + 104 * Math.sin(surahRad);
 
-                {/* AREA KONSENTRIK 3 RODA DIAL (PUTAR PAKAI 1 JARI DENGAN NOMOR DI DALAMNYA) */}
-                <div
-                  ref={wheelContainerRef}
-                  onPointerDown={handleWheelPointerDown}
-                  onPointerMove={handleWheelPointerMove}
-                  onPointerUp={handleWheelPointerUp}
-                  onPointerCancel={handleWheelPointerUp}
-                  style={{ touchAction: 'none' }}
-                  className="w-[300px] h-[300px] sm:w-[340px] sm:h-[340px] relative mx-auto my-1 flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
-                  title="Sentuh dan putar lingkaran dengan 1 jari: Luar (Ayat), Tengah (Surat), Dalam (Juz)"
-                >
-                  <svg
-                    className="w-full h-full drop-shadow-2xl"
-                    viewBox="0 0 340 340"
-                    style={{ overflow: 'visible' }}
-                  >
-                    <defs>
-                      <radialGradient id="ayatGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="65%" stopColor="#022c22" />
-                        <stop offset="90%" stopColor="#064e3b" />
-                        <stop offset="100%" stopColor="#047857" />
-                      </radialGradient>
-                      <radialGradient id="surahGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="50%" stopColor="#022c22" />
-                        <stop offset="85%" stopColor="#065f46" />
-                        <stop offset="100%" stopColor="#0f766e" />
-                      </radialGradient>
-                      <radialGradient id="juzGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="50%" stopColor="#064e3b" />
-                        <stop offset="85%" stopColor="#047857" />
-                        <stop offset="100%" stopColor="#059669" />
-                      </radialGradient>
-                    </defs>
+                // Orbit 3 (Ayat): R = 146
+                const xAyat = 170 + 146 * Math.cos(ayatRad);
+                const yAyat = 170 + 146 * Math.sin(ayatRad);
 
-                    {/* ======================================================== */}
-                    {/* 1. RODA PALING LUAR: AYAT (Radius 144, tebal 42) */}
-                    {/* ======================================================== */}
-                    <g
-                      transform={`rotate(${ayatRotation} 170 170)`}
-                      style={{ transition: isDraggingRing === 'ayat' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                return (
+                  <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-emerald-950 via-slate-900 to-emerald-950 rounded-3xl p-4 sm:p-5 border border-emerald-500/30 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                    {/* Background Kaligrafi & Ornamen Air Islam */}
+                    <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
+                      <span className="text-[260px] font-serif leading-none select-none text-emerald-400">۞</span>
+                    </div>
+
+                    {/* Header Judul Tata Surya */}
+                    <div className="text-center relative z-10 mb-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                        <span>☀️</span>
+                        <span>Sistem Tata Surya Al-Qur'an</span>
+                        <span>۞</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-200/90 mt-1 font-medium">
+                        Putar 3 planet pada poros orbitnya: <strong>Planet Juz</strong> (Dalam) • <strong>Planet Surat</strong> (Tengah) • <strong>Planet Ayat</strong> (Luar)
+                      </p>
+                    </div>
+
+                    {/* 3 KAPSUL PLANET DENGAN STEPPER [-] DAN [+] (PERMUDAH & PERINGAN) */}
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2 relative z-20 mb-2">
+                      {/* Kapsul Planet Juz */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-emerald-500/40 rounded-xl px-1 py-1 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => handleRotateJuz(-1)}
+                          className="w-6 h-6 rounded-lg bg-emerald-900/40 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Juz Sebelumnya"
+                        >
+                          -
+                        </button>
+                        <div className="text-center px-1 overflow-hidden">
+                          <span className="text-[9px] uppercase tracking-wider text-emerald-400 font-bold block leading-none">Juz</span>
+                          <span className="text-xs sm:text-sm font-black text-white leading-tight font-mono">{wheelJuzNum}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRotateJuz(1)}
+                          className="w-6 h-6 rounded-lg bg-emerald-900/40 hover:bg-emerald-800 text-emerald-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Juz Berikutnya"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Kapsul Planet Surat */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-sky-500/40 rounded-xl px-1 py-1 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => handleRotateSurah(-1)}
+                          className="w-6 h-6 rounded-lg bg-sky-900/40 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Surat Sebelumnya"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowSurahPickerModal(true)}
+                          className="text-center px-1 overflow-hidden cursor-pointer hover:opacity-90 flex-1 min-w-0"
+                          title="Klik untuk memilih dari 114 Surat"
+                        >
+                          <span className="text-[9px] uppercase tracking-wider text-sky-400 font-bold block leading-none">Surat</span>
+                          <span className="text-[11px] sm:text-xs font-black text-white leading-tight block truncate">
+                            {quickSurahNum}. {currentQuickSurah.namaLatin}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRotateSurah(1)}
+                          className="w-6 h-6 rounded-lg bg-sky-900/40 hover:bg-sky-800 text-sky-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Surat Berikutnya"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Kapsul Planet Ayat */}
+                      <div className="flex items-center justify-between bg-slate-950/80 border border-amber-500/40 rounded-xl px-1 py-1 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => handleRotateAyat(-1)}
+                          className="w-6 h-6 rounded-lg bg-amber-900/40 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Ayat Sebelumnya"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowAyatGridPicker(true)}
+                          className="text-center px-1 overflow-hidden cursor-pointer hover:opacity-90 flex-1 min-w-0"
+                          title="Klik untuk memilih nomor ayat dari grid"
+                        >
+                          <span className="text-[9px] uppercase tracking-wider text-amber-400 font-bold block leading-none">Ayat</span>
+                          <span className="text-xs sm:text-sm font-black text-amber-300 leading-tight block font-mono">
+                            {quickAyatNum}<span className="text-[10px] text-slate-400 font-normal">/{totalAyat}</span>
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRotateAyat(1)}
+                          className="w-6 h-6 rounded-lg bg-amber-900/40 hover:bg-amber-800 text-amber-300 font-black text-xs flex items-center justify-center cursor-pointer active:scale-90 transition shrink-0"
+                          title="Ayat Berikutnya"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* INDIKATOR STATUS ORBIT DRAG */}
+                    {isDraggingRing && (
+                      <div className="text-center mb-1">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider animate-pulse shadow-md">
+                          <span>🪐</span>
+                          <span>Mengorbitkan {isDraggingRing === 'ayat' ? 'Planet Ayat' : isDraggingRing === 'surah' ? 'Planet Surat' : 'Planet Juz'}...</span>
+                        </span>
+                      </div>
+                    )}
+
+                    {/* AREA SVG TATA SURYA AL-QUR'AN (1-FINGER GLIDE ORBIT TRACKING) */}
+                    <div
+                      ref={wheelContainerRef}
+                      onPointerDown={handleWheelPointerDown}
+                      onPointerMove={handleWheelPointerMove}
+                      onPointerUp={handleWheelPointerUp}
+                      onPointerCancel={handleWheelPointerUp}
+                      style={{ touchAction: 'none' }}
+                      className="w-[300px] h-[300px] sm:w-[340px] sm:h-[340px] relative mx-auto my-1 flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+                      title="Sentuh & putar planet dengan 1 jari: Luar (Ayat), Tengah (Surat), Dalam (Juz). Klik matahari tengah untuk membaca."
                     >
-                      {/* Background Track Ring Ayat */}
-                      <circle
-                        cx="170"
-                        cy="170"
-                        r="144"
-                        stroke="url(#ayatGrad)"
-                        strokeWidth="42"
-                        fill="none"
-                        opacity={isDraggingRing === 'ayat' ? '1' : '0.92'}
-                      />
-                      {/* Garis batas pinggir ring */}
-                      <circle cx="170" cy="170" r="165" stroke={isDraggingRing === 'ayat' ? '#fbbf24' : '#10b981'} strokeWidth="1.2" fill="none" opacity="0.6" strokeDasharray="3 3" />
-                      <circle cx="170" cy="170" r="123" stroke="#f59e0b" strokeWidth="1" fill="none" opacity="0.5" />
+                      <svg
+                        className="w-full h-full drop-shadow-2xl"
+                        viewBox="0 0 340 340"
+                        style={{ overflow: 'visible' }}
+                      >
+                        <defs>
+                          {/* Gradien Langit Kosmos */}
+                          <radialGradient id="solarSpaceGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="#042f2e" stopOpacity="0.5" />
+                            <stop offset="65%" stopColor="#021c14" stopOpacity="0.85" />
+                            <stop offset="100%" stopColor="#01100b" stopOpacity="0.98" />
+                          </radialGradient>
 
-                      {/* Ticks & Nomor Ayat di dalam Roda Luar */}
-                      {(() => {
-                        const total = currentQuickSurah.jumlahAyat;
-                        const step = 360 / total;
-                        const items = [];
-                        for (let a = 1; a <= total; a++) {
-                          const ang = (a - 1) * step - 90;
-                          const rad = (ang * Math.PI) / 180;
-                          const isMajor = a === 1 || a % 5 === 0 || a === total;
-                          const isSelected = a === quickAyatNum;
-                          const isNearActive = Math.abs(a - quickAyatNum) <= 2 || (total - Math.abs(a - quickAyatNum) <= 2);
+                          {/* Gradien Matahari (Sun) */}
+                          <radialGradient id="sunSphereGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#fffbeb" />
+                            <stop offset="25%" stopColor="#fef08a" />
+                            <stop offset="60%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#b45309" />
+                          </radialGradient>
 
-                          // Radial tick marks
-                          const tickLen = isMajor ? 5 : 2.5;
-                          const x1 = 170 + 163 * Math.cos(rad);
-                          const y1 = 170 + 163 * Math.sin(rad);
-                          const x2 = 170 + (163 - tickLen) * Math.cos(rad);
-                          const y2 = 170 + (163 - tickLen) * Math.sin(rad);
+                          {/* Gradien Planet Juz (Emerald) */}
+                          <radialGradient id="planetJuzGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#a7f3d0" />
+                            <stop offset="50%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#064e3b" />
+                          </radialGradient>
 
-                          items.push(
-                            <line
-                              key={`at-${a}`}
-                              x1={x1}
-                              y1={y1}
-                              x2={x2}
-                              y2={y2}
-                              stroke={isSelected ? '#fbbf24' : isMajor ? '#34d399' : '#047857'}
-                              strokeWidth={isSelected ? '2' : isMajor ? '1.2' : '0.6'}
-                            />
-                          );
+                          {/* Gradien Planet Surat (Sky / Sapphire) */}
+                          <radialGradient id="planetSurahGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#bae6fd" />
+                            <stop offset="50%" stopColor="#0ea5e9" />
+                            <stop offset="100%" stopColor="#075985" />
+                          </radialGradient>
 
-                          // Nomor ayat tercetak di dalam roda
-                          if (total <= 40 || isMajor || isNearActive) {
-                            const xText = 170 + 144 * Math.cos(rad);
-                            const yText = 170 + 144 * Math.sin(rad);
-                            items.push(
-                              <text
-                                key={`an-${a}`}
-                                x={xText}
-                                y={yText}
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                fontSize={isSelected ? '10' : total > 60 ? '7' : '8'}
-                                fontWeight={isSelected ? '900' : 'bold'}
-                                fill={isSelected ? '#fbbf24' : '#a7f3d0'}
-                                className="font-mono select-none pointer-events-none"
-                              >
-                                {a}
-                              </text>
+                          {/* Gradien Planet Ayat (Amber / Gold) */}
+                          <radialGradient id="planetAyatGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#fef08a" />
+                            <stop offset="50%" stopColor="#f59e0b" />
+                            <stop offset="100%" stopColor="#92400e" />
+                          </radialGradient>
+
+                          {/* Filter Glow Atmosfer */}
+                          <filter id="solarGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="6" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                          </filter>
+                          <filter id="planetGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                          </filter>
+                        </defs>
+
+                        {/* Background Disk Langit Kosmik */}
+                        <circle cx="170" cy="170" r="169" fill="url(#solarSpaceGrad)" />
+                        <circle cx="170" cy="170" r="168" stroke="#10b981" strokeWidth="1" opacity="0.3" fill="none" />
+                        <circle cx="170" cy="170" r="165" stroke="#f59e0b" strokeWidth="0.6" opacity="0.25" strokeDasharray="3 3" fill="none" />
+
+                        {/* Bintang-bintang Kosmis Statis */}
+                        <text x="45" y="60" fontSize="8" fill="#34d399" opacity="0.5" textAnchor="middle">✦</text>
+                        <text x="295" y="70" fontSize="8" fill="#f59e0b" opacity="0.5" textAnchor="middle">✦</text>
+                        <text x="50" y="275" fontSize="7" fill="#38bdf8" opacity="0.4" textAnchor="middle">✧</text>
+                        <text x="290" y="270" fontSize="7" fill="#34d399" opacity="0.4" textAnchor="middle">✧</text>
+
+                        {/* ======================================================== */}
+                        {/* LINTASAN ORBIT 3 (AYAT - POROS LUAR, R = 146)            */}
+                        {/* ======================================================== */}
+                        <circle
+                          cx="170"
+                          cy="170"
+                          r="146"
+                          fill="none"
+                          stroke={isDraggingRing === 'ayat' ? '#fbbf24' : '#f59e0b'}
+                          strokeWidth={isDraggingRing === 'ayat' ? '2' : '1.2'}
+                          strokeDasharray="4 4"
+                          opacity={isDraggingRing === 'ayat' ? 0.9 : 0.45}
+                        />
+                        {/* Waypoints Orbit Ayat */}
+                        {(() => {
+                          const dots = [];
+                          const step = 360 / totalAyat;
+                          for (let a = 1; a <= totalAyat; a++) {
+                            if (totalAyat <= 30 || a === 1 || a % 5 === 0 || a === totalAyat) {
+                              const ang = (a - 1) * step - 90;
+                              const rad = (ang * Math.PI) / 180;
+                              const wx = 170 + 146 * Math.cos(rad);
+                              const wy = 170 + 146 * Math.sin(rad);
+                              const isSelected = a === quickAyatNum;
+                              dots.push(
+                                <circle
+                                  key={`aw-${a}`}
+                                  cx={wx}
+                                  cy={wy}
+                                  r={isSelected ? 3 : 1.5}
+                                  fill={isSelected ? '#fbbf24' : '#a16207'}
+                                  opacity={isSelected ? 1 : 0.6}
+                                />
+                              );
+                            }
+                          }
+                          return dots;
+                        })()}
+
+                        {/* ======================================================== */}
+                        {/* LINTASAN ORBIT 2 (SURAT - POROS TENGAH, R = 104)          */}
+                        {/* ======================================================== */}
+                        <circle
+                          cx="170"
+                          cy="170"
+                          r="104"
+                          fill="none"
+                          stroke={isDraggingRing === 'surah' ? '#38bdf8' : '#0ea5e9'}
+                          strokeWidth={isDraggingRing === 'surah' ? '2' : '1.2'}
+                          strokeDasharray="4 4"
+                          opacity={isDraggingRing === 'surah' ? 0.9 : 0.45}
+                        />
+                        {/* Waypoints Orbit Surat (114 Surah) */}
+                        {(() => {
+                          const dots = [];
+                          const step = 360 / 114;
+                          for (let s = 1; s <= 114; s++) {
+                            if (s === 1 || s % 10 === 0 || s === 36 || s === 67 || s === 114) {
+                              const ang = (s - 1) * step - 90;
+                              const rad = (ang * Math.PI) / 180;
+                              const wx = 170 + 104 * Math.cos(rad);
+                              const wy = 170 + 104 * Math.sin(rad);
+                              const isSelected = s === quickSurahNum;
+                              dots.push(
+                                <circle
+                                  key={`sw-${s}`}
+                                  cx={wx}
+                                  cy={wy}
+                                  r={isSelected ? 3 : 1.5}
+                                  fill={isSelected ? '#38bdf8' : '#0369a1'}
+                                  opacity={isSelected ? 1 : 0.6}
+                                />
+                              );
+                            }
+                          }
+                          return dots;
+                        })()}
+
+                        {/* ======================================================== */}
+                        {/* LINTASAN ORBIT 1 (JUZ - POROS DALAM, R = 62)              */}
+                        {/* ======================================================== */}
+                        <circle
+                          cx="170"
+                          cy="170"
+                          r="62"
+                          fill="none"
+                          stroke={isDraggingRing === 'juz' ? '#34d399' : '#10b981'}
+                          strokeWidth={isDraggingRing === 'juz' ? '2' : '1.2'}
+                          strokeDasharray="3 3"
+                          opacity={isDraggingRing === 'juz' ? 0.9 : 0.5}
+                        />
+                        {/* Waypoints Orbit Juz (30 Juz) */}
+                        {(() => {
+                          const dots = [];
+                          for (let j = 1; j <= 30; j++) {
+                            const ang = (j - 1) * 12 - 90;
+                            const rad = (ang * Math.PI) / 180;
+                            const wx = 170 + 62 * Math.cos(rad);
+                            const wy = 170 + 62 * Math.sin(rad);
+                            const isSelected = j === wheelJuzNum;
+                            const isMajor = j === 1 || j % 5 === 0 || j === 30;
+                            dots.push(
+                              <circle
+                                key={`jw-${j}`}
+                                cx={wx}
+                                cy={wy}
+                                r={isSelected ? 3 : isMajor ? 2 : 1.2}
+                                fill={isSelected ? '#34d399' : '#065f46'}
+                                opacity={isSelected ? 1 : 0.6}
+                              />
                             );
                           }
-                        }
-                        return items;
-                      })()}
-                    </g>
+                          return dots;
+                        })()}
 
-                    {/* ======================================================== */}
-                    {/* 2. RODA TENGAH: SURAT (Radius 99, tebal 42) */}
-                    {/* ======================================================== */}
-                    <g
-                      transform={`rotate(${surahRotation} 170 170)`}
-                      style={{ transition: isDraggingRing === 'surah' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                        {/* Garis Penunjuk Jam 12 (Puncak Sumbu Utama) */}
+                        <line x1="170" y1="6" x2="170" y2="28" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 2" opacity="0.6" />
+
+                        {/* ======================================================== */}
+                        {/* PLANET 1: JUZ (Orbit Dalam, R = 62)                       */}
+                        {/* ======================================================== */}
+                        <g>
+                          {/* Halo Atmosfer Planet Juz */}
+                          <circle
+                            cx={xJuz}
+                            cy={yJuz}
+                            r="17"
+                            fill="none"
+                            stroke="#6ee7b7"
+                            strokeWidth="1.2"
+                            opacity="0.7"
+                            filter="url(#planetGlow)"
+                          />
+                          {/* Bola Planet Juz */}
+                          <circle
+                            cx={xJuz}
+                            cy={yJuz}
+                            r="13.5"
+                            fill="url(#planetJuzGrad)"
+                            stroke="#34d399"
+                            strokeWidth="1.5"
+                          />
+                          {/* Angka Juz di Dalam Planet (Tegak Lurus & Natural) */}
+                          <text
+                            x={xJuz}
+                            y={yJuz}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize="9"
+                            fontWeight="900"
+                            fill="#ffffff"
+                            className="font-mono select-none pointer-events-none"
+                          >
+                            {wheelJuzNum}
+                          </text>
+                        </g>
+
+                        {/* ======================================================== */}
+                        {/* PLANET 2: SURAT (Orbit Tengah, R = 104)                   */}
+                        {/* ======================================================== */}
+                        <g>
+                          {/* Halo Atmosfer Planet Surat */}
+                          <circle
+                            cx={xSurah}
+                            cy={ySurah}
+                            r="19"
+                            fill="none"
+                            stroke="#7dd3fc"
+                            strokeWidth="1.2"
+                            opacity="0.75"
+                            filter="url(#planetGlow)"
+                          />
+                          {/* Bola Planet Surat */}
+                          <circle
+                            cx={xSurah}
+                            cy={ySurah}
+                            r="15"
+                            fill="url(#planetSurahGrad)"
+                            stroke="#38bdf8"
+                            strokeWidth="1.5"
+                          />
+                          {/* Angka Surat di Dalam Planet (Tegak Lurus & Natural) */}
+                          <text
+                            x={xSurah}
+                            y={ySurah}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize="9.5"
+                            fontWeight="900"
+                            fill="#ffffff"
+                            className="font-mono select-none pointer-events-none"
+                          >
+                            {quickSurahNum}
+                          </text>
+                        </g>
+
+                        {/* ======================================================== */}
+                        {/* PLANET 3: AYAT (Orbit Luar, R = 146)                      */}
+                        {/* ======================================================== */}
+                        <g>
+                          {/* Halo Atmosfer Planet Ayat */}
+                          <circle
+                            cx={xAyat}
+                            cy={yAyat}
+                            r="20.5"
+                            fill="none"
+                            stroke="#fde047"
+                            strokeWidth="1.5"
+                            opacity="0.8"
+                            filter="url(#planetGlow)"
+                          />
+                          {/* Bola Planet Ayat */}
+                          <circle
+                            cx={xAyat}
+                            cy={yAyat}
+                            r="16.5"
+                            fill="url(#planetAyatGrad)"
+                            stroke="#fbbf24"
+                            strokeWidth="1.8"
+                          />
+                          {/* Angka Ayat di Dalam Planet (Tegak Lurus & Natural) */}
+                          <text
+                            x={xAyat}
+                            y={yAyat}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize="10"
+                            fontWeight="900"
+                            fill="#0f172a"
+                            className="font-mono select-none pointer-events-none"
+                          >
+                            {quickAyatNum}
+                          </text>
+                        </g>
+
+                        {/* ======================================================== */}
+                        {/* MATAHARI DI PUSAT TATA SURYA (SUN CORONA & MEDALLION)     */}
+                        {/* ======================================================== */}
+                        {/* Piringan Korona Matahari Luar */}
+                        <circle
+                          cx="170"
+                          cy="170"
+                          r="35"
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth="1.5"
+                          strokeDasharray="4 2"
+                          opacity="0.6"
+                        />
+                        {/* Bola Surya Bercahaya */}
+                        <circle
+                          cx="170"
+                          cy="170"
+                          r="30"
+                          fill="url(#sunSphereGrad)"
+                          stroke="#fde047"
+                          strokeWidth="1.8"
+                          filter="url(#solarGlow)"
+                        />
+                      </svg>
+
+                      {/* TOMBOL MATAHARI TENGAH ( اقْرَأْ / BACA ) */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenSurah(currentQuickSurah, quickAyatNum);
+                        }}
+                        className="absolute z-40 w-15 h-15 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-2xl border-2 border-amber-100 hover:scale-108 active:scale-95 transition-transform group cursor-pointer"
+                        title={`Klik untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
+                      >
+                        <span className="font-quran-lpmq text-base sm:text-lg leading-none font-bold text-slate-950 drop-shadow-xs group-hover:scale-110 transition-transform">
+                          اقْرَأْ
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-wider leading-none mt-0.5 text-slate-950">
+                          BACA
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* TOMBOL UTAMA BUKA SURAT & AYAT DI BAWAH TATA SURYA */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
+                      className="w-full mt-3 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition cursor-pointer"
                     >
-                      {/* Background Track Ring Surat */}
-                      <circle
-                        cx="170"
-                        cy="170"
-                        r="99"
-                        stroke="url(#surahGrad)"
-                        strokeWidth="42"
-                        fill="none"
-                        opacity={isDraggingRing === 'surah' ? '1' : '0.92'}
-                      />
-                      <circle cx="170" cy="170" r="120" stroke={isDraggingRing === 'surah' ? '#fbbf24' : '#f59e0b'} strokeWidth="1.2" fill="none" opacity="0.6" strokeDasharray="3 3" />
-                      <circle cx="170" cy="170" r="78" stroke="#10b981" strokeWidth="1" fill="none" opacity="0.5" />
-
-                      {/* Ticks & Nomor Surat 1..114 di dalam Roda Tengah */}
-                      {(() => {
-                        const step = 360 / 114;
-                        const items = [];
-                        for (let s = 1; s <= 114; s++) {
-                          const ang = (s - 1) * step - 90;
-                          const rad = (ang * Math.PI) / 180;
-                          const isMajor = s === 1 || s % 5 === 0 || s === 114;
-                          const isSelected = s === quickSurahNum;
-                          const isNearActive = Math.abs(s - quickSurahNum) <= 2 || (114 - Math.abs(s - quickSurahNum) <= 2);
-
-                          const tickLen = isMajor ? 5 : 2.5;
-                          const x1 = 170 + 118 * Math.cos(rad);
-                          const y1 = 170 + 118 * Math.sin(rad);
-                          const x2 = 170 + (118 - tickLen) * Math.cos(rad);
-                          const y2 = 170 + (118 - tickLen) * Math.sin(rad);
-
-                          items.push(
-                            <line
-                              key={`st-${s}`}
-                              x1={x1}
-                              y1={y1}
-                              x2={x2}
-                              y2={y2}
-                              stroke={isSelected ? '#fbbf24' : isMajor ? '#f59e0b' : '#047857'}
-                              strokeWidth={isSelected ? '2' : isMajor ? '1.2' : '0.5'}
-                              opacity={isMajor ? 0.9 : 0.4}
-                            />
-                          );
-
-                          // Nomor surat tercetak di dalam roda
-                          if (isMajor || isNearActive) {
-                            const xText = 170 + 99 * Math.cos(rad);
-                            const yText = 170 + 99 * Math.sin(rad);
-                            items.push(
-                              <text
-                                key={`sn-${s}`}
-                                x={xText}
-                                y={yText}
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                fontSize={isSelected ? '9.5' : '7.5'}
-                                fontWeight={isSelected ? '900' : 'bold'}
-                                fill={isSelected ? '#fef08a' : isMajor ? '#fde68a' : '#6ee7b7'}
-                                className="font-mono select-none pointer-events-none"
-                              >
-                                {s}
-                              </text>
-                            );
-                          }
-                        }
-                        return items;
-                      })()}
-                    </g>
-
-                    {/* ======================================================== */}
-                    {/* 3. RODA PALING DALAM: JUZ (Radius 57, tebal 38) */}
-                    {/* ======================================================== */}
-                    <g
-                      transform={`rotate(${juzRotation} 170 170)`}
-                      style={{ transition: isDraggingRing === 'juz' ? 'none' : 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-                    >
-                      {/* Background Track Ring Juz */}
-                      <circle
-                        cx="170"
-                        cy="170"
-                        r="57"
-                        stroke="url(#juzGrad)"
-                        strokeWidth="38"
-                        fill="none"
-                        opacity={isDraggingRing === 'juz' ? '1' : '0.95'}
-                      />
-                      <circle cx="170" cy="170" r="76" stroke={isDraggingRing === 'juz' ? '#fbbf24' : '#fbbf24'} strokeWidth="1" fill="none" opacity="0.6" />
-                      <circle cx="170" cy="170" r="38" stroke="#34d399" strokeWidth="1.2" fill="none" opacity="0.6" />
-
-                      {/* 30 Nomor Juz 1..30 tercetak lengkap di dalam roda */}
-                      {(() => {
-                        const items = [];
-                        for (let j = 1; j <= 30; j++) {
-                          const ang = (j - 1) * 12 - 90;
-                          const rad = (ang * Math.PI) / 180;
-                          const isSelected = j === wheelJuzNum;
-
-                          // Tick
-                          const x1 = 170 + 74 * Math.cos(rad);
-                          const y1 = 170 + 74 * Math.sin(rad);
-                          const x2 = 170 + 70 * Math.cos(rad);
-                          const y2 = 170 + 70 * Math.sin(rad);
-
-                          items.push(
-                            <line
-                              key={`jt-${j}`}
-                              x1={x1}
-                              y1={y1}
-                              x2={x2}
-                              y2={y2}
-                              stroke={isSelected ? '#fbbf24' : '#10b981'}
-                              strokeWidth={isSelected ? '2' : '0.8'}
-                            />
-                          );
-
-                          // Angka Juz 1..30
-                          const xText = 170 + 57 * Math.cos(rad);
-                          const yText = 170 + 57 * Math.sin(rad);
-                          items.push(
-                            <text
-                              key={`jn-${j}`}
-                              x={xText}
-                              y={yText}
-                              textAnchor="middle"
-                              dominantBaseline="central"
-                              fontSize={isSelected ? '9' : '7'}
-                              fontWeight={isSelected ? '900' : 'bold'}
-                              fill={isSelected ? '#fbbf24' : '#ecfdf5'}
-                              className="font-mono select-none pointer-events-none"
-                            >
-                              {j}
-                            </text>
-                          );
-                        }
-                        return items;
-                      })()}
-                    </g>
-
-                    {/* ======================================================== */}
-                    {/* 4. JARUM PENUNJUK EMAS (Puncak Jam 12 / Needle Marker) */}
-                    {/* ======================================================== */}
-                    <g className="pointer-events-none">
-                      {/* Garis lurus penunjuk poros atas */}
-                      <line x1="170" y1="4" x2="170" y2="40" stroke="#f59e0b" strokeWidth="2" strokeDasharray="2 2" opacity="0.85" />
-                      {/* Segitiga Emas Penunjuk Puncak */}
-                      <polygon points="170,18 163,4 177,4" fill="#fbbf24" stroke="#78350f" strokeWidth="1" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.6))" />
-                    </g>
-                  </svg>
-
-                  {/* ======================================================== */}
-                  {/* 5. PUSAT RODA: MEDALLION KALIGRAFI ISLAM & TOMBOL BACA */}
-                  {/* ======================================================== */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenSurah(currentQuickSurah, quickAyatNum);
-                    }}
-                    className="absolute z-40 w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-slate-950 font-black flex flex-col items-center justify-center shadow-2xl border-2 border-amber-200 hover:scale-105 active:scale-95 transition-transform group cursor-pointer"
-                    title={`Klik untuk Buka QS. ${currentQuickSurah.namaLatin} Ayat ${quickAyatNum}`}
-                  >
-                    <span className="font-quran-lpmq text-base sm:text-lg leading-none font-bold text-slate-950 drop-shadow-xs group-hover:scale-110 transition-transform">
-                      اقْرَأْ
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tighter leading-none mt-0.5 text-slate-950">
-                      BACA
-                    </span>
-                  </button>
-                </div>
-
-                {/* TOMBOL UTAMA BUKA SURAT & AYAT DI BAWAH RODA */}
-                <button
-                  type="button"
-                  onClick={() => handleOpenSurah(currentQuickSurah, quickAyatNum)}
-                  className="w-full mt-3 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4 text-slate-950 fill-current" />
-                  <span>Buka QS. {currentQuickSurah.namaLatin} Ayat {quickAyatNum} (Juz {wheelJuzNum})</span>
-                  <ArrowRight className="w-4 h-4 stroke-[3]" />
-                </button>
-              </div>
+                      <BookOpen className="w-4 h-4 text-slate-950 fill-current" />
+                      <span>Buka QS. {currentQuickSurah.namaLatin} Ayat {quickAyatNum} (Juz {wheelJuzNum})</span>
+                      <ArrowRight className="w-4 h-4 stroke-[3]" />
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* ======================================================== */}
               {/* DIBAWAH RODA NAVIGASI: PILIHAN KHATAMAN & CATATAN USER    */}
@@ -4000,468 +4115,328 @@ export default function AlQuranModal({ onClose }) {
         {/* ======================================================== */}
         {/* MODAL 2: PENGATURAN LENGKAP                               */}
         {/* ======================================================== */}
+        {/* ======================================================== */}
+        {/* MODAL 2: PENGATURAN AL-QUR'AN (MINIMALIS & 1-TAP CHIPS)  */}
+        {/* ======================================================== */}
         {showSettingsModal && (
           <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
-            <div className={`w-full max-w-md max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
+            <div className={`w-full max-w-md max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
               {/* Header Hijau Pengaturan */}
               <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-amber-300" />
-                  <h3 className="text-base font-black">Pengaturan Al-Qur'an</h3>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black leading-tight">Pengaturan Al-Qur'an</h3>
+                    <p className="text-[10px] text-emerald-200 font-medium">Kustomisasi tampilan & kenyamanan membaca</p>
+                  </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowSettingsModal(false)}
-                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Konten Pengaturan (Opaque & Rapi Tanpa Tumpang Tindih) */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs font-bold">
-                {/* 1. SLIDER HURUF ARAB DENGAN TOMBOL [-] DAN [+] */}
-                <div className={`space-y-1.5 p-3 rounded-2xl border ${
-                  isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-black">Ukuran Huruf Arab</span>
-                    <span className="font-mono text-sm px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 font-black rounded-lg border border-emerald-400">
-                      {arabicFontSize} px
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleArabicSizeChange(arabicFontSize - 2)}
-                      className={`w-9 h-9 rounded-xl font-black text-base flex items-center justify-center active:scale-95 transition ${
-                        isDark ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-white hover:bg-slate-200 text-slate-800 border border-slate-200'
-                      }`}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="range"
-                      min="18"
-                      max="46"
-                      value={arabicFontSize}
-                      onChange={(e) => handleArabicSizeChange(parseInt(e.target.value, 10))}
-                      className="flex-1 accent-[#0a7c29] cursor-pointer"
-                    />
-                    <button
-                      onClick={() => handleArabicSizeChange(arabicFontSize + 2)}
-                      className={`w-9 h-9 rounded-xl font-black text-base flex items-center justify-center active:scale-95 transition ${
-                        isDark ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-white hover:bg-slate-200 text-slate-800 border border-slate-200'
-                      }`}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* 2. SLIDER HURUF LATIN DENGAN TOMBOL [-] DAN [+] */}
-                <div className={`space-y-1.5 p-3 rounded-2xl border ${
-                  isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-black">Ukuran Huruf Terjemahan</span>
-                    <span className="font-mono text-sm px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 font-black rounded-lg border border-emerald-400">
-                      {latinFontSize} px
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleLatinSizeChange(latinFontSize - 1)}
-                      className={`w-9 h-9 rounded-xl font-black text-base flex items-center justify-center active:scale-95 transition ${
-                        isDark ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-white hover:bg-slate-200 text-slate-800 border border-slate-200'
-                      }`}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="range"
-                      min="12"
-                      max="24"
-                      value={latinFontSize}
-                      onChange={(e) => handleLatinSizeChange(parseInt(e.target.value, 10))}
-                      className="flex-1 accent-[#0a7c29] cursor-pointer"
-                    />
-                    <button
-                      onClick={() => handleLatinSizeChange(latinFontSize + 1)}
-                      className={`w-9 h-9 rounded-xl font-black text-base flex items-center justify-center active:scale-95 transition ${
-                        isDark ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-white hover:bg-slate-200 text-slate-800 border border-slate-200'
-                      }`}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* 3. SECTION: PILIHAN MUSHAF & TULISAN ARAB (HANYA INDONESIA, MADINAH, MODERN) */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black flex items-center justify-between">
-                    <span>Pilihan Tulisan Arab & Mushaf</span>
-                    <span className="text-[10px] font-bold lowercase opacity-75">3 Pilihan Resmi</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      {
-                        id: 'indonesia',
-                        name: 'Mushaf Indonesia',
-                        desc: 'Standar Kemenag RI (LPMQ)',
-                        fontClass: 'font-quran-lpmq',
-                        sample: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ'
-                      },
-                      {
-                        id: 'madinah',
-                        name: 'Mushaf Madinah',
-                        desc: 'Standar Malik Fahd (Utsmani)',
-                        fontClass: 'font-quran-madinah',
-                        sample: 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ'
-                      },
-                      {
-                        id: 'modern',
-                        name: 'Mushaf Modern',
-                        desc: 'Noto Naskh Modern Digital',
-                        fontClass: 'font-quran-modern',
-                        sample: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'
-                      }
-                    ].map((mushaf) => (
-                      <button
-                        key={mushaf.id}
-                        type="button"
-                        onClick={() => handleMushafTypeChange(mushaf.id)}
-                        className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
-                          mushafType === mushaf.id
-                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-md ring-2 ring-emerald-400'
-                            : isDark
-                            ? 'bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-600'
-                            : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-emerald-300'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-black text-xs block leading-tight">{mushaf.name}</span>
-                          <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            mushafType === mushaf.id ? 'border-amber-300 bg-amber-400' : 'border-slate-400'
-                          }`} />
-                        </div>
-                        <span className="text-[10px] opacity-80 block leading-tight mb-2">{mushaf.desc}</span>
-                        <span
-                          className={`${mushaf.fontClass} text-lg block text-right font-medium tracking-wide mt-auto ${
-                            mushafType === mushaf.id ? 'text-amber-300' : 'text-[#0a7c29] dark:text-emerald-400'
-                          }`}
-                          dir="rtl"
-                        >
-                          {mushaf.sample}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Status Pentashihan & Audit Resmi (Discreet & Terverifikasi) */}
-                  <div className={`p-3 rounded-2xl border text-[11px] leading-relaxed transition ${
-                    isDark
-                      ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-200/90'
-                      : 'bg-emerald-50/80 border-emerald-300/80 text-emerald-950'
-                  }`}>
-                    <div className="flex items-center gap-1.5 font-black mb-1 text-emerald-800 dark:text-emerald-300">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                      <span>Status Pentashihan & Audit Resmi</span>
-                    </div>
-                    <p className="text-[10px] leading-relaxed opacity-90">
-                      Teks Al-Qur'an telah diaudit 100% lengkap (114 Surah / 6.236 Ayat) bersumber langsung dari otoritas resmi:
-                    </p>
-                    <div className="mt-1 text-[10px] leading-normal opacity-90 space-y-0.5 pl-1">
-                      <div>• <strong>Mushaf Indonesia:</strong> Lajnah Pentashihan Kemenag RI (LPMQ)</div>
-                      <div>• <strong>Mushaf Madinah:</strong> Mujamma' Al-Malik Fahd (King Fahd Complex)</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. SECTION: FITUR TERJEMAH PER KATA (KOSAKATA AYAT) */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black">
-                    Fitur Terjemah Per Kata
-                  </div>
-                  <div className={`flex items-center justify-between p-3.5 rounded-2xl border transition ${
-                    showWordByWord
-                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 shadow-2xs'
-                      : isDark
-                      ? 'bg-slate-800/90 border-slate-700 text-white'
-                      : 'bg-slate-50 border-slate-200 text-slate-900'
-                  }`}>
-                    <div className="space-y-0.5 max-w-[80%]">
-                      <div className="flex items-center gap-2">
-                        <Languages className="w-4 h-4 text-[#0a7c29] dark:text-emerald-400" />
-                        <span className="block text-xs font-black">Terjemah Per Kata (Kosakata Ayat)</span>
-                      </div>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-relaxed">
-                        Tampilkan arti perkata di bawah potongan lafadz Arab untuk mempermudah belajar bahasa Al-Qur'an.
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleToggleWordByWord}
-                      className={`w-12 h-6.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
-                        showWordByWord ? 'bg-[#0a7c29]' : 'bg-slate-300 dark:bg-slate-600'
-                      }`}
-                      title={showWordByWord ? 'Matikan Arti Per Kata' : 'Aktifkan Arti Per Kata'}
-                    >
-                      <div className={`w-5.5 h-5.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out flex items-center justify-center text-[9px] font-bold ${
-                        showWordByWord ? 'translate-x-5 text-emerald-700' : 'translate-x-0.5 text-slate-400'
-                      }`}>
-                        {showWordByWord ? '✓' : ''}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4B. SECTION: PILIHAN WARNA POLOS BACAAN */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black">
-                    Pilihan Warna Background Bacaan (Polos)
+              {/* Konten Pengaturan Minimalis (1-Tap Selection) */}
+              <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 text-xs font-bold">
+                {/* 1. PILIHAN MUSHAF */}
+                <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Pilihan Standar Mushaf</span>
+                    <span className="text-[10px] text-slate-400 font-medium">3 Mushaf Resmi</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5">
                     {[
-                      { id: 'mushaf', name: 'Hijau Kemenag', color: '#d5f5d8', textColor: '#064e3b' },
-                      { id: 'light', name: 'Putih Bersih', color: '#ffffff', textColor: '#0f172a' },
-                      { id: 'sepia', name: 'Kertas Sepia', color: '#fbf6ea', textColor: '#854d0e' },
-                      { id: 'dark', name: 'Hitam Gelap', color: '#09111c', textColor: '#ffffff' },
-                      { id: 'navy', name: 'Biru Malam', color: '#071b2f', textColor: '#7dd3fc' },
-                      { id: 'cream', name: 'Krem Antik', color: '#fdfbf7', textColor: '#18181b' }
-                    ].map((item) => (
+                      { id: 'indonesia', label: 'Indonesia', sub: 'Kemenag RI' },
+                      { id: 'madinah', label: 'Madinah', sub: 'Utsmani' },
+                      { id: 'modern', label: 'Modern', sub: 'Digital' }
+                    ].map((m) => (
                       <button
-                        key={item.id}
-                        onClick={() => handleThemeChange(item.id)}
-                        style={{ backgroundColor: item.color, color: item.textColor }}
-                        className={`py-2 px-1 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black shadow-2xs active:scale-95 ${
-                          themeMode === item.id
-                            ? 'ring-2 ring-[#0a7c29] border-[#0a7c29] scale-102 font-black'
-                            : 'border-slate-300 dark:border-slate-700 opacity-90 hover:opacity-100'
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleMushafTypeChange(m.id)}
+                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                          mushafType === m.id
+                            ? 'bg-[#0a7c29] text-white border-emerald-500 shadow-xs ring-1 ring-emerald-400'
+                            : isDark
+                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                         }`}
                       >
-                        <span>{item.name}</span>
-                        {themeMode === item.id && <span className="text-[9px]">✓ Aktif</span>}
+                        <span className="font-black text-xs leading-none">{m.label}</span>
+                        <span className="text-[9px] opacity-80 font-normal">{m.sub}</span>
+                        {mushafType === m.id && <span className="text-[9px] text-amber-300 font-black">✓ Aktif</span>}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* 5. SECTION: MODE BACA BERSIH (HIDDEN READ) */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black">
-                    Kenyamanan Membaca (Hidden Read)
-                  </div>
-                  <div className={`flex items-center justify-between p-3 rounded-2xl border ${
-                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                  }`}>
-                    <div>
-                      <span className="block text-xs font-black">Mode Baca Bersih (Hidden Read)</span>
-                      <span className="text-[10px] opacity-75 block">Menu aksi (tafsir, salin, share) baru muncul saat ayat diklik</span>
-                    </div>
-                    <button
-                      onClick={() => handleToggleHiddenRead(!hiddenReadMode)}
-                      className={`w-7 h-7 rounded-full border-2 border-slate-700 flex items-center justify-center transition active:scale-95 ${
-                        hiddenReadMode ? 'bg-amber-400' : 'bg-emerald-800'
-                      }`}
-                    >
-                      <span className={`w-2.5 h-2.5 rounded-full ${hiddenReadMode ? 'bg-slate-950' : 'bg-transparent'}`} />
-                    </button>
-                  </div>
+                {/* 2. UKURAN HURUF (ARAB & LATIN/TERJEMAH) */}
+                <div className={`p-3 rounded-2xl border space-y-2.5 ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Ukuran Huruf</span>
 
-                  {/* Pemanjang Huruf (Kashida / Tatweel Sambungan Sejajar) */}
-                  <div className={`p-3 rounded-2xl border transition ${
-                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                  }`}>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <span className="block text-xs font-black">Pemanjang Huruf (Kashida / Sambungan Sejajar)</span>
-                        <span className="text-[10px] opacity-75 block leading-normal mt-0.5">
-                          Mengurai huruf bertumpuk vertikal agar huruf seperti <span className="font-bold">ل</span> pada <span className="font-bold">لَـهُمْ</span> tidak menindih di atas <span className="font-bold">ه</span> melainkan berada <span className="text-emerald-600 dark:text-emerald-400 font-bold">di depan</span> sejajar mendatar, serta huruf <span className="font-bold">ت</span> pada <span className="font-bold">تَـجْرِي</span> dan <span className="font-bold">فَتَـحْنَا</span>.
-                        </span>
+                  {/* Row A: Huruf Arab */}
+                  <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                    <div className="min-w-[70px]">
+                      <span className="text-xs font-black block">Arab</span>
+                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">{arabicFontSize}px</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {[24, 28, 34, 40].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => handleArabicSizeChange(sz)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer ${
+                            arabicFontSize === sz
+                              ? 'bg-[#0a7c29] text-white border-emerald-500 shadow-2xs'
+                              : isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                          }`}
+                        >
+                          {sz === 24 ? 'Kecil' : sz === 28 ? 'Standar' : sz === 34 ? 'Sedang' : 'Besar'}
+                        </button>
+                      ))}
+                      <div className="flex items-center ml-1 border rounded-lg overflow-hidden border-slate-300 dark:border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => handleArabicSizeChange(arabicFontSize - 2)}
+                          className="w-6 h-6 flex items-center justify-center font-black hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleArabicSizeChange(arabicFontSize + 2)}
+                          className="w-6 h-6 flex items-center justify-center font-black hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                        >
+                          +
+                        </button>
                       </div>
                     </div>
-
-                    {/* 3 Opsi Mode Kashida */}
-                    <div className="grid grid-cols-3 gap-1.5 mt-2">
-                      <button
-                        onClick={() => handleChangeKashidaMode('unstack')}
-                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
-                          kashidaMode === 'unstack'
-                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
-                            : isDark
-                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>Sejajar (Rekomendasi)</span>
-                        <span className="text-[8px] opacity-80">Anti-Tumpuk</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleChangeKashidaMode('extra')}
-                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
-                          kashidaMode === 'extra'
-                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
-                            : isDark
-                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>Ekstra Panjang</span>
-                        <span className="text-[8px] opacity-80">Lebar & Renggang</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleChangeKashidaMode('off')}
-                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 text-[10px] font-black active:scale-95 ${
-                          kashidaMode === 'off'
-                            ? 'bg-[#0a7c29] text-white border-[#0a7c29] shadow-xs'
-                            : isDark
-                            ? 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>Kaligrafi Asli</span>
-                        <span className="text-[8px] opacity-80">Rapat Standar</span>
-                      </button>
-                    </div>
-
-                    {/* Live Visual Preview */}
-                    <div className="mt-2.5 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-center">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-emerald-800 dark:text-emerald-300 px-1 mb-1">
-                        <span>Pratinjau Huruf:</span>
-                        <span className="text-[9px] font-normal opacity-75">
-                          {kashidaMode === 'unstack' ? 'Lam di depan Ha • Sejajar' : kashidaMode === 'extra' ? 'Elongasi Luas' : 'Rapat Asli'}
-                        </span>
-                      </div>
-                      <p
-                        className="text-lg sm:text-xl py-1 text-emerald-950 dark:text-emerald-100 font-quran-lpmq select-none"
-                        dir="rtl"
-                      >
-                        {kashidaMode === 'off'
-                          ? 'لَهُمْ • تَجْرِي • فَتَحْنَا • عَلَيْهِمْ'
-                          : kashidaMode === 'extra'
-                          ? applyKashidaToArabic('لَهُمْ • تَجْرِي • فَتَحْنَا • عَلَيْهِمْ', 'extra')
-                          : 'لَـهُمْ • تَـجْرِي • فَتَـحْنَا • عَلَيْـهِمْ'}
-                      </p>
-                    </div>
                   </div>
 
-                  {/* Spasi Lapang / Spacious Reading */}
-                  <div className={`flex items-center justify-between p-3 rounded-2xl border transition ${
-                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                  }`}>
-                    <div className="space-y-0.5 max-w-[80%]">
-                      <span className="block text-xs font-black">Spasi Lapang Antarkata</span>
-                      <span className="text-[10px] opacity-75 block leading-normal">
-                        Memberi jarak jeda antarkata yang lebih lega agar setiap lafadz terpisah dengan jelas dan nyaman dibaca.
-                      </span>
+                  {/* Row B: Huruf Terjemahan & Latin */}
+                  <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex-wrap">
+                    <div className="min-w-[70px]">
+                      <span className="text-xs font-black block">Terjemah</span>
+                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">{latinFontSize}px</span>
                     </div>
-                    <button
-                      onClick={() => handleToggleSpaciousMode(!spaciousMode)}
-                      className={`w-7 h-7 rounded-full border-2 border-slate-700 flex items-center justify-center transition active:scale-95 ${
-                        spaciousMode ? 'bg-amber-400' : 'bg-emerald-800'
-                      }`}
-                    >
-                      <span className={`w-2.5 h-2.5 rounded-full ${spaciousMode ? 'bg-slate-950' : 'bg-transparent'}`} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {[13, 15, 17, 20].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => handleLatinSizeChange(sz)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-black border transition cursor-pointer ${
+                            latinFontSize === sz
+                              ? 'bg-[#0a7c29] text-white border-emerald-500 shadow-2xs'
+                              : isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                          }`}
+                        >
+                          {sz === 13 ? 'Kecil' : sz === 15 ? 'Standar' : sz === 17 ? 'Sedang' : 'Besar'}
+                        </button>
+                      ))}
+                      <div className="flex items-center ml-1 border rounded-lg overflow-hidden border-slate-300 dark:border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => handleLatinSizeChange(latinFontSize - 1)}
+                          className="w-6 h-6 flex items-center justify-center font-black hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleLatinSizeChange(latinFontSize + 1)}
+                          className="w-6 h-6 flex items-center justify-center font-black hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* 6. SECTION: TERJEMAHAN DAN LATIN */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black">
-                    Tampilan Terjemahan & Latin
+                {/* 3. WARNA SUASANA BACKGROUND */}
+                <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block mb-2">Warna Tampilan</span>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {[
+                      { id: 'mushaf', name: 'Hijau', color: '#d5f5d8', border: '#059669' },
+                      { id: 'light', name: 'Putih', color: '#ffffff', border: '#cbd5e1' },
+                      { id: 'sepia', name: 'Sepia', color: '#fbf6ea', border: '#d97706' },
+                      { id: 'dark', name: 'Hitam', color: '#09111c', border: '#475569' },
+                      { id: 'navy', name: 'Navy', color: '#071b2f', border: '#0284c7' },
+                      { id: 'cream', name: 'Krem', color: '#fdfbf7', border: '#a8a29e' }
+                    ].map((thm) => (
+                      <button
+                        key={thm.id}
+                        type="button"
+                        onClick={() => handleThemeChange(thm.id)}
+                        className={`py-2 px-1 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 ${
+                          themeMode === thm.id
+                            ? 'ring-2 ring-emerald-500 border-emerald-500 shadow-xs'
+                            : isDark ? 'border-slate-700 bg-slate-900/60' : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full border shadow-2xs flex items-center justify-center text-[10px]"
+                          style={{ backgroundColor: thm.color, borderColor: thm.border }}
+                        >
+                          {themeMode === thm.id ? '✓' : ''}
+                        </span>
+                        <span className="text-[9px] font-bold leading-tight">{thm.name}</span>
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  <div className={`flex items-center justify-between p-3 rounded-2xl border ${
-                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                  }`}>
-                    <span>Transliterasi Latin</span>
+                {/* 4. FITUR TAMPILAN AYAT (TINGGAL KLIK-KLIK AKTIF/NONAKTIF) */}
+                <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block mb-2">Fitur Tampilan (Tinggal Klik)</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Terjemahan */}
                     <button
-                      onClick={() => setShowLatin(!showLatin)}
-                      className={`w-7 h-7 rounded-full border-2 border-slate-700 flex items-center justify-center transition ${
-                        showLatin ? 'bg-amber-400' : 'bg-emerald-800'
-                      }`}
-                    >
-                      <span className={`w-2.5 h-2.5 rounded-full ${showLatin ? 'bg-slate-950' : 'bg-transparent'}`} />
-                    </button>
-                  </div>
-
-                  <div className={`flex items-center justify-between p-3 rounded-2xl border ${
-                    isDark ? 'bg-slate-800/90 border-slate-700 text-white' : 'bg-slate-50 border-emerald-300 text-slate-900'
-                  }`}>
-                    <span>Terjemahan Indonesia (Kemenag)</span>
-                    <button
+                      type="button"
                       onClick={() => setShowTranslation(!showTranslation)}
-                      className={`w-7 h-7 rounded-full border-2 border-slate-700 flex items-center justify-center transition ${
-                        showTranslation ? 'bg-amber-400' : 'bg-emerald-800'
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        showTranslation
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
                       }`}
                     >
-                      <span className={`w-2.5 h-2.5 rounded-full ${showTranslation ? 'bg-slate-950' : 'bg-transparent'}`} />
+                      <span className="text-xs font-black">Terjemahan</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTranslation ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {showTranslation ? 'ON' : 'OFF'}
+                      </span>
                     </button>
-                  </div>
-                </div>
 
-                {/* 7. SECTION: TAJWID & RINCIAN WARNA */}
-                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <div className="bg-emerald-100 dark:bg-emerald-950/80 py-1 px-3 rounded-lg text-emerald-900 dark:text-emerald-200 text-xs uppercase tracking-wider font-black flex items-center justify-between">
-                    <span>Tajwid & Rincian Warna</span>
+                    {/* Latin */}
                     <button
-                      onClick={handleToggleTajweed}
-                      className={`w-6 h-6 rounded-full border-2 border-slate-700 flex items-center justify-center transition ${
-                        showTajweed ? 'bg-amber-400' : 'bg-emerald-800'
+                      type="button"
+                      onClick={() => setShowLatin(!showLatin)}
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        showLatin
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
                       }`}
                     >
-                      <span className={`w-2 h-2 rounded-full ${showTajweed ? 'bg-slate-950' : 'bg-transparent'}`} />
+                      <span className="text-xs font-black">Tulisan Latin</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showLatin ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {showLatin ? 'ON' : 'OFF'}
+                      </span>
                     </button>
-                  </div>
 
-                  <div className="grid grid-cols-1 gap-2 px-1 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span>Ghunnah & Idgham Bighunnah (Dengung)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#e11d48] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Qalqalah (Pantulan Suara قطبجد)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#2563eb] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Iqlab (Tukar Nun/Tanwin Menjadi Mim)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#7c3aed] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Ikhfa Haqiqi & Syafawi (Samar)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#059669] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Idgham Bilaghunnah (Lebur Tanpa Dengung)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#ea580c] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Mad Wajib & Jaiz (Panjang 4-5 Harakat)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#dc2626] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Mad Lazim (Panjang 6 Harakat)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#991b1b] border border-slate-400 shadow-2xs" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Tafkhim Lam Jalalah (Lafazh Allah Tebal)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#d97706] border border-slate-400 shadow-2xs" />
-                    </div>
+                    {/* Arti Per Kata */}
+                    <button
+                      type="button"
+                      onClick={handleToggleWordByWord}
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        showWordByWord
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
+                      }`}
+                    >
+                      <span className="text-xs font-black">Arti Per Kata</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showWordByWord ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {showWordByWord ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    {/* Tajwid Berwarna */}
+                    <button
+                      type="button"
+                      onClick={handleToggleTajweed}
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        showTajweed
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
+                      }`}
+                    >
+                      <span className="text-xs font-black">Warna Tajwid</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTajweed ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {showTajweed ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    {/* Mode Bersih */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleHiddenRead(!hiddenReadMode)}
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        hiddenReadMode
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
+                      }`}
+                    >
+                      <span className="text-xs font-black">Mode Bersih</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${hiddenReadMode ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {hiddenReadMode ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    {/* Spasi Lapang */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleSpaciousMode(!spaciousMode)}
+                      className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between cursor-pointer active:scale-95 ${
+                        spaciousMode
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-200'
+                          : isDark ? 'bg-slate-900/40 border-slate-700/80 text-slate-400' : 'bg-white border-slate-200 text-slate-400'
+                      }`}
+                    >
+                      <span className="text-xs font-black">Spasi Lapang</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${spaciousMode ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                        {spaciousMode ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
                   </div>
                 </div>
 
-                {/* 8. SECTION: PILIHAN QARI MUROTTAL */}
-                <div className="space-y-1.5 pt-1 border-t border-slate-200 dark:border-slate-800">
-                  <span className="text-xs uppercase tracking-wider font-black opacity-80">Pilihan Qari Murottal:</span>
+                {/* 5. SAMBUNGAN HURUF (KASHIDA SEJAJAR / ANTI-MENUMPUK) */}
+                <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Sambungan Huruf (Kashida)</span>
+                    <span className="text-[10px] text-slate-400">Anti-Menumpuk</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'unstack', label: 'Sejajar', sub: 'Rekomendasi' },
+                      { id: 'off', label: 'Rapat Asli', sub: 'Kaligrafi' },
+                      { id: 'extra', label: 'Ekstra', sub: 'Lebar' }
+                    ].map((k) => (
+                      <button
+                        key={k.id}
+                        type="button"
+                        onClick={() => handleChangeKashidaMode(k.id)}
+                        className={`py-2 px-1.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                          kashidaMode === k.id
+                            ? 'bg-[#0a7c29] text-white border-emerald-500 shadow-xs ring-1 ring-emerald-400'
+                            : isDark ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <span className="font-black text-xs leading-none">{k.label}</span>
+                        <span className="text-[9px] opacity-80 font-normal">{k.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {/* Mini preview */}
+                  <div className="mt-2 p-1.5 rounded-xl bg-emerald-100/50 dark:bg-emerald-950/40 text-center font-quran-lpmq text-base text-emerald-950 dark:text-emerald-200 select-none" dir="rtl">
+                    {kashidaMode === 'off' ? 'لَهُمْ • تَجْرِي • فَتَحْنَا' : 'لَـهُمْ • تَـجْرِي • فَتَـحْنَا'}
+                  </div>
+                </div>
+
+                {/* 6. PILIHAN QARI MUROTTAL */}
+                <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block mb-2">Qari Murottal</span>
                   <select
                     value={selectedQari}
                     onChange={(e) => setSelectedQari(e.target.value)}
-                    className={`w-full p-2.5 rounded-xl border text-xs font-bold ${
-                      isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-emerald-400 text-slate-900'
+                    className={`w-full p-2.5 rounded-xl border text-xs font-bold cursor-pointer ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   >
                     {QARI_LIST.map((q) => (
@@ -4478,8 +4453,9 @@ export default function AlQuranModal({ onClose }) {
                 isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
                 <button
+                  type="button"
                   onClick={() => setShowSettingsModal(false)}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs shadow-md active:scale-95 transition"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs shadow-md active:scale-95 transition cursor-pointer"
                 >
                   Simpan & Tutup
                 </button>
