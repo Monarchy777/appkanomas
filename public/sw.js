@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanomas-cache-v6-semicircle-drum';
+const CACHE_NAME = 'kanomas-cache-v7-lightning-speed';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

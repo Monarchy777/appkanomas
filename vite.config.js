@@ -14,5 +14,17 @@ export default defineConfig({
     watch: {
       ignored: ['**/*.mp3', '**/public/assets/audio/**', '**/public/assets/*.mp3', '**/*.apk', '**/android/**']
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-capacitor': ['@capacitor/core', '@capacitor/share', '@capacitor/filesystem']
+        }
+      }
+    }
   }
 });

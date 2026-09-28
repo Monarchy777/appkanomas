@@ -3,15 +3,17 @@ import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 
 import HomeView from './views/HomeView';
-import PackagesView from './views/PackagesView';
-import WorshipEducationView from './views/WorshipEducationView';
-import PrayerTimesView from './views/PrayerTimesView';
-import AccountView from './views/AccountView';
-import MitraDashboardView from './views/MitraDashboardView';
-import AdminDashboardView from './views/AdminDashboardView';
-import GoogleSignInModal from './components/GoogleSignInModal';
-import UpdateModal from './components/UpdateModal';
 import { APP_BUILD_VERSION, isRemoteVersionNewer, fetchRemoteVersionInfo } from './config/version';
+
+// Code-splitting via React.lazy for instant launch & ultra-lightweight bundle
+const PackagesView = lazy(() => import('./views/PackagesView'));
+const WorshipEducationView = lazy(() => import('./views/WorshipEducationView'));
+const PrayerTimesView = lazy(() => import('./views/PrayerTimesView'));
+const AccountView = lazy(() => import('./views/AccountView'));
+const MitraDashboardView = lazy(() => import('./views/MitraDashboardView'));
+const AdminDashboardView = lazy(() => import('./views/AdminDashboardView'));
+const GoogleSignInModal = lazy(() => import('./components/GoogleSignInModal'));
+const UpdateModal = lazy(() => import('./components/UpdateModal'));
 
 // Code-splitting via React.lazy for instant launch & lightweight bundle
 const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
@@ -199,86 +201,93 @@ export default function App() {
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto">
-        {/* Route Render */}
-        {activeTab === 'home' && (
-          <HomeView
-            packages={packages}
-            mentors={mentors}
-            nextPrayer={prayerInfo.nextPrayer}
-            onSelectTab={handleTabSelect}
-            onOpenQuran={() => setShowQuran(true)}
-            onOpenDzikir={() => setShowDzikir(true)}
-            onOpenDailyPrayers={() => setShowDailyPrayers(true)}
-            onOpenJamaahServices={() => setShowJamaahServices(true)}
-            onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
-            onOpenCounter={() => setShowCounter(true)}
-            onOpenTasbih={() => setShowTasbih(true)}
-            onOpenTalbiyah={() => setShowTalbiyah(true)}
-            onOpenKajian={() => setShowKajian(true)}
-            onOpenSavings={() => setShowSavings(true)}
-            onOpenNusuk={() => setShowNusuk(true)}
-            onOpenChecklist={() => setShowChecklist(true)}
-            onOpenMap={() => setShowMap(true)}
-            onOpenLookup={() => setShowLookup(true)}
-            onBookPackage={(pkg) => setBookingPackage(pkg)}
-            onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
-          />
-        )}
+        <Suspense fallback={
+          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-2.5 py-12">
+            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs font-bold text-slate-400">Memuat...</span>
+          </div>
+        }>
+          {/* Route Render */}
+          {activeTab === 'home' && (
+            <HomeView
+              packages={packages}
+              mentors={mentors}
+              nextPrayer={prayerInfo.nextPrayer}
+              onSelectTab={handleTabSelect}
+              onOpenQuran={() => setShowQuran(true)}
+              onOpenDzikir={() => setShowDzikir(true)}
+              onOpenDailyPrayers={() => setShowDailyPrayers(true)}
+              onOpenJamaahServices={() => setShowJamaahServices(true)}
+              onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
+              onOpenCounter={() => setShowCounter(true)}
+              onOpenTasbih={() => setShowTasbih(true)}
+              onOpenTalbiyah={() => setShowTalbiyah(true)}
+              onOpenKajian={() => setShowKajian(true)}
+              onOpenSavings={() => setShowSavings(true)}
+              onOpenNusuk={() => setShowNusuk(true)}
+              onOpenChecklist={() => setShowChecklist(true)}
+              onOpenMap={() => setShowMap(true)}
+              onOpenLookup={() => setShowLookup(true)}
+              onBookPackage={(pkg) => setBookingPackage(pkg)}
+              onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
+            />
+          )}
 
-        {activeTab === 'packages' && (
-          <PackagesView
-            packages={packages}
-            onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
-            onBookPackage={(pkg) => setBookingPackage(pkg)}
-            onOpenSavings={() => setShowSavings(true)}
-          />
-        )}
+          {activeTab === 'packages' && (
+            <PackagesView
+              packages={packages}
+              onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
+              onBookPackage={(pkg) => setBookingPackage(pkg)}
+              onOpenSavings={() => setShowSavings(true)}
+            />
+          )}
 
-        {activeTab === 'worship' && (
-          <WorshipEducationView
-            onSelectTab={handleTabSelect}
-            onBack={() => handleTabSelect('home')}
-            onOpenCounter={() => setShowCounter(true)}
-            onOpenTasbih={() => setShowTasbih(true)}
-            onOpenTalbiyah={() => setShowTalbiyah(true)}
-            onOpenKajian={() => setShowKajian(true)}
-            onOpenChecklist={() => setShowChecklist(true)}
-            onOpenMap={() => setShowMap(true)}
-            onOpenNusuk={() => setShowNusuk(true)}
-          />
-        )}
+          {activeTab === 'worship' && (
+            <WorshipEducationView
+              onSelectTab={handleTabSelect}
+              onBack={() => handleTabSelect('home')}
+              onOpenCounter={() => setShowCounter(true)}
+              onOpenTasbih={() => setShowTasbih(true)}
+              onOpenTalbiyah={() => setShowTalbiyah(true)}
+              onOpenKajian={() => setShowKajian(true)}
+              onOpenChecklist={() => setShowChecklist(true)}
+              onOpenMap={() => setShowMap(true)}
+              onOpenNusuk={() => setShowNusuk(true)}
+            />
+          )}
 
-        {activeTab === 'prayer' && (
-          <PrayerTimesView />
-        )}
+          {activeTab === 'prayer' && (
+            <PrayerTimesView />
+          )}
 
-        {activeTab === 'services' && (
-          <AccountView
-            onOpenLookup={() => setShowLookup(true)}
-            onOpenNusuk={() => setShowNusuk(true)}
-            onOpenChecklist={() => setShowChecklist(true)}
-            onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
-            onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
-            onRoleChange={handleRoleChange}
-            role={role}
-            currentUser={currentUser}
-            onOpenGoogleSignIn={() => setShowGoogleModal(true)}
-            onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
-          />
-        )}
+          {activeTab === 'services' && (
+            <AccountView
+              onOpenLookup={() => setShowLookup(true)}
+              onOpenNusuk={() => setShowNusuk(true)}
+              onOpenChecklist={() => setShowChecklist(true)}
+              onOpenDocumentPrint={() => handleOpenDocumentPrint(null)}
+              onOpenWhatsAppCenter={() => handleOpenWhatsAppCenter(null)}
+              onRoleChange={handleRoleChange}
+              role={role}
+              currentUser={currentUser}
+              onOpenGoogleSignIn={() => setShowGoogleModal(true)}
+              onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
+            />
+          )}
 
-        {activeTab === 'mitra_hub' && (
-          <MitraDashboardView
-            onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
-          />
-        )}
+          {activeTab === 'mitra_hub' && (
+            <MitraDashboardView
+              onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
+            />
+          )}
 
-        {activeTab === 'admin_panel' && (
-          <AdminDashboardView
-            onOpenWhatsAppCenter={(recipient) => handleOpenWhatsAppCenter(recipient)}
-            onOpenDocumentPrint={(doc) => handleOpenDocumentPrint(doc)}
-          />
-        )}
+          {activeTab === 'admin_panel' && (
+            <AdminDashboardView
+              onOpenWhatsAppCenter={(recipient) => handleOpenWhatsAppCenter(recipient)}
+              onOpenDocumentPrint={(doc) => handleOpenDocumentPrint(doc)}
+            />
+          )}
+        </Suspense>
       </main>
 
       {/* Floating Bottom Navigation (4 Tabs: Beranda, WA Admin, Paket, Bantuan) */}
