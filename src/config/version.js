@@ -1,8 +1,8 @@
 /**
  * Single source of truth for Kanomas Application Build Version
  */
-export const APP_BUILD_VERSION = '2026.1.3';
-export const APP_BUILD_CODE = 2027;
+export const APP_BUILD_VERSION = '2026.1.4';
+export const APP_BUILD_CODE = 2028;
 export const APP_RELEASE_DATE = '28 September 2026';
 
 /**

@@ -1,15 +1,14 @@
 {
-  "version": "2026.1.3",
-  "versionCode": 2027,
+  "version": "2026.1.4",
+  "versionCode": 2028,
   "releaseDate": "28 September 2026",
-  "title": "Pembaruan Fitur Kanomas 2026 (Share Gambar Ayat HD)",
+  "title": "Pembaruan Tampilan Kanomas (Dzikir Pagi Petang & Navigasi Pesawat)",
   "notes": [
-    "Fitur Bagikan Ayat Al-Qur'an kini menghasilkan GAMBAR KARTU ASLI HD (PNG) dengan background foto Ka'bah/Madinah/Alam/Warna ke WhatsApp.",
-    "Tombol Unduh Gambar Kartu Ayat HD langsung ke Galeri perangkat.",
-    "Validasi Pendaftaran Mitra Syiar dengan OCR KTP & NPWP serta verifikasi nama rekening bank.",
-    "Sistem Google Sign-In otomatis dengan pemilahan peran (Admin ramadhan.adiluhung@gmail.com, Mitra Syiar, dan Jamaah umum).",
-    "Pembersihan file & perapihan struktur direktori aplikasi."
+    "Ikon Dzikir Pagi Petang 3D resmi menggantikan ikon Nusuk di Menu Utama Beranda.",
+    "Paket Umrah kini terpusat di Bottom Navigation Bar dengan ikon Pesawat yang modern & elegan.",
+    "Ikon Tasbih Digital 3D ditambahkan langsung ke Menu Utama Beranda.",
+    "Peningkatan kestabilan sistem koneksi WhatsApp Commander & dev server."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
-  "apkSize": "19.4 MB"
+  "apkSize": "19.6 MB"
 }
