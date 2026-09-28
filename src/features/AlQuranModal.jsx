@@ -305,56 +305,61 @@ export const THEME_PALETTES = {
   }
 };
 
-// ATURAN WARNA TAJWID DENGAN KONTRAS TINGGI UNTUK SETIAP DARI TEMA
+// ATURAN WARNA TAJWID IDENTIK DENGAN MYQURAN & STANDAR KEMENAG RI
 export const TAJWEED_THEME_RULES = {
   mushaf: {
-    ghunnah: '#e11d48',
-    qalqalah: '#0284c7',
-    iqlab: '#7c3aed',
-    ikhfa: '#065f46',
-    madd: '#b45309',
-    maddLazim: '#dc2626',
-    idghamBila: '#ea580c',
+    ghunnah: '#e11d48',    // Vivid Rose/Pink: Ghunnah & Idgham Bighunnah
+    qalqalah: '#2563eb',   // Sky Blue: Qalqalah
+    iqlab: '#7c3aed',      // Royal Violet: Iqlab
+    ikhfa: '#059669',      // Mint/Emerald Green: Ikhfa Haqiqi & Syafawi
+    madd: '#dc2626',       // Coral Red: Mad Wajib & Jaiz 4-5 Harakat
+    maddLazim: '#991b1b',  // Deep Maroon: Mad Lazim 6 Harakat
+    idghamBila: '#ea580c', // Bright Orange: Idgham Bilaghunnah
+    tafkhim: '#d97706',    // Golden Amber: Tafkhim Lam Jalalah
     base: '#022c22'
   },
   light: {
     ghunnah: '#e11d48',
-    qalqalah: '#0284c7',
+    qalqalah: '#2563eb',
     iqlab: '#7c3aed',
     ikhfa: '#059669',
-    madd: '#d97706',
-    maddLazim: '#dc2626',
+    madd: '#dc2626',
+    maddLazim: '#991b1b',
     idghamBila: '#ea580c',
+    tafkhim: '#d97706',
     base: '#000000'
   },
   dark: {
-    ghunnah: '#fb7185',
-    qalqalah: '#38bdf8',
-    iqlab: '#c084fc',
-    ikhfa: '#34d399',
-    madd: '#fbbf24',
-    maddLazim: '#f87171',
-    idghamBila: '#fb923c',
+    ghunnah: '#fb7185',    // Light Rose Pink
+    qalqalah: '#38bdf8',   // Sky Blue
+    iqlab: '#c084fc',      // Lavender Violet
+    ikhfa: '#40d093',      // Mint Teal (exact MyQuran dark mode #40D093)
+    madd: '#f87171',       // Coral Red
+    maddLazim: '#f43f5e',  // Vibrant Crimson
+    idghamBila: '#fb923c', // Warm Orange
+    tafkhim: '#f8be38',    // Golden Amber (exact MyQuran dark mode #F8BE38)
     base: '#ffffff'
   },
   sepia: {
     ghunnah: '#be123c',
-    qalqalah: '#0369a1',
+    qalqalah: '#0284c7',
     iqlab: '#6d28d9',
     ikhfa: '#15803d',
-    madd: '#b45309',
-    maddLazim: '#b91c1c',
+    madd: '#b91c1c',
+    maddLazim: '#881337',
     idghamBila: '#c2410c',
+    tafkhim: '#b45309',
     base: '#1c1917'
   },
   navy: {
     ghunnah: '#fb7185',
     qalqalah: '#38bdf8',
     iqlab: '#c084fc',
-    ikhfa: '#34d399',
-    madd: '#fbbf24',
-    maddLazim: '#f87171',
+    ikhfa: '#40d093',
+    madd: '#f87171',
+    maddLazim: '#f43f5e',
     idghamBila: '#fb923c',
+    tafkhim: '#f8be38',
     base: '#ffffff'
   },
   cream: {
@@ -362,29 +367,32 @@ export const TAJWEED_THEME_RULES = {
     qalqalah: '#0284c7',
     iqlab: '#6d28d9',
     ikhfa: '#047857',
-    madd: '#b45309',
-    maddLazim: '#dc2626',
+    madd: '#b91c1c',
+    maddLazim: '#881337',
     idghamBila: '#c2410c',
+    tafkhim: '#b45309',
     base: '#18181b'
   },
   kabah: {
     ghunnah: '#fb7185',
     qalqalah: '#38bdf8',
     iqlab: '#c084fc',
-    ikhfa: '#34d399',
-    madd: '#fbbf24',
-    maddLazim: '#f87171',
+    ikhfa: '#40d093',
+    madd: '#f87171',
+    maddLazim: '#f43f5e',
     idghamBila: '#fb923c',
+    tafkhim: '#f8be38',
     base: '#ffffff'
   },
   nature: {
     ghunnah: '#fb7185',
     qalqalah: '#38bdf8',
     iqlab: '#c084fc',
-    ikhfa: '#34d399',
-    madd: '#fbbf24',
-    maddLazim: '#f87171',
+    ikhfa: '#40d093',
+    madd: '#f87171',
+    maddLazim: '#f43f5e',
     idghamBila: '#fb923c',
+    tafkhim: '#f8be38',
     base: '#ffffff'
   }
 };
@@ -516,13 +524,17 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
         title = 'Madd Wajib / Jaiz (Panjang 4-5 Harakat)';
       } else {
         color = palette.madd;
-        title = 'Madd (Panjang Harakat)';
+        title = 'Madd (Panjang 4-5 Harakat)';
       }
     }
-    // F. Madd Asli / Thabi'i (Alif Khanjariyah \u0670)
-    else if (marks.includes('\u0670')) {
-      color = palette.madd;
-      title = "Madd Asli / Thabi'i (Panjang 2 Harakat)";
+    // F. Tafkhim Lam Jalalah (Lafazh Allah dibaca tebal setelah fathah / dhammah)
+    else if (base === 'ل' && marks.includes('\u0651') && (marks.includes('\u0670') || marks.includes('\u064E')) && nextBase === 'ه') {
+      const prevGrapheme = i > 0 ? graphemes[i - 1] : null;
+      const prevMarks = prevGrapheme ? prevGrapheme.marks : '';
+      if (!prevMarks.includes('\u0650')) {
+        color = palette.tafkhim || '#d97706';
+        title = 'Tafkhim Lam Jalalah (Dibaca Tebal)';
+      }
     }
 
     if (color) {
@@ -555,7 +567,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
 
     if (!hasAnnotation) {
       return (
-        <span key={`w-${wordIdx}`} style={{ display: 'inline' }}>
+        <span key={`w-${wordIdx}`} style={{ display: 'inline', fontWeight: 400 }}>
           {word}{wordIdx < words.length - 1 ? ' ' : ''}
         </span>
       );
@@ -595,7 +607,9 @@ function renderSafeTajweed(text, themeMode = 'mushaf') {
             style={{
               color: item.color,
               display: 'inline',
-              fontWeight: 600
+              fontWeight: 400,
+              fontSize: 'inherit',
+              lineHeight: 'inherit'
             }}
             className="select-text transition-colors duration-150"
             title={item.title}
@@ -2698,13 +2712,13 @@ export default function AlQuranModal({ onClose }) {
                                 lineHeight: dynamicArabicLineHeight,
                                 textAlign: 'right',
                                 fontFeatureSettings: '"calt" 1, "liga" 1',
-                                fontWeight: 500,
+                                fontWeight: 400,
                                 textRendering: 'geometricPrecision',
                                 WebkitFontSmoothing: 'antialiased',
                                 MozOsxFontSmoothing: 'grayscale',
                                 width: '100%'
                               }}
-                              className={`${getArabicFontClass()} font-medium select-text mb-4 sm:mb-5`}
+                              className={`${getArabicFontClass()} font-normal select-text mb-4 sm:mb-5`}
                             >
                               {renderArabic(ayat)}
 
@@ -3552,28 +3566,36 @@ export default function AlQuranModal({ onClose }) {
 
                   <div className="grid grid-cols-1 gap-2 px-1 text-xs">
                     <div className="flex items-center justify-between">
-                      <span>Ghunnah / Idgham Bighunnah (Dengung)</span>
+                      <span>Ghunnah & Idgham Bighunnah (Dengung)</span>
                       <span className="w-5 h-5 rounded-full bg-[#e11d48] border border-slate-400 shadow-2xs" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>Qalqalah (Pantulan Suara)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#0284c7] border border-slate-400 shadow-2xs" />
+                      <span>Qalqalah (Pantulan Suara قطبجد)</span>
+                      <span className="w-5 h-5 rounded-full bg-[#2563eb] border border-slate-400 shadow-2xs" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>Iqlab (Tukar Bunyi Mim)</span>
+                      <span>Iqlab (Tukar Nun/Tanwin Menjadi Mim)</span>
                       <span className="w-5 h-5 rounded-full bg-[#7c3aed] border border-slate-400 shadow-2xs" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>Ikhfa & Tanwin (Samar)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#065f46] border border-slate-400 shadow-2xs" />
+                      <span>Ikhfa Haqiqi & Syafawi (Samar)</span>
+                      <span className="w-5 h-5 rounded-full bg-[#059669] border border-slate-400 shadow-2xs" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>Madd (Panjang Harakat)</span>
-                      <span className="w-5 h-5 rounded-full bg-[#b45309] border border-slate-400 shadow-2xs" />
+                      <span>Idgham Bilaghunnah (Lebur Tanpa Dengung)</span>
+                      <span className="w-5 h-5 rounded-full bg-[#ea580c] border border-slate-400 shadow-2xs" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>Idgham Bilaghunnah & Madd Lazim</span>
+                      <span>Mad Wajib & Jaiz (Panjang 4-5 Harakat)</span>
                       <span className="w-5 h-5 rounded-full bg-[#dc2626] border border-slate-400 shadow-2xs" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Mad Lazim (Panjang 6 Harakat)</span>
+                      <span className="w-5 h-5 rounded-full bg-[#991b1b] border border-slate-400 shadow-2xs" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Tafkhim Lam Jalalah (Lafazh Allah Tebal)</span>
+                      <span className="w-5 h-5 rounded-full bg-[#d97706] border border-slate-400 shadow-2xs" />
                     </div>
                   </div>
                 </div>
@@ -4285,13 +4307,13 @@ export default function AlQuranModal({ onClose }) {
                 <div className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-[#e11d48] flex-shrink-0 shadow-sm" />
                   <div>
-                    <span className="font-bold block">Pink / Magenta: Ghunnah & Idgam Bigunnah</span>
-                    <span className="text-[11px] opacity-75">Dengung 2 harakat saat bertemu mim/nun tasydid</span>
+                    <span className="font-bold block">Pink / Magenta: Ghunnah & Idgham Bighunnah</span>
+                    <span className="text-[11px] opacity-75">Dengung 2 harakat saat nun/mim bertasydid atau nun/tanwin bertemu ينمو</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#0284c7] flex-shrink-0 shadow-sm" />
+                  <span className="w-5 h-5 rounded-full bg-[#2563eb] flex-shrink-0 shadow-sm" />
                   <div>
                     <span className="font-bold block">Biru Cerah: Qalqalah</span>
                     <span className="text-[11px] opacity-75">Pantulan suara huruf sukun قطبجد (baju di thoko)</span>
@@ -4302,31 +4324,47 @@ export default function AlQuranModal({ onClose }) {
                   <span className="w-5 h-5 rounded-full bg-[#7c3aed] flex-shrink-0 shadow-sm" />
                   <div>
                     <span className="font-bold block">Ungu: Iqlab</span>
-                    <span className="text-[11px] opacity-75">Tukar bunyi nun sukun / tanwin menjadi mim</span>
+                    <span className="text-[11px] opacity-75">Tukar bunyi nun sukun / tanwin menjadi mim saat bertemu huruf ba (ب)</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#065f46] flex-shrink-0 shadow-sm" />
+                  <span className="w-5 h-5 rounded-full bg-[#059669] flex-shrink-0 shadow-sm" />
                   <div>
-                    <span className="font-bold block">Hijau Zamrud: Ikhfa & Tanwin</span>
-                    <span className="text-[11px] opacity-75">Samar-samar berdengung saat bertemu 15 huruf ikhfa</span>
+                    <span className="font-bold block">Hijau Zamrud: Ikhfa Haqiqi & Syafawi</span>
+                    <span className="text-[11px] opacity-75">Samar-samar berdengung saat bertemu 15 huruf ikhfa atau mim sukun bertemu ba</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-[#b45309] flex-shrink-0 shadow-sm" />
+                  <span className="w-5 h-5 rounded-full bg-[#ea580c] flex-shrink-0 shadow-sm" />
                   <div>
-                    <span className="font-bold block">Kuning Emas / Amber: Madd</span>
-                    <span className="text-[11px] opacity-75">Panjang harakat mad thabi'i dan mad jaiz / wajib</span>
+                    <span className="font-bold block">Oranye: Idgham Bilaghunnah</span>
+                    <span className="text-[11px] opacity-75">Lebur tanpa dengung saat nun sukun/tanwin bertemu lam (ل) atau ra (ر)</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-[#dc2626] flex-shrink-0 shadow-sm" />
                   <div>
-                    <span className="font-bold block">Merah: Idgam Bilagunnah & Madd Lazim</span>
-                    <span className="text-[11px] opacity-75">Lebur tanpa dengung / Mad panjang 6 harakat</span>
+                    <span className="font-bold block">Merah Cerah: Mad Wajib & Jaiz</span>
+                    <span className="text-[11px] opacity-75">Panjang 4-5 harakat (tanda layar ~ bertemu hamzah)</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#991b1b] flex-shrink-0 shadow-sm" />
+                  <div>
+                    <span className="font-bold block">Merah Marun: Mad Lazim</span>
+                    <span className="text-[11px] opacity-75">Panjang 6 harakat penuh (tanda layar ~ bertemu tasydid/sukun)</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#d97706] flex-shrink-0 shadow-sm" />
+                  <div>
+                    <span className="font-bold block">Kuning Emas / Amber: Tafkhim Lam Jalalah</span>
+                    <span className="text-[11px] opacity-75">Lafazh Allah dibaca tebal setelah harakat fathah atau dhammah</span>
                   </div>
                 </div>
               </div>
