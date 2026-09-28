@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, RefreshCw, X, Sparkles, CheckCircle2, AlertCircle, ShieldAlert } from 'lucide-react';
-import { APP_BUILD_VERSION, isRemoteVersionNewer } from '../config/version';
+import { APP_BUILD_VERSION, isRemoteVersionNewer, fetchRemoteVersionInfo } from '../config/version';
 
 export { APP_BUILD_VERSION };
 
@@ -20,18 +20,7 @@ export default function UpdateModal({
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const remoteUrl = `https://appkanomas.mediasosial.net/version.json?t=${Date.now()}`;
-      let data = null;
-
-      try {
-        const res = await fetch(remoteUrl, { cache: 'no-store' });
-        if (res.ok) data = await res.json();
-      } catch (netErr) {
-        // Fallback ke local version.json jika offline / server remote tidak terjangkau
-        const localRes = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
-        if (localRes.ok) data = await localRes.json();
-      }
-
+      const data = await fetchRemoteVersionInfo();
       if (!data) throw new Error('Gagal memeriksa versi server.');
       setRemoteInfo(data);
 
@@ -72,7 +61,11 @@ export default function UpdateModal({
 
   const handleDownloadApk = () => {
     const apkUrl = remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk';
-    window.location.href = apkUrl;
+    try {
+      window.open(apkUrl, '_system');
+    } catch {
+      window.location.href = apkUrl;
+    }
   };
 
   const handleHotReload = async () => {

@@ -1,3 +1,5 @@
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
+
 /**
  * Single source of truth for Kanomas Application Build Version
  */
@@ -25,4 +27,42 @@ export function isRemoteVersionNewer(remoteVer, localVer = APP_BUILD_VERSION) {
     if (r < l) return false;
   }
   return false;
+}
+
+/**
+ * Robust version checker supporting Native Capacitor (CORS-free) and Web
+ */
+export async function fetchRemoteVersionInfo() {
+  const remoteUrl = `https://appkanomas.mediasosial.net/version.json?t=${Date.now()}`;
+
+  // 1. Jika native Android / iOS, gunakan CapacitorHttp (Bypass CORS WebView sepenuhnya)
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await CapacitorHttp.get({
+        url: remoteUrl,
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
+      if (res && res.data) {
+        return typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+      }
+    } catch (e) {
+      console.warn('CapacitorHttp native fetch error, trying web fetch fallback:', e);
+    }
+  }
+
+  // 2. Fetch browser standard
+  try {
+    const res = await fetch(remoteUrl, { cache: 'no-store' });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.warn('Remote fetch error, trying local version:', e);
+  }
+
+  // 3. Fallback lokal
+  try {
+    const localRes = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (localRes.ok) return await localRes.json();
+  } catch {}
+
+  return null;
 }

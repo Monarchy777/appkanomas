@@ -11,7 +11,7 @@ import MitraDashboardView from './views/MitraDashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
 import GoogleSignInModal from './components/GoogleSignInModal';
 import UpdateModal from './components/UpdateModal';
-import { APP_BUILD_VERSION, isRemoteVersionNewer } from './config/version';
+import { APP_BUILD_VERSION, isRemoteVersionNewer, fetchRemoteVersionInfo } from './config/version';
 
 // Code-splitting via React.lazy for instant launch & lightweight bundle
 const TawafSaiCounter = lazy(() => import('./features/TawafSaiCounter'));
@@ -78,16 +78,7 @@ export default function App() {
   useEffect(() => {
     const checkVersionOnLaunch = async () => {
       try {
-        const remoteUrl = `https://appkanomas.mediasosial.net/version.json?t=${Date.now()}`;
-        let data = null;
-
-        try {
-          const res = await fetch(remoteUrl, { cache: 'no-store' });
-          if (res.ok) data = await res.json();
-        } catch (netErr) {
-          const localRes = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
-          if (localRes.ok) data = await localRes.json();
-        }
+        const data = await fetchRemoteVersionInfo();
 
         if (data && data.version) {
           setRemoteUpdateInfo(data);
