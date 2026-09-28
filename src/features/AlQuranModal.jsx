@@ -882,13 +882,8 @@ export default function AlQuranModal({ onClose }) {
     } catch {}
     return 1;
   });
-  const [showFullSurahList, setShowFullSurahList] = useState(false);
-  const [fullListTab, setFullListTab] = useState('surah'); // 'surah' | 'juz'
-  const [showSurahPickerModal, setShowSurahPickerModal] = useState(false);
-  const [showAyatGridPicker, setShowAyatGridPicker] = useState(false);
   const [verticalPickerType, setVerticalPickerType] = useState(null); // 'juz' | 'surah' | 'ayat' | null
   const [verticalSearchQuery, setVerticalSearchQuery] = useState('');
-  const [quickSurahFilter, setQuickSurahFilter] = useState('');
   const currentQuickSurah = SURAH_LIST.find((s) => s.nomor === quickSurahNum) || SURAH_LIST[0];
 
   // Auto-scroll ke angka yang sedang aktif saat pemilih vertikal dibuka
@@ -918,6 +913,7 @@ export default function AlQuranModal({ onClose }) {
 
   const wheelContainerRef = useRef(null);
   const dragStateRef = useRef(null);
+  const rafIdRef = useRef(null);
 
   // Handler Putar Planet dengan 1 Jari (1-Finger Solar Orbit Drag pada Kubah 1/2 Lingkaran)
   const handleWheelPointerDown = (e) => {
@@ -1004,13 +1000,25 @@ export default function AlQuranModal({ onClose }) {
       if (navigator.vibrate) try { navigator.vibrate(6); } catch {}
     }
 
-    setDragOffsets((prev) => ({
-      ...prev,
-      [ringType]: dragStateRef.current ? dragStateRef.current.accumulatedAngle : 0
-    }));
+    // 60fps rAF Throttling untuk performa super ringan dan mulus tanpa render berlebih
+    if (!rafIdRef.current) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
+        if (dragStateRef.current) {
+          setDragOffsets((prev) => ({
+            ...prev,
+            [dragStateRef.current.ringType]: dragStateRef.current.accumulatedAngle
+          }));
+        }
+      });
+    }
   };
 
   const handleWheelPointerUp = (e) => {
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
     if (!dragStateRef.current) return;
     try {
       if (e && e.currentTarget && e.pointerId) {
@@ -1022,14 +1030,16 @@ export default function AlQuranModal({ onClose }) {
     setDragOffsets({ juz: 0, surah: 0, ayat: 0 });
   };
 
-  // Helper Rotasi Roda Navigasi 3 Lapis
+  // Helper Rotasi Roda Navigasi 3 Lapis (Bersih dari side-effects di setter)
   const handleRotateJuz = (delta) => {
     setWheelJuzNum((prev) => {
       const nextJuz = ((prev - 1 + delta + 30) % 30) + 1;
       const targetJuzData = JUZ_LIST[nextJuz - 1];
       if (targetJuzData) {
-        setQuickSurahNum(targetJuzData.surahNomor);
-        setQuickAyatNum(targetJuzData.ayat || 1);
+        Promise.resolve().then(() => {
+          setQuickSurahNum(targetJuzData.surahNomor);
+          setQuickAyatNum(targetJuzData.ayat || 1);
+        });
       }
       return nextJuz;
     });
@@ -1040,8 +1050,10 @@ export default function AlQuranModal({ onClose }) {
       const nextSurah = ((prev - 1 + delta + 114) % 114) + 1;
       const sObj = SURAH_LIST.find((s) => s.nomor === nextSurah) || SURAH_LIST[0];
       if (sObj) {
-        setWheelJuzNum(sObj.juz);
-        setQuickAyatNum(1);
+        Promise.resolve().then(() => {
+          setWheelJuzNum(sObj.juz);
+          setQuickAyatNum(1);
+        });
       }
       return nextSurah;
     });
@@ -5787,162 +5799,6 @@ export default function AlQuranModal({ onClose }) {
           </div>
         )}
 
-        {/* ======================================================== */}
-        {/* MODAL 7B: PILIH SURAT (114 SURAT LENGKAP - NAVIGASI CEPAT) */}
-        {/* ======================================================== */}
-        {showSurahPickerModal && (
-          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
-            <div className={`w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
-              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
-            }`}>
-              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <Compass className="w-5 h-5 text-amber-300" />
-                  <h3 className="text-sm sm:text-base font-black">Pilih Surat dari 114 Surat</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSurahPickerModal(false)}
-                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Search bar inside modal */}
-              <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
-                <div className="relative">
-                  <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-                  <input
-                    type="text"
-                    value={quickSurahFilter}
-                    onChange={(e) => setQuickSurahFilter(e.target.value)}
-                    placeholder="Cari nomor atau nama surat (contoh: 36, Yasin, Al-Mulk)..."
-                    className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] transition ${
-                      isDark
-                        ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
-                        : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500'
-                    }`}
-                    autoFocus
-                  />
-                  {quickSurahFilter && (
-                    <button
-                      type="button"
-                      onClick={() => setQuickSurahFilter('')}
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 transition ${
-                        isDark ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
-                      }`}
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Grid 114 Surat */}
-              <div className="flex-1 overflow-y-auto p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {SURAH_LIST.filter(
-                  (s) =>
-                    s.namaLatin.toLowerCase().includes(quickSurahFilter.toLowerCase()) ||
-                    s.arti.toLowerCase().includes(quickSurahFilter.toLowerCase()) ||
-                    String(s.nomor).includes(quickSurahFilter)
-                ).map((surah) => (
-                  <button
-                    key={surah.nomor}
-                    type="button"
-                    onClick={() => {
-                      setQuickSurahNum(surah.nomor);
-                      if (quickAyatNum > surah.jumlahAyat) {
-                        setQuickAyatNum(surah.jumlahAyat);
-                      }
-                      setShowSurahPickerModal(false);
-                      setQuickSurahFilter('');
-                    }}
-                    className={`p-2.5 rounded-2xl border text-left transition flex items-center justify-between gap-2 ${
-                      quickSurahNum === surah.nomor
-                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500'
-                        : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-[#0a7c29] dark:text-emerald-300 font-mono font-black text-xs flex items-center justify-center flex-shrink-0">
-                        {surah.nomor}
-                      </span>
-                      <div className="min-w-0">
-                        <span className="font-bold text-xs block truncate text-slate-900 dark:text-white">
-                          {surah.namaLatin}
-                        </span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                          {surah.arti} • {surah.jumlahAyat} ayat
-                        </span>
-                      </div>
-                    </div>
-                    <span className="font-quran-lpmq text-base text-[#0a7c29] dark:text-emerald-400 font-bold flex-shrink-0" dir="rtl">
-                      {surah.nama}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* MODAL 7C: GRID NOMOR AYAT (INTERAKTIF - NAVIGASI CEPAT)    */}
-        {/* ======================================================== */}
-        {showAyatGridPicker && (
-          <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 ${isDark ? 'dark' : ''}`}>
-            <div className={`w-full max-w-md max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border ${
-              isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
-            }`}>
-              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <ListOrdered className="w-5 h-5 text-amber-300" />
-                  <div>
-                    <h3 className="text-sm sm:text-base font-black leading-tight">
-                      Pilih Ayat: QS. {currentQuickSurah.namaLatin}
-                    </h3>
-                    <span className="text-[11px] text-emerald-200 font-medium">
-                      Total {currentQuickSurah.jumlahAyat} Ayat • {currentQuickSurah.arti}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAyatGridPicker(false)}
-                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium text-center">
-                  Ketuk nomor ayat untuk memilih:
-                </p>
-                <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
-                  {Array.from({ length: currentQuickSurah.jumlahAyat }, (_, i) => i + 1).map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => {
-                        setQuickAyatNum(num);
-                        setShowAyatGridPicker(false);
-                      }}
-                      className={`py-2.5 rounded-xl border font-mono font-bold text-xs sm:text-sm active:scale-95 transition shadow-2xs ${
-                        quickAyatNum === num
-                          ? 'bg-[#0a7c29] text-white border-[#0a7c29] ring-2 ring-amber-400'
-                          : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 text-slate-800 dark:text-slate-200'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ======================================================== */}
         {/* MODAL 8: BUAT TARGET KHATAMAN BARU                       */}
