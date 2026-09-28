@@ -1,15 +1,17 @@
 {
-  "version": "2026.1.6",
-  "versionCode": 2030,
+  "version": "2026.2.0",
+  "versionCode": 2031,
   "releaseDate": "28 September 2026",
-  "title": "Pembaruan Legalitas PPIU/PIHK, Logo Berjalan & Mitra Rekanan",
+  "title": "Aplikasi Kanomas Live Edition (Auto-Update Otomatis)",
   "notes": [
-    "Banner ajakan mitra syiar disederhanakan 2-3 baris proporsional dengan tombol slim.",
-    "Teks 'menu layanan & ibadah' serta 'ketuk untuk membuka' dihilangkan untuk tampilan beranda yang lebih bersih.",
-    "Legalitas PPIU (U.310) & PIHK (HK.5008) Kanomas ditata rapi, elegan, dan informatif.",
-    "Logo berjalan resmi (Kemenag, IATA, KAN, AMPHURI, ASITA) tampil bersih tanpa kotak pembungkus.",
-    "Daftar logo perusahaan rekanan resmi (Airlines, Hotel, Bank Syariah, GDS) dikelompokkan sesuai jenis."
+    "Resmi mendukung Live Over-The-Air (OTA) Updates dari server Hostinger.",
+    "Pasang versi ini 1x saja, seluruh pembaruan fitur & tampilan di masa depan otomatis berubah di HP tanpa unduh APK lagi.",
+    "Banner kemitraan syiar 3 baris proporsional dengan tombol slim.",
+    "Tampilan beranda lebih lega dan bersih tanpa teks menu yang menumpuk.",
+    "Legalitas PPIU & PIHK Kanomas resmi Kemenag RI tertata elegan.",
+    "Logo berjalan resmi (Kemenag, IATA, KAN, AMPHURI, ASITA) meluncur bebas tanpa kotak.",
+    "Daftar rekanan resmi maskapai bintang 5, hotel tanah suci, BSI, dan GDS global."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
-  "apkSize": "19.6 MB"
+  "apkSize": "23.8 MB"
 }
