@@ -495,7 +495,18 @@ export function normalizeQuranText(text, isMadinah = false) {
     // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
     .replace(/\u06E4/g, '\u0653');
 
-  // 6. Gunakan sukun resmi Rasm Utsmani (kepala kha' \u06E1) persis MyQuran untuk tampilan tanda mati yang otentik
+  // 6. Normalisasi Dhabth Mad Shilah (Mencegah Dhammah terlihat menjadi Fatahtain):
+  // Pada font KFGQPC Madinah, kode U+0657 (dhammah terbalik Kemenag) dibajak untuk glif open-fathatan.
+  // Jika sedang memproses Mushaf Madinah, konversi dhabth Kemenag ke dhabth resmi Madinah:
+  // Dhammah terbalik (U+0657) -> Dhammah biasa + Wawu kecil (ُۥ / \u064F\u06E5)
+  // Kasrah berdiri (U+0656) -> Kasrah biasa + Ya kecil (ِۦ / \u0650\u06E6)
+  if (isMadinah) {
+    cleaned = cleaned
+      .replace(/\u0657/g, '\u064F\u06E5')
+      .replace(/\u0656/g, '\u0650\u06E6');
+  }
+
+  // 7. Gunakan sukun resmi Rasm Utsmani (kepala kha' \u06E1) persis MyQuran untuk tampilan tanda mati yang otentik
   cleaned = cleaned.replace(/\u0652/g, '\u06E1');
 
   cleaned = cleaned.replace(/\s+/g, ' ');
@@ -1150,13 +1161,16 @@ export default function AlQuranModal({ onClose }) {
     }
   };
 
-  // Helper font family kaligrafi Arab aktif (Menggunakan font KFGQPC Hafs/Uthman Taha dengan penyambungan horizontal luas & anti-stacking)
+  // Helper font family kaligrafi Arab aktif sesuai mushaf yang dipilih
   const getActiveFontFamily = () => {
     if (mushafType === 'modern') {
       return "'Noto Naskh Arabic', 'Plus Jakarta Sans', sans-serif";
     }
-    // Baik Mushaf Madinah maupun Mushaf Indonesia menggunakan font kaligrafi horizontal luas KFGQPC (persis MyQuran)
-    return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'LPMQ Isep Misbah', 'Amiri Quran', 'Scheherazade New', serif";
+    if (mushafType === 'madinah') {
+      return "'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', serif";
+    }
+    // Mushaf Standar Indonesia Kemenag: font resmi LPMQ Isep Misbah (menampilkan dhommah terbalik U+0657 otentik)
+    return "'LPMQ Isep Misbah', 'LPMQ', 'Amiri Quran', 'Scheherazade New', serif";
   };
 
   // Helper kelas font kaligrafi Arab aktif
