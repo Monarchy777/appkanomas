@@ -420,6 +420,25 @@ export function applyKashidaToArabic(text) {
   return text;
 }
 
+// NORMALISASI TEKS ARAB AL-QUR'AN (MEMPERBAIKI FATHATAIN, MENGHILANGKAN SISIPAN U+06ED, & MERAPIKAN WAQAF)
+export function normalizeQuranText(text, isMadinah = false) {
+  if (!text) return '';
+  let cleaned = text
+    // 1. Bersihkan karakter warisan Tanzil yang merusak harakat tanwin (fathatain, kasratain, dammatain)
+    .replace(/[\u06ED\u06EA\u06EB]/g, '')
+    // 2. Bersihkan karakter kontrol tak kasat mata
+    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
+    // 3. Pisahkan tanda waqaf yang menempel langsung tanpa spasi agar tidak bertumpuk/menindih harakat tanwin
+    .replace(/([^\s])([ۖ-ۜۘ-ۛ])/g, '$1 $2')
+    // 4. Hapus tanda ruku khusus Kemenag (ࣖ) yang tidak didukung font modern
+    .replace(/\u08D6/g, '')
+    // 5. Normalisasi small madda (ۤ) ke standard madda (ٓ)
+    .replace(/\u06E4/g, '\u0653')
+    .replace(/\s+/g, ' ');
+
+  return cleaned.trim();
+}
+
 // RENDER TAJWID AMAN DENGAN RTL MURNI, KAIDAH ILMU TAJWID, & DUKUNGAN TERJEMAH PER KATA UNIFIED
 function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOptions = null) {
   if (!text) return null;
@@ -556,6 +575,19 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
 
       if (color && !annotations.has(g.start)) {
         annotations.set(g.start, { color, title, full: g.full, end: g.end, base: g.base });
+        // Jika hukum tanwin (terutama fathatan) diikuti oleh Alif penopang tanwin tanpa harakat (e.g. جًا):
+        // Ikutkan alif tersebut dalam warna yang sama agar ligatur tidak terbelah & posisi fathatan tetap sempurna!
+        if (isTanwin && marks.includes('\u064B')) {
+          const nextIndex = i + 1;
+          if (nextIndex < graphemes.length) {
+            const nextG = graphemes[nextIndex];
+            if ((nextG.base === 'ا' || nextG.base === 'ى') && !/[\u064B-\u0652]/.test(nextG.marks)) {
+              if (!annotations.has(nextG.start)) {
+                annotations.set(nextG.start, { color, title, full: nextG.full, end: nextG.end, base: nextG.base });
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -1009,12 +1041,12 @@ export default function AlQuranModal({ onClose }) {
     return 'font-quran-lpmq';
   };
 
-  // Helper teks Arab ayat sesuai mushaf aktif
+  // Helper teks Arab ayat sesuai mushaf aktif dengan normalisasi menyeluruh
   const getAyatArabText = (ayat) => {
     if (!ayat) return '';
-    return ((mushafType === 'madinah' || mushafType === 'modern') && ayat.teksArabMadinah)
-      ? ayat.teksArabMadinah
-      : (ayat.teksArab || '');
+    const isMadinah = (mushafType === 'madinah' || mushafType === 'modern') && !!ayat.teksArabMadinah;
+    const raw = isMadinah ? ayat.teksArabMadinah : (ayat.teksArab || '');
+    return normalizeQuranText(raw, isMadinah);
   };
 
   // Save Preferences
@@ -1284,7 +1316,7 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v8_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v10_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -1302,7 +1334,7 @@ export default function AlQuranModal({ onClose }) {
       try {
         const [resIndo, resMadinah] = await Promise.allSettled([
           fetch(`https://equran.id/api/v2/surat/${selectedSurah.nomor}`),
-          fetch(`https://api.alquran.cloud/v1/surah/${selectedSurah.nomor}/quran-uthmani`)
+          fetch(`https://api.quran.com/api/v4/verses/by_chapter/${selectedSurah.nomor}?fields=text_uthmani,chapter_id,verse_number,page_number,juz_number&per_page=300`)
         ]);
 
         let data = null;
@@ -1316,7 +1348,35 @@ export default function AlQuranModal({ onClose }) {
         if (data && resMadinah.status === 'fulfilled') {
           try {
             const jsonMadinah = await resMadinah.value.json();
-            if (jsonMadinah && jsonMadinah.data && jsonMadinah.data.ayahs) {
+            if (jsonMadinah && Array.isArray(jsonMadinah.verses) && jsonMadinah.verses.length > 0) {
+              const madinahMap = new Map();
+              jsonMadinah.verses.forEach((v) => {
+                madinahMap.set(v.verse_number, v);
+              });
+
+              data.ayat = data.ayat.map((ayat) => {
+                const m = madinahMap.get(ayat.nomorAyat);
+                if (m) {
+                  let mText = normalizeQuranText(m.text_uthmani || '', true);
+                  // Quran.com tidak menyisipkan Bismillah kecuali di Surah 1, tapi safeguard jika ada
+                  if (ayat.nomorAyat === 1 && selectedSurah.nomor > 1 && selectedSurah.nomor !== 9) {
+                    mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                  }
+                  return {
+                    ...ayat,
+                    teksArab: normalizeQuranText(ayat.teksArab || '', false),
+                    teksArabMadinah: mText.trim(),
+                    pageMadinah: m.page_number,
+                    juzMadinah: m.juz_number
+                  };
+                }
+                return {
+                  ...ayat,
+                  teksArab: normalizeQuranText(ayat.teksArab || '', false)
+                };
+              });
+            } else if (jsonMadinah && jsonMadinah.data && jsonMadinah.data.ayahs) {
+              // Fallback jika response dari endpoint alternatif
               const madinahMap = new Map();
               jsonMadinah.data.ayahs.forEach((mAyah) => {
                 madinahMap.set(mAyah.numberInSurah, mAyah);
@@ -1325,20 +1385,22 @@ export default function AlQuranModal({ onClose }) {
               data.ayat = data.ayat.map((ayat) => {
                 const m = madinahMap.get(ayat.nomorAyat);
                 if (m) {
-                  let mText = m.text || '';
-                  // Hilangkan awalan Bismillah otomatis pada ayat 1 selain Al-Fatihah (1) & At-Taubah (9)
+                  let mText = normalizeQuranText(m.text || '', true);
                   if (ayat.nomorAyat === 1 && selectedSurah.nomor > 1 && selectedSurah.nomor !== 9) {
                     mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]*بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
                   }
-                  mText = mText.replace(/^[\uFEFF\u200B\u200C\u200D\u200E\u200F\s]+/, '').trim();
                   return {
                     ...ayat,
-                    teksArabMadinah: mText,
+                    teksArab: normalizeQuranText(ayat.teksArab || '', false),
+                    teksArabMadinah: mText.trim(),
                     pageMadinah: m.page,
                     juzMadinah: m.juz
                   };
                 }
-                return ayat;
+                return {
+                  ...ayat,
+                  teksArab: normalizeQuranText(ayat.teksArab || '', false)
+                };
               });
             }
           } catch (e) {
@@ -2607,16 +2669,16 @@ export default function AlQuranModal({ onClose }) {
                     onClick={() => handleMushafTypeChange(
                       mushafType === 'indonesia' ? 'madinah' : mushafType === 'madinah' ? 'modern' : 'indonesia'
                     )}
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold border transition active:scale-95 ${
-                      mushafType === 'madinah'
-                        ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-400'
-                        : mushafType === 'modern'
-                        ? 'bg-sky-500/20 text-sky-800 dark:text-sky-200 border-sky-400'
-                        : 'bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border-emerald-400'
-                    }`}
+                    style={{
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      borderColor: isDark ? '#475569' : '#cbd5e1'
+                    }}
+                    className="text-[11px] px-2.5 py-0.5 rounded-full font-bold border shadow-xs transition-all active:scale-95 inline-flex items-center gap-1 hover:brightness-105 cursor-pointer"
                     title="Klik untuk beralih font Arab (Indonesia ⇄ Madinah ⇄ Modern)"
                   >
-                    {mushafType === 'madinah' ? 'Madinah' : mushafType === 'modern' ? 'Modern' : 'Indonesia'} ⇄
+                    <span>Mushaf {mushafType === 'madinah' ? 'Madinah' : mushafType === 'modern' ? 'Modern' : 'Indonesia'}</span>
+                    <span className="text-[10px] opacity-70">⇄</span>
                   </button>
                 </div>
                 <p className="text-[10px] sm:text-[11px] opacity-80 font-medium">
