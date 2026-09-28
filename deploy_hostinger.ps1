@@ -29,6 +29,10 @@ if (Test-Path "dist\.htaccess") {
     Copy-Item -Path "dist\.htaccess" -Destination $temp -Force
 }
 
+# 3b. Buat zip arsip produksi untuk kemudahan upload manual jika diperlukan
+Write-Host "    Membuat paket zip produksi appkanomas-hostinger.zip..." -ForegroundColor Gray
+Compress-Archive -Path "dist\*" -DestinationPath "appkanomas-hostinger.zip" -Force
+
 # Tambahkan README panduan
 $readmeContent = @"
 # Aplikasi Kanomas - Production Build
