@@ -38,11 +38,15 @@ const DaftarMitraModal = lazy(() => import('./features/DaftarMitraModal'));
 import { db } from './services/db';
 import { calculatePrayerTimes } from './services/prayerTimes';
 import { auth, ADMIN_EMAIL } from './services/auth';
+import { backButtonManager } from './services/backButtonManager';
+import { useBackButton } from './hooks/useBackButton';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => auth.getUser());
   const [role, setRole] = useState(() => (auth.getUser() ? auth.getUser().role : 'jamaah')); // 'jamaah' | 'mitra' | 'admin'
   const [activeTab, setActiveTab] = useState('home');
+  const [tabHistory, setTabHistory] = useState(['home']);
+  const [backToast, setBackToast] = useState('');
   const [dbData, setDbData] = useState(() => db.getAll());
   const [prayerInfo, setPrayerInfo] = useState(() => calculatePrayerTimes('tasikmalaya'));
 
@@ -137,6 +141,16 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
+  // Inisialisasi Back Button Manager (Mobile Back Button & PWA Popstate)
+  useEffect(() => {
+    let timer = null;
+    backButtonManager.init((msg) => {
+      setBackToast(msg);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setBackToast(''), 2500);
+    });
+  }, []);
+
   const handleRoleChange = (newRole) => {
     if (newRole === 'admin') {
       if (currentUser?.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
@@ -146,18 +160,62 @@ export default function App() {
     }
     setRole(newRole);
     if (newRole === 'mitra') {
-      setActiveTab('mitra_hub');
+      handleTabSelect('mitra_hub');
     } else if (newRole === 'admin') {
-      setActiveTab('admin_panel');
+      handleTabSelect('admin_panel');
     } else {
-      setActiveTab('home');
+      handleTabSelect('home');
     }
   };
 
   const handleTabSelect = (tabId) => {
     setActiveTab(tabId);
+    if (tabId === 'home') {
+      setTabHistory(['home']);
+    } else {
+      setTabHistory((prev) => {
+        if (prev[prev.length - 1] === tabId) return prev;
+        return [...prev, tabId];
+      });
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // 1. Back button untuk navigasi Tab (Menu sebelumnya -> Home)
+  useBackButton(() => {
+    setTabHistory((prev) => {
+      if (prev.length <= 1) {
+        setActiveTab('home');
+        return ['home'];
+      }
+      const nextHistory = prev.slice(0, -1);
+      const prevTab = nextHistory[nextHistory.length - 1] || 'home';
+      setActiveTab(prevTab);
+      return nextHistory;
+    });
+  }, activeTab !== 'home', 1, 'nav_tab');
+
+  // 2. Back button untuk seluruh Modal di App.jsx
+  useBackButton(() => setShowUpdateModal(false), showUpdateModal && !updateModalProps.isMandatory, 10, 'modal_update');
+  useBackButton(() => setShowGoogleModal(false), showGoogleModal, 10, 'modal_google');
+  useBackButton(() => setShowDaftarMitraModal(false), showDaftarMitraModal, 10, 'modal_daftar_mitra');
+  useBackButton(() => setShowDocumentPrint(false), showDocumentPrint, 10, 'modal_document_print');
+  useBackButton(() => { setShowWhatsAppCenter(false); setWhatsAppRecipient(null); }, showWhatsAppCenter, 10, 'modal_whatsapp_center');
+  useBackButton(() => setShowLookup(false), showLookup, 12, 'modal_lookup');
+  useBackButton(() => setShowMap(false), showMap, 10, 'modal_map');
+  useBackButton(() => setShowChecklist(false), showChecklist, 12, 'modal_checklist');
+  useBackButton(() => setShowNusuk(false), showNusuk, 10, 'modal_nusuk');
+  useBackButton(() => setShowSavings(false), showSavings, 10, 'modal_savings');
+  useBackButton(() => setShowKajian(false), showKajian, 10, 'modal_kajian');
+  useBackButton(() => setShowTalbiyah(false), showTalbiyah, 10, 'modal_talbiyah');
+  useBackButton(() => setShowTasbih(false), showTasbih, 10, 'modal_tasbih');
+  useBackButton(() => setShowCounter(false), showCounter, 10, 'modal_counter');
+  useBackButton(() => setBookingPackage(null), !!bookingPackage, 15, 'modal_booking');
+  useBackButton(() => setDetailPackage(null), !!detailPackage, 10, 'modal_detail_package');
+  useBackButton(() => setShowJamaahServices(false), showJamaahServices, 10, 'modal_jamaah_services');
+  useBackButton(() => setShowDzikir(false), showDzikir, 10, 'modal_dzikir');
+  useBackButton(() => setShowDailyPrayers(false), showDailyPrayers, 10, 'modal_daily_prayers');
+  useBackButton(() => setShowQuran(false), showQuran, 10, 'modal_quran');
 
   const handleOpenWhatsAppCenter = (recipient) => {
     if (recipient && recipient.phone) {
@@ -442,6 +500,13 @@ export default function App() {
           initialRemoteInfo={remoteUpdateInfo}
         />
       </Suspense>
+
+      {/* Floating Toast Penanda Back Exit */}
+      {backToast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] px-4 py-2 rounded-full bg-slate-900/95 text-white border border-slate-700 shadow-2xl text-xs font-bold animate-in fade-in duration-200 pointer-events-none text-center whitespace-nowrap">
+          {backToast}
+        </div>
+      )}
     </div>
   );
 }

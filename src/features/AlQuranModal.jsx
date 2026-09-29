@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useBackButton } from '../hooks/useBackButton';
 import {
   ArrowLeft,
   Sun,
@@ -1466,6 +1467,35 @@ export default function AlQuranModal({ onClose }) {
   const [copiedAyatNum, setCopiedAyatNum] = useState(null);
   const [showTajweedGuide, setShowTajweedGuide] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
+
+  // Navigasi Tombol Back HP / Browser History untuk Al-Qur'an:
+  // 1. Prioritas 50: Kartu Share Ayat
+  useBackButton(() => setShowShareModal(null), !!showShareModal, 50, 'quran_share_modal');
+
+  // 2. Prioritas 45: Modal Rincian Ayat & Tafsir
+  useBackButton(() => setShowRincianModal(null), !!showRincianModal, 45, 'quran_rincian_modal');
+
+  // 3. Prioritas 40: Dialog & Popover di Al-Qur'an
+  useBackButton(() => setShowNoteModal(null), !!showNoteModal, 40, 'quran_note_modal');
+  useBackButton(() => setShowJumpModal(false), showJumpModal, 40, 'quran_jump_modal');
+  useBackButton(() => setSurahAyatJumpModal(null), !!surahAyatJumpModal, 40, 'quran_surah_ayat_jump_modal');
+  useBackButton(() => setShowSurahPicker(false), showSurahPicker, 40, 'quran_surah_picker');
+  useBackButton(() => setShowTajweedGuide(false), showTajweedGuide, 40, 'quran_tajweed_guide');
+  useBackButton(() => setShowThemePicker(false), showThemePicker, 40, 'quran_theme_picker');
+  useBackButton(() => setShowSettingsModal(false), showSettingsModal, 40, 'quran_settings_modal');
+  useBackButton(() => setShowNewKhatamModal(false), showNewKhatamModal, 40, 'quran_new_khatam_modal');
+
+  // 4. Prioritas 25: Kembali dari Mode Baca Surat ke Index Daftar 114 Surat
+  useBackButton(() => {
+    setViewState('index');
+    if (audioRef.current) audioRef.current.pause();
+    setIsPlayingAudio(false);
+  }, viewState === 'reader', 25, 'quran_reader_view');
+
+  // 5. Prioritas 15: Kembali dari Tab Khatam / Juz / Bookmarks ke Tab Surat
+  useBackButton(() => {
+    setIndexTab('surah');
+  }, viewState === 'index' && indexTab !== 'surah', 15, 'quran_index_tab');
 
   // Lock body scroll & prevent iOS Safari native page zoom interference
   useEffect(() => {
