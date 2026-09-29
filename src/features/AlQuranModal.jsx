@@ -554,22 +554,32 @@ export function convertToUthmaniMadinah(text) {
   return normalizeQuranText(res, true);
 }
 
+// HELPER BERSIHKAN TANDA KURUNG HARAKAT WAQAF (AMAN UNTUK TENGAH MAUPUN AKHIR AYAT)
+export function cleanWaqfParentheses(text) {
+  if (!text) return '';
+  // 1. Tanda kurung waqaf di akhir kalimat: (i). atau (u), atau (a). -> akhiri dengan titik
+  let res = text.replace(/\s*\(([aiueoAIUEO]|an|in|un)\)\s*([.,;])?\s*$/, '.');
+  // 2. Tanda kurung waqaf di tengah kalimat: fīh(i), -> fīh, ATAU fīh(i) -> fīh (jangan beri titik di tengah kalimat!)
+  res = res.replace(/\s*\(([aiueoAIUEO]|an|in|un)\)\s*([.,;])?/g, (m, v, punct) => punct ? punct + ' ' : ' ');
+  // 3. Rapikan spasi dan tanda baca
+  res = res.replace(/\s+/g, ' ').replace(/\s+([.,;])/g, '$1').trim();
+  if (!/[.!?]$/.test(res)) res += '.';
+  return res;
+}
+
 // FORMAT TRANSLITERASI LATIN SESUAI 3 STANDAR MUSHAF (KEMENAG RI, MADINAH UTSMANI, & MODERN POPULER)
 export function formatAyatLatin(rawLatin, mushafType = 'indonesia') {
   if (!rawLatin) return '';
-  // 1. Bersihkan tanda kurung harakat waqaf keliru dari API (misal "(i).", "(a).", "(u),", "(in).")
-  let cleaned = rawLatin
-    .replace(/\s*\(([aiueoAIUEO]|an|in|un)\)\s*([.,;])?/g, (m, v, punct) => punct || '.')
-    .replace(/\s*,\s*$/, '.')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const cleaned = cleanWaqfParentheses(rawLatin);
 
-  // 2. Mode Modern: Ejaan Populer Indonesia tanpa huruf bertitik rumit (sangat mudah dibaca orang awam & lansia)
+  // 1. Mode Modern: Ejaan Populer Indonesia tanpa huruf bertitik rumit (sangat mudah dibaca orang awam & lansia)
   if (mushafType === 'modern') {
-    let mod = cleaned
+    return cleaned
+      // Vokal panjang ke huruf alfabet biasa
       .replace(/ā/g, 'a').replace(/Ā/g, 'A')
       .replace(/ī/g, 'i').replace(/Ī/g, 'I')
       .replace(/ū/g, 'u').replace(/Ū/g, 'U')
+      // Konsonan bertitik ke ejaan populer Indonesia
       .replace(/ḥ/g, 'h').replace(/Ḥ/g, 'H')
       .replace(/ṣ/g, 'sh').replace(/Ṣ/g, 'Sh')
       .replace(/ḍ/g, 'dh').replace(/Ḍ/g, 'Dh')
@@ -577,42 +587,57 @@ export function formatAyatLatin(rawLatin, mushafType = 'indonesia') {
       .replace(/ẓ/g, 'zh').replace(/Ẓ/g, 'Zh')
       .replace(/ż/g, 'dz').replace(/Ż/g, 'Dz')
       .replace(/ṡ/g, 'ts').replace(/Ṡ/g, 'Ts')
+      // Ghain (data Kemenag sering hanya 'g')
       .replace(/\bgair/gi, 'ghair')
+      .replace(/\bgaib/gi, 'ghaib')
       .replace(/magḍ/gi, 'maghd')
+      .replace(/magd/gi, 'maghd')
       .replace(/laḍ-ḍāll/gi, 'ladh-dhall')
       .replace(/laḍ-ḍall/gi, 'ladh-dhall')
+      // Tanda kutip 'ain & hamzah
       .replace(/[‘`]/g, "'")
       .replace(/bismillāhir-raḥmānir-raḥīm/gi, 'Bismillahir-rahmanir-rahim')
       .replace(/al-ḥamdu/gi, 'Alhamdulillahi')
       .replace(/rabbil-‘ālamīn/gi, "rabbil 'alamin");
-
-    if (!/[.!?]$/.test(mod)) mod += '.';
-    return mod;
   }
 
-  // 3. Mode Madinah: Transliterasi Standar Utsmani Internasional (KFGQPC / Qur'an Enc)
+  // 2. Mode Madinah: Transliterasi Standar Utsmani Internasional (King Fahd Complex / Encyclopedia of Islam / IJMES)
   if (mushafType === 'madinah') {
-    let mad = cleaned
-      .replace(/\byaum/gi, 'yawm')
-      .replace(/alaihim/gi, 'alayhim')
+    return cleaned
+      // Dzal -> dh, Tsa -> th, Syin -> sh
+      .replace(/ż/g, 'dh').replace(/Ż/g, 'Dh')
+      .replace(/ṡ/g, 'th').replace(/Ṡ/g, 'Th')
+      .replace(/\bsy/g, 'sh').replace(/\bSy/g, 'Sh')
+      // Ghain
       .replace(/\bgair/gi, 'ghayr')
+      .replace(/\bgaib/gi, 'ghayb')
       .replace(/magḍ/gi, 'maghḍ')
+      .replace(/magd/gi, 'maghḍ')
+      // Diphthong ay / aw
+      .replace(/yaum/gi, 'yawm')
+      .replace(/khauf/gi, 'khawf')
+      .replace(/alaihim/gi, 'alayhim')
+      .replace(/ilaihi/gi, 'ilayhi')
+      .replace(/kaifa/gi, 'kayfa')
+      .replace(/baina/gi, 'bayna')
+      // Kapitalisasi istilah ilahiah & nama surah
       .replace(/\bbismillāh/gi, 'Bismillāh')
       .replace(/\bal-ḥamdu/gi, 'Al-ḥamdu')
       .replace(/\bar-raḥmān/gi, 'Ar-Raḥmān')
+      .replace(/\bar-raḥīm/gi, 'Ar-Raḥīm')
       .replace(/\brabb/gi, 'Rabb')
       .replace(/\bmāliki/gi, 'Māliki')
       .replace(/\bihdinaṣ/gi, 'Ihdinaṣ')
       .replace(/\bṣirāṭ/gi, 'Ṣirāṭ')
-      .replace(/\blaḍ-ḍāll/gi, 'laḍ-ḍāll');
-
-    if (!/[.!?]$/.test(mad)) mad += '.';
-    return mad;
+      .replace(/\ballāh/gi, 'Allāh');
   }
 
-  // 4. Mode Indonesia (Kemenag RI): SKB Menteri Agama & Mendikbud resmi, bersih dari tanda kurung waqaf
-  if (!/[.!?]$/.test(cleaned)) cleaned += '.';
-  return cleaned;
+  // 3. Mode Indonesia (Kemenag RI): SKB Menteri Agama & Mendikbud RI resmi
+  // Mempertahankan diakritik resmi SKB (ā, ī, ū, ḥ, ṣ, ḍ, ṭ, ẓ, ż, ṡ), menyelaraskan ghain revisi
+  return cleaned
+    .replace(/\bgair/gi, 'ghair')
+    .replace(/\bgaib/gi, 'ghaib')
+    .replace(/magd/gi, 'magd');
 }
 
 // FORMAT TERJEMAHAN BAHASA INDONESIA SESUAI STANDAR MUSHAF (RAPI, BEBAS KOMA GANTUNG)
@@ -1360,7 +1385,10 @@ export default function AlQuranModal({ onClose }) {
   // 5. Modals State
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showRincianModal, setShowRincianModal] = useState(null); // Ayat object for Rincian & Tafsir
+  const [tafsirSource, setTafsirSource] = useState('kemenag'); // 'kemenag' | 'ringkas'
+  const [tafsirFontSize, setTafsirFontSize] = useState(13); // 12 | 14 | 16
   const [tafsirText, setTafsirText] = useState(null);
+  const [tafsirRingkasText, setTafsirRingkasText] = useState(null);
   const [loadingTafsir, setLoadingTafsir] = useState(false);
 
   const [showShareModal, setShowShareModal] = useState(null); // Ayat object for Share Card
@@ -1938,37 +1966,72 @@ export default function AlQuranModal({ onClose }) {
     };
   }, [selectedSurah]);
 
-  // Load Tafsir Ibnu Katsir & Kemenag for Modal "Rincian"
+  // Load Tafsir Resmi (Kemenag RI Tahlili & Ringkasan Tematik Kompleks Raja Fahd Madinah)
   const handleOpenRincian = async (ayat) => {
     setShowRincianModal(ayat);
     setLoadingTafsir(true);
     setTafsirText(null);
+    setTafsirRingkasText(null);
 
-    const cacheKey = `kanomas_tafsir_v2_${selectedSurah.nomor}`;
+    // A. Cek Cache Lokal Tafsir Kemenag RI
+    const kemenagCacheKey = `kanomas_tafsir_v2_${selectedSurah.nomor}`;
     try {
-      const cached = localStorage.getItem(cacheKey);
+      const cached = localStorage.getItem(kemenagCacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
         const match = parsed.find((t) => t.ayat === ayat.nomorAyat);
-        setTafsirText(match ? match.teks : 'Tafsir ayat ini sedang dipersiapkan.');
-        setLoadingTafsir(false);
-        return;
+        if (match) setTafsirText(match.teks);
       }
     } catch {}
 
+    // B. Cek Cache Lokal Tafsir Ringkas Madinah
+    const ringkasCacheKey = `kanomas_tafsir_ringkas_${selectedSurah.nomor}`;
     try {
-      const res = await fetch(`https://equran.id/api/v2/tafsir/${selectedSurah.nomor}`);
-      const json = await res.json();
-      if (json && json.data && json.data.tafsir) {
-        const list = json.data.tafsir;
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify(list));
-        } catch {}
-        const match = list.find((t) => t.ayat === ayat.nomorAyat);
-        setTafsirText(match ? match.teks : 'Tafsir ayat ini sedang dipersiapkan.');
+      const cachedRingkas = localStorage.getItem(ringkasCacheKey);
+      if (cachedRingkas) {
+        const parsedR = JSON.parse(cachedRingkas);
+        const matchR = parsedR.find((r) => Number(r.aya) === ayat.nomorAyat);
+        if (matchR) {
+          const cleanFootnotes = (matchR.footnotes || '').replace(/\[\d+\]\.\s*/g, '').trim();
+          setTafsirRingkasText(cleanFootnotes || matchR.translation || '');
+        }
+      }
+    } catch {}
+
+    // C. Fetch Data Paralel jika belum lengkap di memori
+    try {
+      const [resKemenag, resRingkas] = await Promise.allSettled([
+        fetch(`https://equran.id/api/v2/tafsir/${selectedSurah.nomor}`),
+        fetch(`https://quranenc.com/api/v1/translation/sura/indonesian_complex/${selectedSurah.nomor}`)
+      ]);
+
+      if (resKemenag.status === 'fulfilled') {
+        const jsonK = await resKemenag.value.json();
+        if (jsonK && jsonK.data && jsonK.data.tafsir) {
+          try {
+            localStorage.setItem(kemenagCacheKey, JSON.stringify(jsonK.data.tafsir));
+          } catch {}
+          const matchK = jsonK.data.tafsir.find((t) => t.ayat === ayat.nomorAyat);
+          setTafsirText(matchK ? matchK.teks : 'Tafsir Tahlili Kemenag ayat ini sedang dipersiapkan.');
+        }
+      }
+
+      if (resRingkas.status === 'fulfilled') {
+        const jsonR = await resRingkas.value.json();
+        if (jsonR && Array.isArray(jsonR.result)) {
+          try {
+            localStorage.setItem(ringkasCacheKey, JSON.stringify(jsonR.result));
+          } catch {}
+          const matchR = jsonR.result.find((r) => Number(r.aya) === ayat.nomorAyat);
+          if (matchR) {
+            const cleanFootnotes = (matchR.footnotes || '').replace(/\[\d+\]\.\s*/g, '').trim();
+            const textRingkas = cleanFootnotes || matchR.translation || 'Intisari makna ayat sesuai kaidah ulama tafsir.';
+            setTafsirRingkasText(textRingkas);
+          }
+        }
       }
     } catch (e) {
-      setTafsirText('Gagal memuat tafsir. Periksa koneksi internet Anda.');
+      console.warn('Gagal memuat tafsir:', e);
     } finally {
       setLoadingTafsir(false);
     }
@@ -4303,40 +4366,132 @@ export default function AlQuranModal({ onClose }) {
                 {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'}, {selectedSurah.jumlahAyat} ayat • Juz {selectedSurah.juz}
               </div>
 
-              {/* Body: Info Rincian */}
+              {/* Body: Info Rincian & Kutipan Ayat */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div className={`p-3 rounded-2xl border space-y-1.5 text-xs sm:text-sm font-bold ${
-                  isDark ? 'bg-slate-800/80 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+                {/* 1. KUTIPAN AYAT SUCI TERPILIH */}
+                <div className={`p-4 rounded-2xl border space-y-3 ${
+                  isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-emerald-50/70 border-emerald-200'
                 }`}>
-                  <p><span className="opacity-60 font-medium">Surah :</span> QS. {selectedSurah.namaLatin} ({selectedSurah.arti})</p>
-                  <p><span className="opacity-60 font-medium">Ayat Terpilih :</span> Ayat {showRincianModal.nomorAyat}</p>
-                  <p><span className="opacity-60 font-medium">Halaman Mushaf :</span> Halaman {calculateAyatPage(selectedSurah, showRincianModal.nomorAyat)}</p>
-                  <p><span className="opacity-60 font-medium">Urutan Turun :</span> Wahyu ke-{selectedSurah.wahyu || 96}</p>
+                  <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
+                    <span className="text-xs font-black text-emerald-700 dark:text-emerald-400">
+                      QS. {selectedSurah.namaLatin} [{selectedSurah.nomor}] : Ayat {showRincianModal.nomorAyat}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#0a7c29] text-white">
+                      Mushaf {mushafType === 'madinah' ? 'Madinah' : mushafType === 'modern' ? 'Modern' : 'Indonesia'}
+                    </span>
+                  </div>
+
+                  {/* Teks Arab Ayat */}
+                  <p
+                    style={{ fontFamily: getActiveFontFamily() }}
+                    className={`${getArabicFontClass()} text-xl sm:text-2xl leading-loose text-right font-medium select-text ${
+                      isDark ? 'text-amber-100' : 'text-slate-900'
+                    }`}
+                    dir="rtl"
+                  >
+                    {getAyatArabText(showRincianModal)}
+                  </p>
+
+                  {/* Transliterasi Latin */}
+                  <p className="text-xs sm:text-sm font-medium leading-relaxed italic text-emerald-800 dark:text-emerald-300 select-text">
+                    {formatAyatLatin(showRincianModal.teksLatin, mushafType)}
+                  </p>
+
+                  {/* Terjemahan */}
+                  <p className="text-xs sm:text-sm font-normal leading-relaxed text-slate-700 dark:text-slate-200 select-text">
+                    "{formatAyatTranslation(showRincianModal.teksIndonesia, mushafType)}"
+                  </p>
                 </div>
 
-                {/* Sub-Header Tafsir */}
-                <div className="bg-[#0a7c29] text-amber-200 font-bold text-center py-1.5 text-xs tracking-wider uppercase rounded-xl shadow-xs">
-                  Teks Tafsir (Kemenag RI & Ringkasan Ibnu Katsir)
+                {/* 2. PILIHAN SUMBER TAFSIR (DUAL TAB RESMI) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Rujukan Tafsir Resmi
+                    </span>
+                    {/* Ukuran Font Tafsir */}
+                    <div className="flex items-center gap-1">
+                      {[
+                        { sz: 12, label: 'Kecil' },
+                        { sz: 14, label: 'Standar' },
+                        { sz: 16, label: 'Besar' }
+                      ].map((f) => (
+                        <button
+                          key={f.sz}
+                          type="button"
+                          onClick={() => setTafsirFontSize(f.sz)}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
+                            tafsirFontSize === f.sz
+                              ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-2xs'
+                              : isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setTafsirSource('kemenag')}
+                      className={`py-2 px-2 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        tafsirSource === 'kemenag'
+                          ? 'bg-[#0a7c29] text-white shadow-xs font-black'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
+                      }`}
+                    >
+                      <span className="text-xs leading-none">Tafsir Kemenag RI</span>
+                      <span className="text-[9px] opacity-80">Tahlili Lengkap</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTafsirSource('ringkas')}
+                      className={`py-2 px-2 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        tafsirSource === 'ringkas'
+                          ? 'bg-[#0a7c29] text-white shadow-xs font-black'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
+                      }`}
+                    >
+                      <span className="text-xs leading-none">Tafsir Ringkas Tematik</span>
+                      <span className="text-[9px] opacity-80">Mujamma' Raja Fahd</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Box Tafsir */}
-                <div className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-3 font-serif border ${
+                {/* 3. BOX KONTEN TAFSIR */}
+                <div className={`p-4 sm:p-5 rounded-2xl leading-relaxed space-y-3 border ${
                   isDark
                     ? 'bg-[#082414] text-emerald-100 border-emerald-900/60'
-                    : 'bg-[#0c381c] text-white border-emerald-800'
+                    : 'bg-[#0c381c] text-white border-emerald-800 shadow-md'
                 }`}>
                   {loadingTafsir ? (
                     <div className="py-8 text-center space-y-2">
                       <Loader2 className="w-6 h-6 animate-spin text-emerald-400 mx-auto" />
-                      <p className="text-xs text-emerald-200 font-sans">Memuat teks tafsir resmi Kemenag RI...</p>
+                      <p className="text-xs text-emerald-200 font-sans">
+                        Memuat rujukan teks tafsir resmi...
+                      </p>
                     </div>
                   ) : (
                     <div>
-                      <span className="font-bold text-amber-300 block mb-2 font-sans text-xs">
-                        ({showRincianModal.nomorAyat}) QS. {selectedSurah.namaLatin} : {showRincianModal.nomorAyat}
-                      </span>
-                      <p className="whitespace-pre-line text-emerald-50 font-normal leading-relaxed text-xs sm:text-sm">
-                        {tafsirText}
+                      <div className="flex items-center justify-between border-b border-emerald-700/60 pb-2 mb-3">
+                        <span className="font-bold text-amber-300 block font-sans text-xs">
+                          {tafsirSource === 'kemenag' ? '📖 Tafsir Tahlili Kemenag RI' : '📌 Tafsir Ringkas & Catatan Ulama Madinah'}
+                        </span>
+                        <span className="text-[10px] text-emerald-300 font-mono">
+                          Ayat {showRincianModal.nomorAyat}
+                        </span>
+                      </div>
+
+                      <p
+                        style={{ fontSize: `${tafsirFontSize}px`, lineHeight: '1.8' }}
+                        className="whitespace-pre-line text-emerald-50 font-normal leading-relaxed select-text"
+                      >
+                        {tafsirSource === 'kemenag'
+                          ? (tafsirText || 'Tafsir Tahlili Kemenag RI untuk ayat ini sedang dipersiapkan.')
+                          : (tafsirRingkasText || tafsirText || 'Intisari makna ayat sesuai kaidah tafsir para ulama salaf.')}
                       </p>
                     </div>
                   )}
@@ -4353,8 +4508,10 @@ export default function AlQuranModal({ onClose }) {
                   </span>
                   <button
                     onClick={() => {
-                      if (tafsirText) {
-                        navigator.clipboard?.writeText(`Tafsir QS. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${showRincianModal.nomorAyat}\n\n${tafsirText}\n\n(Aplikasi Kanomas)`);
+                      const activeTafsirContent = tafsirSource === 'kemenag' ? (tafsirText || '') : (tafsirRingkasText || tafsirText || '');
+                      if (activeTafsirContent) {
+                        const sourceLabel = tafsirSource === 'kemenag' ? 'Tafsir Tahlili Kemenag RI' : 'Tafsir Ringkas Tematik Madinah';
+                        navigator.clipboard?.writeText(`*${sourceLabel}*\nQS. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${showRincianModal.nomorAyat}\n\n${activeTafsirContent}\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_`);
                         alert('Teks tafsir berhasil disalin!');
                       }
                     }}
