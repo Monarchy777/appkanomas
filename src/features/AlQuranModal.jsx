@@ -5384,7 +5384,10 @@ export default function AlQuranModal({ onClose }) {
                         <img
                           src={KANOMAS_LOGO_BASE64}
                           alt="Kanomas"
-                          className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0"
+                          width={24}
+                          height={24}
+                          style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', maxWidth: '24px', maxHeight: '24px' }}
+                          className="w-6 h-6 rounded-md object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0"
                         />
                         <div className="text-left min-w-0">
                           <span className={`text-[9.5px] sm:text-[10.5px] font-black block leading-tight truncate ${
