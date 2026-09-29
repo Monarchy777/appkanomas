@@ -5387,59 +5387,77 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Footer Kartu: Kanomas Tour & Travel Official Branding */}
-                    <div className={`relative z-10 text-center border-t flex items-center justify-between gap-1.5 flex-shrink-0 ${
-                      shareCardFormat === 'kotak' ? 'pt-2 mt-1.5' : 'pt-2.5 mt-2.5'
-                    } ${
-                      isShareDark ? 'border-white/20' : 'border-amber-900/20'
-                    }`}>
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                        <img
-                          src={KANOMAS_LOGO_BASE64}
-                          alt="Kanomas"
-                          width={shareCardFormat === 'kotak' ? 24 : 34}
-                          height={shareCardFormat === 'kotak' ? 24 : 34}
-                          style={
-                            shareCardFormat === 'kotak'
-                              ? { width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', maxWidth: '24px', maxHeight: '24px' }
-                              : { width: '34px', height: '34px', minWidth: '34px', minHeight: '34px', maxWidth: '34px', maxHeight: '34px' }
-                          }
-                          className={`${
-                            shareCardFormat === 'kotak' ? 'w-6 h-6 rounded-md' : 'w-8.5 h-8.5 rounded-lg'
-                          } object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0`}
-                        />
-                        <div className="text-left min-w-0">
-                          <span className={`${
-                            shareCardFormat === 'kotak'
-                              ? 'text-[9.5px] sm:text-[10.5px]'
-                              : 'text-xs sm:text-[13px]'
-                          } font-black block leading-tight truncate ${
-                            isShareDark ? 'text-amber-200' : 'text-amber-950'
-                          }`}>
-                            Kanomas Tour & Travel
-                          </span>
-                          <span className={`${
-                            shareCardFormat === 'kotak'
-                              ? 'text-[7.5px] sm:text-[8px]'
-                              : 'text-[9px] sm:text-[9.5px]'
-                          } block truncate ${
-                            isShareDark ? 'text-slate-300' : 'text-slate-600'
-                          }`}>
-                            Izin Resmi Kemenag RI
-                          </span>
-                        </div>
-                      </div>
-                      <span className={`${
-                        shareCardFormat === 'kotak'
-                          ? 'text-[8px] sm:text-[9px] px-2 py-0.5'
-                          : 'text-[9.5px] sm:text-[10px] px-2.5 py-1'
-                      } rounded-full font-mono font-bold whitespace-nowrap flex-shrink-0 border ${
-                        isShareDark
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
-                          : 'bg-emerald-800 text-white border-emerald-900'
+                    {shareCardFormat === 'portrait' ? (
+                      /* Layout Khusus Format STORY (9:16) - Elegan 2-Tingkat di Tengah (Anti-Truncate & Bebas Titik-Titik) */
+                      <div className={`relative z-10 text-center border-t pt-2.5 mt-2 flex flex-col items-center justify-center gap-1.5 flex-shrink-0 ${
+                        isShareDark ? 'border-white/20' : 'border-amber-900/20'
                       }`}>
-                        appkanomas.mediasosial.net
-                      </span>
-                    </div>
+                        <div className="flex items-center justify-center gap-2">
+                          <img
+                            src={KANOMAS_LOGO_BASE64}
+                            alt="Kanomas"
+                            width={34}
+                            height={34}
+                            style={{ width: '34px', height: '34px', minWidth: '34px', minHeight: '34px', maxWidth: '34px', maxHeight: '34px' }}
+                            className="w-8.5 h-8.5 rounded-lg object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0"
+                          />
+                          <div className="text-left">
+                            <span className={`text-xs sm:text-[13px] font-black block leading-tight whitespace-nowrap ${
+                              isShareDark ? 'text-amber-200' : 'text-amber-950'
+                            }`}>
+                              Kanomas Tour & Travel
+                            </span>
+                            <span className={`text-[8.5px] sm:text-[9px] block font-medium whitespace-nowrap ${
+                              isShareDark ? 'text-slate-300' : 'text-slate-600'
+                            }`}>
+                              Izin Resmi Kemenag RI
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`text-[9px] sm:text-[9.5px] px-3 py-0.5 rounded-full font-mono font-bold whitespace-nowrap border ${
+                          isShareDark
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                            : 'bg-emerald-800 text-white border-emerald-900'
+                        }`}>
+                          appkanomas.mediasosial.net
+                        </span>
+                      </div>
+                    ) : (
+                      /* Layout Khusus Format KOTAK (1:1) - 1 Baris Horizontal yang Sudah Pas (Bebas Titik-Titik) */
+                      <div className={`relative z-10 text-center border-t pt-2 mt-1.5 flex items-center justify-between gap-1.5 flex-shrink-0 ${
+                        isShareDark ? 'border-white/20' : 'border-amber-900/20'
+                      }`}>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <img
+                            src={KANOMAS_LOGO_BASE64}
+                            alt="Kanomas"
+                            width={24}
+                            height={24}
+                            style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', maxWidth: '24px', maxHeight: '24px' }}
+                            className="w-6 h-6 rounded-md object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0"
+                          />
+                          <div className="text-left">
+                            <span className={`text-[9.5px] sm:text-[10.5px] font-black block leading-tight whitespace-nowrap ${
+                              isShareDark ? 'text-amber-200' : 'text-amber-950'
+                            }`}>
+                              Kanomas Tour & Travel
+                            </span>
+                            <span className={`text-[7.5px] sm:text-[8px] block whitespace-nowrap ${
+                              isShareDark ? 'text-slate-300' : 'text-slate-600'
+                            }`}>
+                              Izin Resmi Kemenag RI
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full font-mono font-bold whitespace-nowrap flex-shrink-0 border ${
+                          isShareDark
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                            : 'bg-emerald-800 text-white border-emerald-900'
+                        }`}>
+                          appkanomas.mediasosial.net
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
