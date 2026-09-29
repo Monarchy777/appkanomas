@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanomas-cache-v11-logo-compact-autofit';
+const CACHE_NAME = 'kanomas-cache-v13-back-fix';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
