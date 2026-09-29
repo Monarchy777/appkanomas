@@ -17,11 +17,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;600;700&family=Scheherazade+New:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-BgMCBwGm.js"></script>
+    <script type="module" crossorigin src="./assets/index-CvX_Sv7L.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/vendor-icons-wmtkA3KQ.js">
     <link rel="modulepreload" crossorigin href="./assets/vendor-react-fq9l8ngy.js">
     <link rel="modulepreload" crossorigin href="./assets/vendor-capacitor-c_pVEujX.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-DhMZhwrg.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CAKtZCyV.css">
   </head>
   <body class="bg-[#f8fafc] text-slate-800 antialiased selection:bg-amber-500 selection:text-white min-h-screen">
     <div id="root"></div>
@@ -29,8 +29,8 @@
       // Register service worker for PWA support with auto-update cache busting
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=11').then((reg) => {
-            console.log('Kanomas PWA Service Worker terdaftar (v11):', reg.scope);
+          navigator.serviceWorker.register('/sw.js?v=12').then((reg) => {
+            console.log('Kanomas PWA Service Worker terdaftar (v12):', reg.scope);
             try { reg.update(); } catch(e) {}
           }).catch((err) => {
             console.warn('Kanomas PWA Service Worker gagal:', err);
