@@ -245,7 +245,7 @@ export const THEME_PALETTES = {
     accentBg: 'bg-emerald-100 dark:bg-emerald-950/80 text-[#0a7c29] dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700',
     accentRing: 'focus:ring-2 ${currentTheme.accentRing}',
     cardBorderHover: 'hover:border-emerald-500',
-    rollerHighlight: 'bg-emerald-500/15 border-emerald-500/40 text-[#0a7c29] dark:text-amber-300',
+    rollerHighlight: 'bg-emerald-500/15 border-emerald-500/40 ${currentTheme.accentText}',
     ayatBadgeBg: 'bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20',
     toolbarBorder: 'border-emerald-300 dark:border-slate-700',
     themeHex: '#0a7c29',
@@ -3146,14 +3146,14 @@ export default function AlQuranModal({ onClose }) {
                   onClick={() => setIndexTab(indexTab === 'khatam' ? 'surah' : 'khatam')}
                   className={`p-3 rounded-2xl border text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
                     indexTab === 'khatam'
-                      ? 'bg-[#0a7c29] text-white border-emerald-400 ring-2 ring-emerald-300 shadow-md'
+                      ? `${currentTheme.activeTab} ring-2 ring-white/50 shadow-md`
                       : isDark
                       ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-emerald-500'
                       : 'bg-white border-slate-200/90 text-slate-800 hover:border-emerald-500'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full mb-1.5">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'khatam' ? 'bg-amber-400 text-slate-950' : 'bg-emerald-100 dark:bg-emerald-950 text-[#0a7c29] dark:text-emerald-400'}`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'khatam' ? 'bg-amber-400 text-slate-950' : `${currentTheme.accentBg} ${currentTheme.accentText}`}`}>
                       <Target className="w-4 h-4" />
                     </div>
                     <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'khatam' ? 'bg-white/20 text-white' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}`}>
@@ -3201,7 +3201,7 @@ export default function AlQuranModal({ onClose }) {
               <div className={`w-full max-w-lg mx-auto rounded-3xl p-3 sm:p-3.5 border shadow-xl backdrop-blur-md transition-all ${
                 isDark
                   ? 'bg-slate-900/90 border-slate-700/80 shadow-slate-950/50'
-                  : 'bg-white/95 border-emerald-100 shadow-emerald-950/5'
+                  : 'bg-white/95 border-slate-200/90 shadow-xs'
               }`}>
                 {/* BARIS 1: KIRI JUZ & KANAN AYAT */}
                 <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-2.5">
@@ -3232,12 +3232,12 @@ export default function AlQuranModal({ onClose }) {
                       itemHeight={38}
                       visibleCount={3}
                       isDark={isDark}
-                      highlightBg="bg-emerald-500/15 border-emerald-500/40"
+                      highlightBg={currentTheme.rollerHighlight}
                       renderItem={(juzNum, isSelected) => (
                         <span
                           className={`font-mono transition-all ${
                             isSelected
-                              ? 'text-lg font-black text-[#0a7c29] dark:text-amber-300 scale-110 drop-shadow-xs'
+                              ? 'text-lg font-black ${currentTheme.accentText} scale-110 drop-shadow-xs'
                               : 'text-sm font-semibold text-slate-400 dark:text-slate-500'
                           }`}
                         >
@@ -3432,7 +3432,7 @@ export default function AlQuranModal({ onClose }) {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Cari nama surat, arti, atau nomor (contoh: Al-Baqarah, Sapi, 36)..."
-                      className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] shadow-2xs transition ${
+                      className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 ${currentTheme.accentRing} shadow-2xs transition ${
                         isDark
                           ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                           : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
@@ -3460,7 +3460,7 @@ export default function AlQuranModal({ onClose }) {
                     ).map((surah) => (
                       <div
                         key={surah.nomor}
-                        className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:border-emerald-500 hover:shadow-md transition space-y-2.5 flex flex-col justify-between"
+                        className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs ${currentTheme.cardBorderHover} hover:shadow-md transition space-y-2.5 flex flex-col justify-between"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -3473,7 +3473,7 @@ export default function AlQuranModal({ onClose }) {
                               </h4>
                               {/* Prominently Mention Surah Meaning */}
                               <div className="mt-0.5">
-                                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 inline-block">
+                                <span className={`text-[11px] font-bold ${currentTheme.accentText} ${currentTheme.accentBg} px-2 py-0.5 rounded-md inline-block`}>
                                   Arti: "{surah.arti}"
                                 </span>
                               </div>
@@ -3500,7 +3500,7 @@ export default function AlQuranModal({ onClose }) {
                             className="py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-emerald-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition"
                             title="Pilih nomor ayat tertentu"
                           >
-                            <ListOrdered className="w-3.5 h-3.5 text-[#0a7c29] dark:text-emerald-400" />
+                            <ListOrdered className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
                             <span>Pilih Ayat</span>
                           </button>
                         </div>
@@ -3516,7 +3516,7 @@ export default function AlQuranModal({ onClose }) {
                   {JUZ_LIST.map((juzItem) => (
                     <div
                       key={juzItem.juz}
-                      className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:border-emerald-500 hover:shadow-md transition space-y-3 flex flex-col justify-between"
+                      className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs ${currentTheme.cardBorderHover} hover:shadow-md transition space-y-3 flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between">
                         <span className={`px-3 py-1 rounded-xl ${currentTheme.headerBg} text-amber-300 font-black text-xs shadow-xs`}>
@@ -3554,7 +3554,7 @@ export default function AlQuranModal({ onClose }) {
               {indexTab === 'khatam' && (
                 <div className="space-y-4">
                   {/* Top Bar: Buat Target Baru */}
-                  <div className="p-4 rounded-3xl ${currentTheme.bannerBg} shadow-md flex items-center justify-between gap-3">
+                  <div className={`p-4 rounded-3xl ${currentTheme.bannerBg} shadow-md flex items-center justify-between gap-3`}>
                     <div>
                       <h3 className="text-sm sm:text-base font-black flex items-center gap-2">
                         <Target className="w-5 h-5 text-amber-300" />
@@ -4054,7 +4054,7 @@ export default function AlQuranModal({ onClose }) {
               {/* LOADING STATE */}
               {loadingSurah && (
                 <div className="py-20 text-center space-y-3 z-10">
-                  <Loader2 className="w-10 h-10 text-[#0a7c29] animate-spin mx-auto" />
+                  <Loader2 className={`w-10 h-10 ${currentTheme.accentText} animate-spin mx-auto`} />
                   <p style={{ color: currentTheme.translationColor }} className="text-xs sm:text-sm font-bold opacity-80">
                     Memuat mushaf QS. {selectedSurah.namaLatin}...
                   </p>
@@ -4616,7 +4616,7 @@ export default function AlQuranModal({ onClose }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari nama surat (contoh: Ar-Ra'd, Al-Fath, Yasin)..."
-                  className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] border transition ${
+                  className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 ${currentTheme.accentRing} border transition ${
                     isDark
                       ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                       : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500'
@@ -4670,7 +4670,7 @@ export default function AlQuranModal({ onClose }) {
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
               {/* Header Hijau Rincian */}
-              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
+              <div className={`p-3.5 ${currentTheme.headerBg} ${currentTheme.headerText} flex items-center justify-between flex-shrink-0`}>
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-amber-300" />
                   <h3 className="text-base font-black">Rincian & Tafsir Ayat</h3>
@@ -4781,7 +4781,7 @@ export default function AlQuranModal({ onClose }) {
                       onClick={() => setTafsirSource('kemenag')}
                       className={`py-2 px-2 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                         tafsirSource === 'kemenag'
-                          ? 'bg-[#0a7c29] text-white shadow-xs font-black'
+                          ? `${currentTheme.primaryBtn} shadow-xs font-black`
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
                       }`}
                     >
@@ -4794,7 +4794,7 @@ export default function AlQuranModal({ onClose }) {
                       onClick={() => setTafsirSource('ringkas')}
                       className={`py-2 px-2 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                         tafsirSource === 'ringkas'
-                          ? 'bg-[#0a7c29] text-white shadow-xs font-black'
+                          ? `${currentTheme.primaryBtn} shadow-xs font-black`
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
                       }`}
                     >
@@ -4860,7 +4860,7 @@ export default function AlQuranModal({ onClose }) {
                 isDark ? 'bg-slate-800/90 border-slate-700' : 'bg-slate-100 border-slate-200'
               }`}>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-[#0a7c29] text-amber-300 font-mono font-black text-xs rounded-lg border border-emerald-400/40">
+                  <span className={`px-3 py-1 ${currentTheme.ayatBadgeBg} font-mono font-black text-xs rounded-lg`}>
                     Ayat {showRincianModal.nomorAyat}
                   </span>
                   <button
@@ -4881,7 +4881,7 @@ export default function AlQuranModal({ onClose }) {
                 </div>
                 <button
                   onClick={() => setShowRincianModal(null)}
-                  className="px-5 py-1.5 rounded-xl bg-[#0a7c29] text-white font-bold text-xs shadow-xs hover:bg-emerald-800 transition active:scale-95"
+                  className={`px-5 py-1.5 rounded-xl ${currentTheme.primaryBtn} text-xs shadow-xs active:scale-95 transition`}
                 >
                   Tutup
                 </button>
@@ -4902,7 +4902,7 @@ export default function AlQuranModal({ onClose }) {
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
               {/* Header Hijau Pengaturan */}
-              <div className="p-3.5 bg-[#0a7c29] text-white flex items-center justify-between flex-shrink-0">
+              <div className={`p-3.5 ${currentTheme.headerBg} ${currentTheme.headerText} flex items-center justify-between flex-shrink-0`}>
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-amber-300" />
                   <div>
@@ -5087,7 +5087,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Terjemahan</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTranslation ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTranslation ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {showTranslation ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5103,7 +5103,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Tulisan Latin</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showLatin ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showLatin ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {showLatin ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5119,7 +5119,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Arti Per Kata</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showWordByWord ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showWordByWord ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {showWordByWord ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5135,7 +5135,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Warna Tajwid</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTajweed ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${showTajweed ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {showTajweed ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5151,7 +5151,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Mode Bersih</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${hiddenReadMode ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${hiddenReadMode ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {hiddenReadMode ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5167,7 +5167,7 @@ export default function AlQuranModal({ onClose }) {
                       }`}
                     >
                       <span className="text-xs font-black">Spasi Lapang</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${spaciousMode ? 'bg-[#0a7c29] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-black ${spaciousMode ? `${currentTheme.primaryBtn}` : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}>
                         {spaciousMode ? 'ON' : 'OFF'}
                       </span>
                     </button>
@@ -5233,7 +5233,7 @@ export default function AlQuranModal({ onClose }) {
                 <button
                   type="button"
                   onClick={() => setShowSettingsModal(false)}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs shadow-md active:scale-95 transition cursor-pointer"
+                  className={`w-full sm:w-auto px-6 py-2.5 rounded-xl ${currentTheme.primaryBtn} font-black text-xs shadow-md active:scale-95 transition cursor-pointer`}
                 >
                   Simpan & Tutup
                 </button>
@@ -5978,7 +5978,7 @@ export default function AlQuranModal({ onClose }) {
             }`}>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Compass className="w-5 h-5 text-[#0a7c29] dark:text-emerald-400" />
+                  <Compass className={`w-5 h-5 ${currentTheme.accentText}`} />
                   <div>
                     <h3 className="text-base font-black leading-tight">
                       Loncat ke Ayat
@@ -6001,7 +6001,7 @@ export default function AlQuranModal({ onClose }) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="opacity-75 font-medium">Total Ayat:</span>
-                  <span className="font-mono font-black text-[#0a7c29] dark:text-emerald-400 px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/80">
+                  <span className={`font-mono font-black ${currentTheme.accentText} px-2 py-0.5 rounded-lg ${currentTheme.accentBg}`}>
                     {selectedSurah.jumlahAyat} ayat (Maks: {selectedSurah.jumlahAyat})
                   </span>
                 </div>
@@ -6023,7 +6023,7 @@ export default function AlQuranModal({ onClose }) {
                   </button>
 
                   <div className="text-center flex-1">
-                    <span className="text-3xl font-black font-mono text-[#0a7c29] dark:text-emerald-400 block tracking-tight">
+                    <span className={`text-3xl font-black font-mono ${currentTheme.accentText} block tracking-tight`}>
                       {jumpInput || 1}
                     </span>
                     <span className="text-[10px] opacity-60 block">
@@ -6052,7 +6052,7 @@ export default function AlQuranModal({ onClose }) {
                     max={selectedSurah.jumlahAyat}
                     value={parseInt(jumpInput, 10) || 1}
                     onChange={(e) => setJumpInput(e.target.value)}
-                    className="w-full accent-[#0a7c29] cursor-pointer"
+                    className="w-full cursor-pointer"
                   />
                 </div>
 
@@ -6096,7 +6096,7 @@ export default function AlQuranModal({ onClose }) {
               <div className="flex items-center gap-2 pt-2">
                 <button
                   onClick={() => handleJumpToAyat(jumpInput || 1)}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs sm:text-sm shadow-md active:scale-95 transition"
+                  className={`w-full py-3 rounded-2xl ${currentTheme.primaryBtn} font-black text-xs sm:text-sm shadow-md active:scale-95 transition`}
                 >
                   LONCAT KE AYAT {jumpInput || 1}
                 </button>
@@ -6141,7 +6141,7 @@ export default function AlQuranModal({ onClose }) {
                   onChange={(e) => setNoteInput(e.target.value)}
                   placeholder="Tulis refleksi, doa, atau catatan pribadi untuk ayat ini..."
                   rows={4}
-                  className={`w-full p-3 rounded-2xl border text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#0a7c29] ${
+                  className={`w-full p-3 rounded-2xl border text-xs leading-relaxed focus:outline-none focus:ring-2 ${currentTheme.accentRing} ${
                     isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
                   }`}
                 />
@@ -6168,7 +6168,7 @@ export default function AlQuranModal({ onClose }) {
                   </button>
                   <button
                     onClick={handleSaveNote}
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 text-white font-black text-xs shadow-md transition active:scale-95"
+                    className={`px-5 py-2 rounded-xl ${currentTheme.primaryBtn} font-black text-xs shadow-md transition active:scale-95`}
                   >
                     Simpan Catatan
                   </button>
@@ -6187,7 +6187,7 @@ export default function AlQuranModal({ onClose }) {
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-[#cbf7d2] text-slate-800 border-emerald-400'
             }`}>
               {/* Header Hijau MyQuran */}
-              <div className="bg-[#0a7c29] text-white px-5 py-3.5 flex items-center justify-between">
+              <div className={`px-5 py-3.5 ${currentTheme.headerBg} ${currentTheme.headerText} flex items-center justify-between`}>
                 <span className="w-6" />
                 <h3 className="text-base font-bold tracking-wide">
                   Pengaturan
@@ -6425,7 +6425,7 @@ export default function AlQuranModal({ onClose }) {
               isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'
             }`}>
               {/* Header Modal */}
-              <div className="p-3.5 bg-gradient-to-r from-emerald-800 via-[#0a7c29] to-emerald-900 text-white flex items-center justify-between flex-shrink-0 shadow-md">
+              <div className={`p-3.5 ${currentTheme.headerBg} ${currentTheme.headerText} flex items-center justify-between flex-shrink-0 shadow-md`}>
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black shadow-xs">
                     {verticalPickerType === 'juz' ? (
@@ -6588,7 +6588,7 @@ export default function AlQuranModal({ onClose }) {
                         value={verticalSearchQuery}
                         onChange={(e) => setVerticalSearchQuery(e.target.value)}
                         placeholder="Cari nomor atau nama surat (contoh: 36, Yasin, Al-Mulk)..."
-                        className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0a7c29] transition ${
+                        className={`w-full pl-10 pr-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 ${currentTheme.accentRing} transition ${
                           isDark
                             ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                             : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500'
@@ -6765,7 +6765,7 @@ export default function AlQuranModal({ onClose }) {
                     setVerticalSearchQuery('');
                     handleOpenSurah(currentQuickSurah, quickAyatNum);
                   }}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
+                  className={`px-4 py-2 rounded-xl ${currentTheme.primaryBtn} font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer`}
                 >
                   <BookOpen className="w-3.5 h-3.5 text-amber-300" />
                   <span>Buka QS. {currentQuickSurah.namaLatin} : {quickAyatNum}</span>
@@ -6808,7 +6808,7 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.title}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, title: e.target.value })}
                     placeholder="Contoh: Khataman Ramadhan 1447H, Khataman Rutin"
-                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 ${currentTheme.accentRing} focus:outline-none transition ${
                       isDark
                         ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                         : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
@@ -6826,7 +6826,7 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.targetPerson}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetPerson: e.target.value })}
                     placeholder="Contoh: Pribadi, Untuk Ibu Tercinta, Almarhum Ayah"
-                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 ${currentTheme.accentRing} focus:outline-none transition ${
                       isDark
                         ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                         : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
@@ -6844,7 +6844,7 @@ export default function AlQuranModal({ onClose }) {
                       required
                       value={newKhatamInput.startDate}
                       onChange={(e) => setNewKhatamInput({ ...newKhatamInput, startDate: e.target.value })}
-                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 ${currentTheme.accentRing} focus:outline-none transition ${
                         isDark
                           ? 'bg-slate-800 border-slate-700 text-white'
                           : 'bg-slate-50 border-slate-300 text-slate-900'
@@ -6861,7 +6861,7 @@ export default function AlQuranModal({ onClose }) {
                       max="365"
                       value={newKhatamInput.targetDays}
                       onChange={(e) => setNewKhatamInput({ ...newKhatamInput, targetDays: e.target.value })}
-                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                      className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 ${currentTheme.accentRing} focus:outline-none transition ${
                         isDark
                           ? 'bg-slate-800 border-slate-700 text-white'
                           : 'bg-slate-50 border-slate-300 text-slate-900'
@@ -6879,7 +6879,7 @@ export default function AlQuranModal({ onClose }) {
                     value={newKhatamInput.notes}
                     onChange={(e) => setNewKhatamInput({ ...newKhatamInput, notes: e.target.value })}
                     placeholder="Tulis niat doa, harapan, atau pesan untuk khataman ini..."
-                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 focus:ring-[#0a7c29] focus:outline-none transition ${
+                    className={`w-full p-2.5 rounded-xl border font-medium focus:ring-2 ${currentTheme.accentRing} focus:outline-none transition ${
                       isDark
                         ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400'
                         : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
@@ -6897,7 +6897,7 @@ export default function AlQuranModal({ onClose }) {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-600 hover:from-emerald-700 text-white font-black shadow-md transition active:scale-95"
+                    className={`px-5 py-2 rounded-xl ${currentTheme.primaryBtn} font-black shadow-md transition active:scale-95`}
                   >
                     Simpan Program
                   </button>
