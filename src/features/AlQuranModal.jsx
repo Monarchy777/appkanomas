@@ -893,9 +893,11 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
               key={`g-${globalPos}`}
               style={{
                 color: item.color,
-                display: 'inline'
+                display: 'inline',
+                userSelect: 'none',
+                WebkitUserSelect: 'none'
               }}
-              className="select-text transition-colors duration-150"
+              className="select-none transition-colors duration-150"
               title={item.title}
             >
               {item.full}
@@ -920,8 +922,8 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
         return (
           <span
             key={`w-${wordIdx}`}
-            className="inline-flex items-center px-1 self-center text-slate-500 opacity-70"
-            style={{ direction: 'rtl' }}
+            className="inline-flex items-center px-1 self-center text-slate-500 opacity-70 select-none"
+            style={{ direction: 'rtl', userSelect: 'none', WebkitUserSelect: 'none' }}
           >
             {wordContent}
           </span>
@@ -931,8 +933,8 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
       return (
         <div
           key={`wbw-${wordIdx}`}
-          className="inline-flex flex-col items-center justify-start text-center px-1.5 py-0.5"
-          style={{ direction: 'rtl', verticalAlign: 'top' }}
+          className="inline-flex flex-col items-center justify-start text-center px-1.5 py-0.5 select-none"
+          style={{ direction: 'rtl', verticalAlign: 'top', userSelect: 'none', WebkitUserSelect: 'none' }}
         >
           {/* Huruf Arab perkata */}
           <span
@@ -941,9 +943,11 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
               fontSize: `${wbwOptions.arabicFontSize}px`,
               color: wbwOptions.arabicColor,
               lineHeight: wbwOptions.dynamicArabicLineHeight,
-              fontWeight: 500
+              fontWeight: 500,
+              userSelect: 'none',
+              WebkitUserSelect: 'none'
             }}
-            className={`${wbwOptions.arabicFontClass} font-medium select-text`}
+            className={`${wbwOptions.arabicFontClass} font-medium select-none`}
           >
             {wordContent}
           </span>
@@ -953,9 +957,11 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
             <span
               style={{
                 color: wbwOptions.isDark ? '#94a3b8' : '#475569',
-                maxWidth: '140px'
+                maxWidth: '140px',
+                userSelect: 'none',
+                WebkitUserSelect: 'none'
               }}
-              className="text-[11px] sm:text-xs font-normal leading-tight text-center select-text mt-1 break-words opacity-90"
+              className="text-[11px] sm:text-xs font-normal leading-tight text-center select-none mt-1 break-words opacity-90"
               dir="ltr"
             >
               {currentWbwItem.arti || '-'}
@@ -967,7 +973,7 @@ function renderSafeTajweed(text, themeMode = 'mushaf', showTajweed = true, wbwOp
 
     // Tampilan ayat biasa saat terjemah per kata tidak aktif
     return (
-      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 500 }}>
+      <span key={`w-${wordIdx}`} style={{ display: 'inline', unicodeBidi: 'isolate', fontWeight: 500, userSelect: 'none', WebkitUserSelect: 'none' }} className="select-none">
         {wordContent}
         {wordIdx < words.length - 1 ? ' ' : ''}
       </span>
@@ -3629,9 +3635,12 @@ export default function AlQuranModal({ onClose }) {
           </div>
         ) : (
           /* ======================================================== */
-          /* READER VIEW: MUSHAF LENGKAP & AL-QUR'AN READER           */
-          /* ======================================================== */
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div
+            className="flex-1 flex flex-col min-h-0 overflow-hidden"
+            onClick={() => {
+              if (activeAyatId) setActiveAyatId(null);
+            }}
+          >
             {/* Header Reader */}
             <div className="bg-[#0a7c29] text-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 shadow-md flex-shrink-0 z-20">
               {/* Tombol Back ke Index Daftar Surat */}
@@ -3768,7 +3777,11 @@ export default function AlQuranModal({ onClose }) {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 space-y-6 select-text touch-pan-y"
+              onClick={() => {
+                if (activeAyatId) setActiveAyatId(null);
+              }}
+              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+              className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 space-y-6 select-none touch-pan-y"
             >
               {/* SURAH INTRO BANNER (SEBUTKAN ARTI SURAT DI AWALNYA) */}
               <div className="relative mx-auto my-3 max-w-xl text-center px-4 py-4 rounded-3xl border-2 border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-950/40 backdrop-blur-xs shadow-md">
@@ -3808,9 +3821,11 @@ export default function AlQuranModal({ onClose }) {
                       <span
                         style={{
                           fontFamily: getActiveFontFamily(),
-                          color: currentTheme.bismillahColor
+                          color: currentTheme.bismillahColor,
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none'
                         }}
-                        className={`${getArabicFontClass()} text-2xl sm:text-3xl tracking-wide inline-block select-text font-bold drop-shadow-sm`}
+                        className={`${getArabicFontClass()} text-2xl sm:text-3xl tracking-wide inline-block select-none font-bold drop-shadow-sm`}
                         dir="rtl"
                       >
                         {mushafType === 'madinah'
@@ -3891,13 +3906,16 @@ export default function AlQuranModal({ onClose }) {
 
                         <div
                           id={`ayat-card-${ayat.nomorAyat}`}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setActiveAyatId(activeAyatId === ayat.nomorAyat ? null : ayat.nomorAyat);
                           }}
                           style={{
-                            borderBottomColor: currentTheme.borderDivider
+                            borderBottomColor: currentTheme.borderDivider,
+                            userSelect: 'none',
+                            WebkitUserSelect: 'none'
                           }}
-                          className={`space-y-3 pb-5 pt-3 px-3 sm:px-4 border-b rounded-2xl cursor-pointer relative z-10 transition-colors duration-150 ${
+                          className={`space-y-3 pb-5 pt-3 px-3 sm:px-4 border-b rounded-2xl cursor-pointer relative z-10 transition-colors duration-150 select-none ${
                             isHighlighted
                               ? currentTheme.highlightBg
                               : isAudioPlaying
@@ -3923,11 +3941,13 @@ export default function AlQuranModal({ onClose }) {
                           <div className="w-full" dir="rtl" data-zoom-zone="arabic">
                             {showWordByWord ? (
                               <div
-                                className="flex flex-wrap items-start justify-start gap-y-4 gap-x-2.5 w-full select-text mb-4 sm:mb-5"
+                                className="flex flex-wrap items-start justify-start gap-y-4 gap-x-2.5 w-full select-none mb-4 sm:mb-5"
                                 dir="rtl"
                                 style={{
                                   direction: 'rtl',
-                                  textAlign: 'right'
+                                  textAlign: 'right',
+                                  userSelect: 'none',
+                                  WebkitUserSelect: 'none'
                                 }}
                               >
                                 {renderArabic(ayat)}
@@ -3962,9 +3982,11 @@ export default function AlQuranModal({ onClose }) {
                                   textRendering: 'optimizeLegibility',
                                   WebkitFontSmoothing: 'antialiased',
                                   MozOsxFontSmoothing: 'grayscale',
-                                  width: '100%'
+                                  width: '100%',
+                                  userSelect: 'none',
+                                  WebkitUserSelect: 'none'
                                 }}
-                                className={`${getArabicFontClass()} font-medium select-text mb-4 sm:mb-5`}
+                                className={`${getArabicFontClass()} font-medium select-none mb-4 sm:mb-5`}
                               >
                                 {renderArabic(ayat)}
 
@@ -3995,7 +4017,7 @@ export default function AlQuranModal({ onClose }) {
 
                           {/* B. TRANSLITERASI LATIN */}
                           {showLatin && ayat.teksLatin && (
-                            <div className="mt-3 sm:mt-3.5 pt-1 w-full" data-zoom-zone="latin">
+                            <div className="mt-3 sm:mt-3.5 pt-1 w-full select-none" data-zoom-zone="latin">
                               <p
                                 style={{
                                   fontSize: `${latinFontSize}px`,
@@ -4005,9 +4027,11 @@ export default function AlQuranModal({ onClose }) {
                                   textAlignLast: 'left',
                                   textJustify: 'inter-word',
                                   hyphens: 'auto',
-                                  width: '100%'
+                                  width: '100%',
+                                  userSelect: 'none',
+                                  WebkitUserSelect: 'none'
                                 }}
-                                className="font-medium select-text"
+                                className="font-medium select-none"
                               >
                                 {formatAyatLatin(ayat.teksLatin, mushafType)}
                               </p>
@@ -4016,7 +4040,7 @@ export default function AlQuranModal({ onClose }) {
 
                           {/* C. TERJEMAHAN BAHASA INDONESIA */}
                           {showTranslation && ayat.teksIndonesia && (
-                            <div className="mt-2.5 sm:mt-3 w-full" data-zoom-zone="translation">
+                            <div className="mt-2.5 sm:mt-3 w-full select-none" data-zoom-zone="translation">
                               <p
                                 style={{
                                   fontSize: `${latinFontSize}px`,
@@ -4026,9 +4050,11 @@ export default function AlQuranModal({ onClose }) {
                                   textAlignLast: 'left',
                                   textJustify: 'inter-word',
                                   hyphens: 'auto',
-                                  width: '100%'
+                                  width: '100%',
+                                  userSelect: 'none',
+                                  WebkitUserSelect: 'none'
                                 }}
-                                className="font-normal select-text opacity-95"
+                                className="font-normal select-none opacity-95"
                               >
                                 {formatAyatTranslation(ayat.teksIndonesia, mushafType)}
                               </p>
@@ -4178,16 +4204,6 @@ export default function AlQuranModal({ onClose }) {
                                 >
                                   <HelpCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 </button>
-
-                                {hiddenReadMode && (
-                                  <button
-                                    onClick={() => setActiveAyatId(null)}
-                                    className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition ml-auto shrink-0"
-                                    title="Tutup Menu"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                )}
                               </div>
                             </div>
                           )}
