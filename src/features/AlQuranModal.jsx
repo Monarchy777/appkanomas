@@ -50,6 +50,7 @@ import html2canvas from 'html2canvas';
 import { Capacitor } from '@capacitor/core';
 import { Share as CapShare } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { KANOMAS_LOGO_BASE64 } from '../config/logoBase64';
 
 
 // DAFTAR 114 SURAH LENGKAP DENGAN METADATA RESMI (WAHYU, JUZ, HALAMAN)
@@ -1666,7 +1667,7 @@ export default function AlQuranModal({ onClose }) {
     setSelectedSurah(surah);
     setViewState('reader');
     setShowSurahPicker(false);
-    if (targetAyat && targetAyat > 1) {
+    if (targetAyat && targetAyat >= 1) {
       setTargetAyatToScroll(targetAyat);
     } else {
       setTargetAyatToScroll(null);
@@ -2112,20 +2113,30 @@ export default function AlQuranModal({ onClose }) {
     } catch {}
   };
 
+  const handleDeleteBookmark = (key) => {
+    const updated = bookmarks.filter((b) => b.key !== key);
+    setBookmarks(updated);
+    try {
+      localStorage.setItem('kanomas_quran_bookmarks', JSON.stringify(updated));
+    } catch {}
+  };
+
   // Share Ayat (Card Generator & Quick Share)
   const handleOpenShareModal = (ayat) => {
     setShowShareModal(ayat);
-    // Otomatis sinkronkan background kartu dengan tema yang sedang aktif
+    // Otomatis sinkronkan background kartu dengan tema yang sedang aktif atau default makkah-1
     if (themeMode === 'kabah') {
-      setShareBgTheme('kaaba');
+      setShareBgTheme('makkah-1');
     } else if (themeMode === 'nature') {
-      setShareBgTheme('nature');
-    } else if (themeMode === 'dark' || themeMode === 'navy') {
+      setShareBgTheme('gurun-arab');
+    } else if (themeMode === 'dark') {
       setShareBgTheme('dark');
+    } else if (themeMode === 'navy') {
+      setShareBgTheme('navy');
     } else if (themeMode === 'sepia') {
       setShareBgTheme('sepia');
     } else {
-      setShareBgTheme('mushaf');
+      setShareBgTheme('makkah-1');
     }
   };
 
@@ -2141,14 +2152,14 @@ export default function AlQuranModal({ onClose }) {
     setShareFeedback('🎨 Sedang merender gambar kartu ayat HD...');
     try {
       const canvas = await html2canvas(shareCardRef.current, {
-        scale: 2, // High resolution (Retina / HD)
+        scale: 2.5, // Resolusi tinggi tajam (HD)
         useCORS: true,
         allowTaint: false,
         backgroundColor: null,
         logging: false,
         scrollX: 0,
         scrollY: 0,
-        imageTimeout: 8000
+        imageTimeout: 10000
       });
       return canvas;
     } catch (err) {
@@ -2201,7 +2212,7 @@ export default function AlQuranModal({ onClose }) {
       }
     }
 
-    // B. Web Platform (Browser)
+    // B. Web Platform (Browser dengan Web Share Level 2 - Lampiran File)
     try {
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
       if (blob && navigator.canShare) {
@@ -2222,11 +2233,18 @@ export default function AlQuranModal({ onClose }) {
       console.warn('Web share file failed:', shareErr);
     }
 
-    // C. Fallback: Buka Pratinjau Gambar Siap Unduh & Share WhatsApp
+    // C. Fallback: Otomatis Unduh Gambar + Buka Pratinjau Siap Lampirkan & Bagikan
     try {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
       setPreviewCardData({ dataUrl, blob, captionText, ayat, fileName });
-      setShareFeedback('📸 Gambar HD siap disimpan / dibagikan!');
+      setShareFeedback('📸 Gambar HD terunduh & siap dilampirkan!');
       setTimeout(() => setShareFeedback(''), 3000);
     } catch (e) {
       handleQuickShareWA(ayat);
@@ -3609,26 +3627,55 @@ export default function AlQuranModal({ onClose }) {
                       <p className="text-xs text-slate-400 italic">Belum ada ayat yang disimpan.</p>
                     ) : (
                       <div className="space-y-2">
-                        {bookmarks.map((bm) => (
-                          <div
-                            key={bm.key}
-                            onClick={() => {
-                              const surah = SURAH_LIST.find((s) => s.nomor === bm.surahNomor);
-                              if (surah) handleOpenSurah(surah, bm.ayatNomor);
-                            }}
-                            className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-emerald-500 cursor-pointer transition shadow-2xs flex items-center justify-between"
-                          >
-                            <div>
-                              <span className="text-xs font-black text-slate-900 dark:text-white block">
-                                QS. {bm.surahNama} : Ayat {bm.ayatNomor}
-                              </span>
-                              <p className="text-[11px] text-slate-500 line-clamp-1">
-                                "{bm.teksIndonesia}"
-                              </p>
+                        {bookmarks.map((bm) => {
+                          const surah = SURAH_LIST.find((s) => s.nomor === bm.surahNomor);
+                          return (
+                            <div
+                              key={bm.key}
+                              className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-emerald-500 transition shadow-2xs flex items-center justify-between gap-3"
+                            >
+                              <div
+                                className="min-w-0 cursor-pointer flex-1"
+                                onClick={() => {
+                                  if (surah) handleOpenSurah(surah, bm.ayatNomor);
+                                }}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <Bookmark className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                                  <span className="text-xs font-black text-slate-900 dark:text-white">
+                                    QS. {bm.surahNama} : Ayat {bm.ayatNomor}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                  "{bm.teksIndonesia}"
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (surah) handleOpenSurah(surah, bm.ayatNomor);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95 transition"
+                                  title="Buka Ayat di Mushaf"
+                                >
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteBookmark(bm.key);
+                                  }}
+                                  className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                                  title="Hapus Penanda"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
-                            <ArrowRight className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -4908,81 +4955,94 @@ export default function AlQuranModal({ onClose }) {
         {/* ======================================================== */}
         {showShareModal && (() => {
           const SHARE_STYLES = [
-            // 1. Dinamis / Foto Asli
+            // 1. 6 Background Foto Asli Tanah Suci & Arab
             {
-              id: 'kaaba',
-              name: 'Ka’bah Makkah',
+              id: 'gurun-arab',
+              name: 'Gurun Arab Aesthetic',
               type: 'photo',
-              badge: 'Foto Asli',
-              icon: '🕋',
-              imageUrl: '/assets/bg-kabah.jpg',
-              bgStyle: { backgroundColor: '#09111c' },
-              borderColor: 'border-amber-400/70',
+              icon: '🏜️',
+              imageUrl: '/assets/share-bg/bg-gurun-arab.jpg',
+              bgStyle: { backgroundColor: '#1c1309' },
+              borderColor: 'border-amber-400/80',
               isDark: true
             },
             {
-              id: 'nature',
-              name: 'Gurun Senja',
+              id: 'perkotaan-arab',
+              name: 'Perkotaan Arab',
               type: 'photo',
-              badge: 'Foto Asli',
-              icon: '🌄',
-              imageUrl: '/assets/bg-nature.jpg',
+              icon: '🏙️',
+              imageUrl: '/assets/share-bg/bg-perkotaan-arab.jpg',
               bgStyle: { backgroundColor: '#09111c' },
-              borderColor: 'border-emerald-400/70',
+              borderColor: 'border-sky-400/80',
               isDark: true
             },
             {
-              id: 'nabawi',
-              name: 'Masjid Nabawi',
+              id: 'madinah-1',
+              name: 'Madinah',
               type: 'photo',
-              badge: 'Foto Asli',
               icon: '🕌',
-              imageUrl: '/assets/banners/banner-3-promo.jpg',
-              bgStyle: { backgroundColor: '#09111c' },
-              borderColor: 'border-amber-300/70',
+              imageUrl: '/assets/share-bg/bg-madinah-1.jpg',
+              bgStyle: { backgroundColor: '#091c13' },
+              borderColor: 'border-emerald-400/80',
               isDark: true
             },
             {
-              id: 'pelataran',
-              name: 'Pelataran Haram',
+              id: 'madinah-2',
+              name: 'Madinah 2',
               type: 'photo',
-              badge: 'Foto Asli',
-              icon: '🕋',
-              imageUrl: '/assets/banners/banner-2-hotel.jpg',
-              bgStyle: { backgroundColor: '#09111c' },
-              borderColor: 'border-amber-400/70',
+              icon: '✨',
+              imageUrl: '/assets/share-bg/bg-madinah-2.jpg',
+              bgStyle: { backgroundColor: '#111726' },
+              borderColor: 'border-amber-300/80',
               isDark: true
             },
-            // 2. Warna Polos & Gradasi Mewah
+            {
+              id: 'makkah-1',
+              name: 'Makah',
+              type: 'photo',
+              icon: '🕋',
+              imageUrl: '/assets/share-bg/bg-makkah-1.jpg',
+              bgStyle: { backgroundColor: '#0f141c' },
+              borderColor: 'border-amber-400/80',
+              isDark: true
+            },
+            {
+              id: 'makkah-2',
+              name: 'Makah 2',
+              type: 'photo',
+              icon: '🌙',
+              imageUrl: '/assets/share-bg/bg-makkah-2.jpg',
+              bgStyle: { backgroundColor: '#0d131f' },
+              borderColor: 'border-amber-300/80',
+              isDark: true
+            },
+            // 2. 6 Background Warna & Aksen Elegan
             {
               id: 'mushaf',
               name: 'Hijau Zamrud',
               type: 'color',
-              badge: 'Warna Polos',
               icon: '🟢',
               bgStyle: {
-                background: 'linear-gradient(145deg, #064e1c, #0a7c29, #043312)'
+                background: 'linear-gradient(145deg, #043813, #0a6925, #02200a)'
               },
-              borderColor: 'border-emerald-400/60',
+              borderColor: 'border-emerald-400/70',
               isDark: true
             },
             {
               id: 'dark',
-              name: 'Hitam Onyx',
+              name: 'Hitam Kiswah',
               type: 'color',
-              badge: 'Warna Polos',
               icon: '⚫',
               bgStyle: {
-                background: 'linear-gradient(145deg, #09111c, #111c2e, #050b13)'
+                background: 'linear-gradient(145deg, #0a0d14, #181d26, #06080d)'
               },
-              borderColor: 'border-amber-400/60',
+              borderColor: 'border-amber-400/70',
               isDark: true
             },
             {
               id: 'navy',
               name: 'Royal Navy',
               type: 'color',
-              badge: 'Warna Polos',
               icon: '🔵',
               bgStyle: {
                 background: 'linear-gradient(145deg, #071b2f, #0d3b66, #041424)'
@@ -4991,28 +5051,37 @@ export default function AlQuranModal({ onClose }) {
               isDark: true
             },
             {
+              id: 'maroon',
+              name: 'Ruby Maroon',
+              type: 'color',
+              icon: '🔴',
+              bgStyle: {
+                background: 'linear-gradient(145deg, #3d0914, #5c0e1e, #26050b)'
+              },
+              borderColor: 'border-rose-400/70',
+              isDark: true
+            },
+            {
               id: 'sepia',
               name: 'Kertas Mushaf',
               type: 'color',
-              badge: 'Warna Polos',
               icon: '📜',
               bgStyle: {
-                background: 'linear-gradient(145deg, #fbf6ea, #f5ebd6, #eedec0)'
+                background: 'linear-gradient(145deg, #fcf8ee, #f5ebd6, #ebd7b5)'
               },
-              borderColor: 'border-amber-600/50',
+              borderColor: 'border-amber-600/60',
               isDark: false
             },
             {
-              id: 'gold',
-              name: 'Emas Sultan',
+              id: 'pearl',
+              name: 'Mutiara Putih',
               type: 'color',
-              badge: 'Warna Polos',
-              icon: '🟡',
+              icon: '⚪',
               bgStyle: {
-                background: 'linear-gradient(145deg, #78350f, #92400e, #451a03)'
+                background: 'linear-gradient(145deg, #f8fafc, #f1f5f9, #e2e8f0)'
               },
-              borderColor: 'border-amber-300/80',
-              isDark: true
+              borderColor: 'border-slate-300',
+              isDark: false
             }
           ];
 
@@ -5030,29 +5099,33 @@ export default function AlQuranModal({ onClose }) {
                   </div>
                   <button
                     onClick={() => setShowShareModal(null)}
-                    className="w-7 h-7 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition"
+                    className="w-7 h-7 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Body: Preview Kartu Ayat & Pilihan Background Dinamis / Polos */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
                   {/* PREVIEW KARTU AYAT LIVE */}
                   <div
                     ref={shareCardRef}
                     style={activeShareStyle.bgStyle}
                     className={`w-full rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all border ${activeShareStyle.borderColor} ${
-                      shareCardFormat === 'kotak' ? 'aspect-square' : 'min-h-[380px]'
+                      shareCardFormat === 'kotak'
+                        ? 'aspect-square max-w-[340px] sm:max-w-[370px] mx-auto'
+                        : 'aspect-[9/16] max-w-[290px] sm:max-w-[310px] mx-auto'
                     }`}
                   >
                     {/* Background Foto Asli & Overlay (Khusus Tipe Photo) */}
                     {activeShareStyle.imageUrl && (
                       <img
                         src={activeShareStyle.imageUrl}
-                        alt="Background"
-                        crossOrigin="anonymous"
+                        alt={activeShareStyle.name}
                         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     )}
                     {activeShareStyle.imageUrl && (
@@ -5080,17 +5153,21 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Teks Arab & Terjemahan Tengah */}
-                    <div className="relative z-10 space-y-3 my-auto py-3 text-center">
+                    <div className="relative z-10 space-y-2.5 my-auto py-2 text-center">
                       <p
                         style={{ fontFamily: getActiveFontFamily() }}
-                        className={`${getArabicFontClass()} text-xl sm:text-2xl leading-loose drop-shadow-md ${
+                        className={`${getArabicFontClass()} ${
+                          shareCardFormat === 'kotak' ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl'
+                        } leading-loose drop-shadow-md ${
                           isShareDark ? 'text-amber-50' : 'text-slate-950 font-bold'
                         }`}
                         dir="rtl"
                       >
                         {getAyatArabText(showShareModal)}
                       </p>
-                      <p className={`text-xs sm:text-sm font-medium leading-relaxed drop-shadow-sm px-2 ${
+                      <p className={`text-xs font-medium leading-relaxed drop-shadow-sm px-2 ${
+                        shareCardFormat === 'kotak' ? 'line-clamp-4 sm:line-clamp-5' : 'line-clamp-6'
+                      } ${
                         isShareDark ? 'text-slate-100' : 'text-slate-800'
                       }`}>
                         "{formatAyatTranslation(showShareModal.teksIndonesia, mushafType)}"
@@ -5102,7 +5179,11 @@ export default function AlQuranModal({ onClose }) {
                       isShareDark ? 'border-white/20' : 'border-amber-900/20'
                     }`}>
                       <div className="flex items-center gap-2">
-                        <img src="/assets/logo-kanomas-3d-192.png" alt="Kanomas" crossOrigin="anonymous" className="w-6 h-6 rounded-lg object-cover" />
+                        <img
+                          src={KANOMAS_LOGO_BASE64}
+                          alt="Kanomas"
+                          className="w-7 h-7 rounded-xl object-contain bg-white/10 p-0.5 shadow-sm"
+                        />
                         <div className="text-left">
                           <span className={`text-xs font-black block leading-tight ${
                             isShareDark ? 'text-amber-200' : 'text-amber-950'
@@ -5129,40 +5210,78 @@ export default function AlQuranModal({ onClose }) {
                   {/* Kontrol Format Kartu (Story vs Feed) */}
                   <div className="grid grid-cols-2 gap-2 text-xs font-bold">
                     <button
+                      type="button"
                       onClick={() => setShareCardFormat('portrait')}
-                      className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                      className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
                         shareCardFormat === 'portrait'
                           ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
-                          : 'bg-slate-800 text-slate-300 border-slate-700'
+                          : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                       }`}
                     >
                       <span>Story / Status (9:16)</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => setShareCardFormat('kotak')}
-                      className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                      className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
                         shareCardFormat === 'kotak'
                           ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
-                          : 'bg-slate-800 text-slate-300 border-slate-700'
+                          : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                       }`}
                     >
                       <span>Feed / Kotak (1:1)</span>
                     </button>
                   </div>
 
-                  {/* 1. KATEGORI FOTO ASLI & DINAMIS */}
+                  {/* Dropdown Pemilih Background */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="share-bg-dropdown" className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                        <Palette className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Pilih Tema Background:</span>
+                      </label>
+                      <span className="text-[10px] text-slate-400 font-medium">12 Pilihan Siap Pakai</span>
+                    </div>
+                    <div className="relative">
+                      <select
+                        id="share-bg-dropdown"
+                        value={shareBgTheme}
+                        onChange={(e) => setShareBgTheme(e.target.value)}
+                        className="w-full py-2.5 px-3 pr-8 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer appearance-none transition"
+                      >
+                        <optgroup label="📸 Background Foto Asli Tanah Suci & Arab (6 Pilihan)">
+                          {SHARE_STYLES.filter((s) => s.type === 'photo').map((style) => (
+                            <option key={style.id} value={style.id}>
+                              {style.icon} {style.name} (Foto Asli)
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="🎨 Background Warna & Aksen Elegan (6 Pilihan)">
+                          {SHARE_STYLES.filter((s) => s.type === 'color').map((style) => (
+                            <option key={style.id} value={style.id}>
+                              {style.icon} {style.name} (Warna Mewah)
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* 1. KATEGORI FOTO ASLI (6 Pilihan) */}
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-amber-300 font-bold block">1. Background Foto Asli & Dinamis:</span>
-                      <span className="text-[10px] text-slate-400">Live wallpaper pemandangan</span>
+                      <span className="text-amber-300 font-bold block">1. Foto Asli Tanah Suci & Arab (6):</span>
+                      <span className="text-[10px] text-slate-400">Pemandangan megah</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                       {SHARE_STYLES.filter((s) => s.type === 'photo').map((style) => (
                         <button
                           key={style.id}
+                          type="button"
                           onClick={() => setShareBgTheme(style.id)}
                           style={style.bgStyle}
-                          className={`p-2 rounded-xl border text-left flex flex-col justify-end h-16 relative overflow-hidden transition active:scale-95 shadow-sm ${
+                          className={`p-2 rounded-xl border text-left flex flex-col justify-end h-14 relative overflow-hidden transition active:scale-95 shadow-sm cursor-pointer ${
                             shareBgTheme === style.id
                               ? 'ring-2 ring-amber-400 border-amber-400'
                               : 'border-slate-700 opacity-80 hover:opacity-100'
@@ -5176,19 +5295,20 @@ export default function AlQuranModal({ onClose }) {
                     </div>
                   </div>
 
-                  {/* 2. KATEGORI WARNA POLOS & GRADASI */}
+                  {/* 2. KATEGORI WARNA POLOS & ELEGAN (6 Pilihan) */}
                   <div className="space-y-1.5 text-xs pt-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-emerald-300 font-bold block">2. Background Warna Polos & Elegan:</span>
-                      <span className="text-[10px] text-slate-400">Polos solid & gradasi aksen</span>
+                      <span className="text-emerald-300 font-bold block">2. Warna Polos & Elegan (6):</span>
+                      <span className="text-[10px] text-slate-400">Gradasi aksen mewah</span>
                     </div>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                       {SHARE_STYLES.filter((s) => s.type === 'color').map((style) => (
                         <button
                           key={style.id}
+                          type="button"
                           onClick={() => setShareBgTheme(style.id)}
                           style={style.bgStyle}
-                          className={`py-2 px-1 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 active:scale-95 shadow-2xs ${
+                          className={`py-2 px-1 rounded-xl border text-center transition flex flex-col items-center justify-center gap-0.5 active:scale-95 shadow-2xs cursor-pointer ${
                             shareBgTheme === style.id
                               ? 'ring-2 ring-emerald-400 border-emerald-400 scale-102'
                               : 'border-slate-700 opacity-80 hover:opacity-100'
