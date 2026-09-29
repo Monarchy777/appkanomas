@@ -46,6 +46,7 @@ import {
   Pin,
   Award
 } from 'lucide-react';
+import { toCanvas, toPng, toBlob } from 'html-to-image';
 import html2canvas from 'html2canvas';
 import { Capacitor } from '@capacitor/core';
 import { Share as CapShare } from '@capacitor/share';
@@ -2217,11 +2218,11 @@ export default function AlQuranModal({ onClose }) {
     setShowJumpModal(true);
   };
 
-  // 1. Generate Canvas dari Kartu Ayat DOM
+  // 1. Generate Canvas dari Kartu Ayat DOM menggunakan Native SVG / html-to-image (100% Persis Engine Browser)
   const generateCardCanvas = async () => {
     if (!shareCardRef.current) return null;
     setIsGeneratingImage(true);
-    setShareFeedback('🎨 Sedang merender gambar kartu ayat HD...');
+    setShareFeedback('🎨 Sedang merender gambar kartu ayat HD (Engine Asli Browser)...');
     try {
       if (document.fonts && document.fonts.ready) {
         try {
@@ -2230,22 +2231,60 @@ export default function AlQuranModal({ onClose }) {
           console.warn('Wait for document.fonts.ready warning:', fontErr);
         }
       }
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 150));
 
-      const canvas = await html2canvas(shareCardRef.current, {
-        scale: 2.5, // Resolusi tinggi tajam (HD)
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: null,
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        imageTimeout: 10000
+      // Prioritas 1: Native SVG foreignObject via html-to-image (100% Persis Tampilan Browser Asli)
+      const canvas = await toCanvas(shareCardRef.current, {
+        pixelRatio: 2.5, // Kualitas HD tajam
+        cacheBust: false,
+        backgroundColor: null
       });
       return canvas;
-    } catch (err) {
-      console.error('Gagal generate gambar kartu ayat:', err);
-      return null;
+    } catch (svgErr) {
+      console.warn('html-to-image toCanvas gagal, mencoba fallback html2canvas:', svgErr);
+      try {
+        const canvasFallback = await html2canvas(shareCardRef.current, {
+          scale: 2.5,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: null,
+          logging: false
+        });
+        return canvasFallback;
+      } catch (fallbackErr) {
+        console.error('Semua metode render kartu ayat gagal:', fallbackErr);
+        return null;
+      }
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // 1b. Salin Gambar Kartu Langsung ke Clipboard (Bisa langsung Ctrl+V di WA Web, Canva, Telegram)
+  const handleCopyCardImage = async (ayat) => {
+    if (!ayat) return;
+    try {
+      setIsGeneratingImage(true);
+      setShareFeedback('📋 Sedang menyalin gambar kartu ayat ke clipboard...');
+      const canvas = await generateCardCanvas();
+      if (!canvas) {
+        alert('Gagal menyalin gambar kartu ayat.');
+        return;
+      }
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      if (navigator.clipboard && window.ClipboardItem && blob) {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        setShareFeedback('✅ Gambar kartu tersalin ke clipboard! Siap di-paste (Ctrl+V).');
+        setTimeout(() => setShareFeedback(''), 3500);
+      } else {
+        handleDownloadCardImage(ayat);
+      }
+    } catch (copyErr) {
+      console.warn('Gagal salin gambar kartu ke clipboard:', copyErr);
+      handleDownloadCardImage(ayat);
     } finally {
       setIsGeneratingImage(false);
     }
@@ -5567,22 +5606,34 @@ export default function AlQuranModal({ onClose }) {
                       )}
                     </button>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <button
                         onClick={() => handleDownloadCardImage(showShareModal)}
                         disabled={isGeneratingImage}
-                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
+                        className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                        title="Unduh berkas gambar HD (PNG)"
                       >
-                        <Download className="w-4 h-4 text-emerald-400" />
-                        <span>Unduh Gambar HD</span>
+                        <Download className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="truncate">Unduh HD</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleCopyCardImage(showShareModal)}
+                        disabled={isGeneratingImage}
+                        className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                        title="Salin gambar kartu langsung ke clipboard (bisa langsung paste / Ctrl+V di WA)"
+                      >
+                        <Copy className="w-3.5 h-3.5 text-blue-400" />
+                        <span className="truncate">Salin Gambar</span>
                       </button>
 
                       <button
                         onClick={() => handleCopyAyat(showShareModal)}
-                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-2 transition active:scale-95"
+                        className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                        title="Salin teks ayat (Arab, Latin, & Terjemahan)"
                       >
-                        <Copy className="w-4 h-4 text-amber-400" />
-                        <span>{copiedAyatNum === showShareModal.nomorAyat ? 'Teks Tersalin!' : 'Salin Teks'}</span>
+                        <FileText className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="truncate">{copiedAyatNum === showShareModal.nomorAyat ? 'Tersalin!' : 'Salin Teks'}</span>
                       </button>
                     </div>
                   </div>
