@@ -4,26 +4,27 @@ import { Capacitor } from '@capacitor/core';
 class BackButtonManager {
   constructor() {
     this.stack = [];
-    this.isSilentPop = false;
-    this.lastBackPressTime = 0;
+    this.lastActionTime = 0;
+    this.lastExitPromptTime = 0;
     this.exitToastCallback = null;
     this.hasInitialized = false;
     this.fallbackHandler = null;
+    this.ACTION_COOLDOWN_MS = 280; // 280ms throttle to prevent hardware button bounce & double-fire
 
     if (typeof window !== 'undefined') {
       this.ensureRootGuard();
     }
   }
 
-  // Pastikan browser history selalu memiliki buffer (Root Guard)
-  // Ini mencegah Android Chrome / WebView langsung menutup / meminimize aplikasi saat tombol Back ditekan
+  // Menjaga agar browser history selalu memiliki buffer (Root Guard)
+  // Mencegah Android Chrome / PWA / WebView langsung menutup / meminimize aplikasi saat tombol Back ditekan
   ensureRootGuard() {
     if (typeof window === 'undefined' || !window.history) return;
     try {
       const currentState = window.history.state;
-      if (!currentState || !currentState.kanomasActive) {
-        window.history.replaceState({ kanomasBase: true }, '');
-        window.history.pushState({ kanomasActive: true }, '');
+      if (!currentState || currentState.kanomasGuard !== true) {
+        window.history.replaceState({ kanomasRoot: true }, '');
+        window.history.pushState({ kanomasGuard: true }, '');
       }
     } catch (e) {
       console.warn('ensureRootGuard warning:', e);
@@ -38,34 +39,24 @@ class BackButtonManager {
     // Pasang guard state di awal
     this.ensureRootGuard();
 
-    // 1. Browser / Mobile Web / PWA popstate listener
-    if (typeof window !== 'undefined') {
-      window.addEventListener('popstate', () => {
-        if (this.isSilentPop) {
-          this.isSilentPop = false;
-          return;
-        }
-        this.handleBackEvent(true);
-      });
-    }
-
-    // 2. Document "backbutton" event (Cordova / Capacitor Android WebView)
-    if (typeof document !== 'undefined') {
-      document.addEventListener('backbutton', (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        this.handleBackEvent(false);
-      });
-    }
-
-    // 3. Capacitor Native Android Hardware Back Button listener
-    try {
-      if (Capacitor.isNativePlatform()) {
+    // 1. Capacitor Native Android Hardware Back Button listener
+    if (Capacitor.isNativePlatform()) {
+      try {
         CapApp.addListener('backButton', () => {
-          this.handleBackEvent(false);
+          this.handleBackEvent();
+        });
+      } catch (e) {
+        console.warn('Capacitor backButton listener init warning:', e);
+      }
+    } else {
+      // 2. Browser / Mobile Web / PWA popstate listener (HANYA jika bukan Native Capacitor)
+      if (typeof window !== 'undefined') {
+        window.addEventListener('popstate', () => {
+          // Segera pasang kembali Guard State agar buffer history tidak pernah habis ke level 0
+          this.ensureRootGuard();
+          this.handleBackEvent();
         });
       }
-    } catch (e) {
-      console.warn('Capacitor backButton listener init warning:', e);
     }
   }
 
@@ -73,68 +64,47 @@ class BackButtonManager {
     this.fallbackHandler = fn;
   }
 
-  pushHandler(id, fn, { priority = 10, pushHistory = true } = {}) {
+  pushHandler(id, fn, { priority = 10 } = {}) {
     const existingIndex = this.stack.findIndex((item) => item.id === id);
     if (existingIndex !== -1) {
-      this.stack[existingIndex] = { id, fn, priority, pushHistory };
+      this.stack[existingIndex] = { id, fn, priority };
       this.sortStack();
       return () => this.removeHandler(id);
     }
 
-    if (pushHistory && typeof window !== 'undefined' && window.history) {
-      try {
-        window.history.pushState({ kanomasBackId: id, timestamp: Date.now() }, '');
-      } catch (e) {
-        console.warn('history.pushState error:', e);
-      }
-    }
-
-    this.stack.push({ id, fn, priority, pushHistory });
+    this.stack.push({ id, fn, priority });
     this.sortStack();
 
     return () => this.removeHandler(id);
   }
 
-  removeHandler(id, silentHistorySync = true) {
+  removeHandler(id) {
     const index = this.stack.findIndex((item) => item.id === id);
-    if (index === -1) return;
-
-    const [removed] = this.stack.splice(index, 1);
-
-    if (removed && removed.pushHistory && silentHistorySync && typeof window !== 'undefined' && window.history) {
-      try {
-        this.isSilentPop = true;
-        window.history.back();
-      } catch (e) {
-        this.isSilentPop = false;
-      }
+    if (index !== -1) {
+      this.stack.splice(index, 1);
     }
   }
 
   sortStack() {
+    // Sort urut dari prioritas terendah ke tertinggi.
+    // Saat tombol Back ditekan, stack.pop() akan mengambil handler dengan prioritas tertinggi lebih dahulu.
     this.stack.sort((a, b) => (a.priority || 0) - (b.priority || 0));
   }
 
-  handleBackEvent(calledFromPopstate = false) {
-    // 1. Jika ada handler di stack (modal, drawer, sub-view, dsb.)
+  handleBackEvent() {
+    const now = Date.now();
+    // Throttle / Cooldown: abaikan event ganda yang masuk dalam interval sangat rapat (< 280ms)
+    if (now - this.lastActionTime < this.ACTION_COOLDOWN_MS) {
+      return true;
+    }
+    this.lastActionTime = now;
+
+    // 1. Periksa apakah ada modal, reader, picker, atau sub-view di dalam stack
     if (this.stack.length > 0) {
-      // Pop the highest priority (topmost) handler
       const top = this.stack.pop();
       if (top && typeof top.fn === 'function') {
-        if (!calledFromPopstate && top.pushHistory && typeof window !== 'undefined' && window.history) {
-          try {
-            this.isSilentPop = true;
-            window.history.back();
-          } catch (e) {
-            this.isSilentPop = false;
-          }
-        }
-
-        // Jika dipanggil dari popstate, segera pastikan buffer history tetap ada
-        if (calledFromPopstate) {
-          this.ensureRootGuard();
-        }
-
+        // Reset timer konfirmasi keluar karena pengguna sedang navigasi mundur di dalam aplikasi
+        this.lastExitPromptTime = 0;
         try {
           top.fn();
         } catch (err) {
@@ -144,14 +114,13 @@ class BackButtonManager {
       }
     }
 
-    // 2. Jika stack kosong, periksa apakah fallback handler (misal kembali dari tab selain home) bisa menangani
+    // 2. Jika stack kosong, jalankan fallback handler (kembali ke tab sebelumnya -> home)
     if (this.fallbackHandler && typeof this.fallbackHandler === 'function') {
       try {
         const handled = this.fallbackHandler();
         if (handled) {
-          if (calledFromPopstate) {
-            this.ensureRootGuard();
-          }
+          // Reset timer konfirmasi keluar karena berhasil mundur 1 tab
+          this.lastExitPromptTime = 0;
           return true;
         }
       } catch (err) {
@@ -159,28 +128,28 @@ class BackButtonManager {
       }
     }
 
-    // 3. User sudah di level paling dasar (Home utama dan tidak ada modal/sub-menu):
+    // 3. Pengguna sudah berada di Home utama dan tidak ada modal/sub-menu yang aktif:
     // Terapkan Double Back to Exit (Konfirmasi 2 detik)
-    const now = Date.now();
-    if (now - this.lastBackPressTime < 2000) {
+    if (now - this.lastExitPromptTime < 2000) {
       if (Capacitor.isNativePlatform()) {
         try {
           CapApp.exitApp();
         } catch {}
+      } else {
+        try {
+          // Web / PWA exit
+          window.history.go(-2);
+        } catch {}
       }
       return false;
     } else {
-      this.lastBackPressTime = now;
+      this.lastExitPromptTime = now;
       if (this.exitToastCallback) {
         this.exitToastCallback('Tekan sekali lagi untuk keluar dari Aplikasi Kanomas');
       }
-
-      // Pastikan history guard terpasang kembali agar klik pertama tidak langsung keluar
-      this.ensureRootGuard();
       return true;
     }
   }
 }
 
 export const backButtonManager = new BackButtonManager();
-

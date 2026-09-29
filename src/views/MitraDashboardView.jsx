@@ -42,6 +42,7 @@ import {
 import { db } from '../services/db';
 import { toCanvas } from 'html-to-image';
 import { KANOMAS_LOGO_BASE64 } from '../config/logoBase64';
+import { useBackButton } from '../hooks/useBackButton';
 
 export default function MitraDashboardView({ onOpenPackageDetail, onOpenDaftarMitra, currentUser }) {
   const [mitraList, setMitraList] = useState(() => db.getMitra());
@@ -63,6 +64,13 @@ export default function MitraDashboardView({ onOpenPackageDetail, onOpenDaftarMi
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
   const [selectedFlyerPkg, setSelectedFlyerPkg] = useState(null); // For personalized flyer modal
   const [lastSubmittedWd, setLastSubmittedWd] = useState(null);
+
+  // Navigasi Tombol Back HP Android untuk Modal Mitra & Tab
+  useBackButton(() => setSelectedFlyerPkg(null), !!selectedFlyerPkg, 35, 'mitra_flyer_modal');
+  useBackButton(() => setShowWithdrawModal(false), showWithdrawModal, 30, 'mitra_withdraw_modal');
+  useBackButton(() => setShowKtaModal(false), showKtaModal, 30, 'mitra_kta_modal');
+  useBackButton(() => setShowAddLeadModal(false), showAddLeadModal, 30, 'mitra_lead_modal');
+  useBackButton(() => setActiveTab('ringkasan'), activeTab !== 'ringkasan' && !selectedFlyerPkg && !showWithdrawModal && !showKtaModal && !showAddLeadModal, 5, 'mitra_subtab');
 
   // Filter & Search Jamaah
   const [leadFilter, setLeadFilter] = useState('semua'); // 'semua' | 'berangkat' | 'prospek'

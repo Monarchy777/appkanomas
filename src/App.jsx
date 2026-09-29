@@ -202,8 +202,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 1. Fallback handler darurat jika stack kosong tapi activeTab bukan home:
-  // Tombol Back Android selalu kembali ke menu sebelumnya / home (tidak keluar/minimize aplikasi)
+  // 1. Fallback handler jika stack modal kosong tapi activeTab bukan home:
+  // Tombol Back Android selalu kembali ke tab/menu sebelumnya -> home (tidak keluar/minimize aplikasi)
   useEffect(() => {
     backButtonManager.setFallbackHandler(() => {
       if (activeTab !== 'home') {
@@ -217,30 +217,11 @@ export default function App() {
           setActiveTab(prevTab);
           return nextHistory;
         });
-        return true; // Berhasil ditangani, cegah exit
+        return true; // Berhasil ditangani, mundur 1 tab
       }
       return false; // Sudah di home, biarkan backButtonManager menangani double-tap exit
     });
   }, [activeTab]);
-
-  // 1B. Back button aktif untuk navigasi Tab bertingkat (Menu sebelumnya -> Home)
-  useBackButton(
-    () => {
-      setTabHistory((prev) => {
-        if (prev.length <= 1) {
-          setActiveTab('home');
-          return ['home'];
-        }
-        const nextHistory = prev.slice(0, -1);
-        const prevTab = nextHistory[nextHistory.length - 1] || 'home';
-        setActiveTab(prevTab);
-        return nextHistory;
-      });
-    },
-    activeTab !== 'home',
-    2,
-    `nav_tab_${activeTab}_${tabHistory.length}`
-  );
 
   // 2. Back button untuk seluruh Modal di App.jsx
   useBackButton(() => setShowUpdateModal(false), showUpdateModal && !updateModalProps.isMandatory, 10, 'modal_update');
@@ -262,7 +243,6 @@ export default function App() {
   useBackButton(() => setShowJamaahServices(false), showJamaahServices, 10, 'modal_jamaah_services');
   useBackButton(() => setShowDzikir(false), showDzikir, 10, 'modal_dzikir');
   useBackButton(() => setShowDailyPrayers(false), showDailyPrayers, 10, 'modal_daily_prayers');
-  useBackButton(() => setShowQuran(false), showQuran, 10, 'modal_quran');
 
   const handleOpenWhatsAppCenter = (recipient) => {
     if (recipient && recipient.phone) {

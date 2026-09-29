@@ -1990,15 +1990,20 @@ export default function AlQuranModal({ onClose }) {
     setIsPlayingAudio(false);
   }, viewState === 'reader', 25, 'quran_reader_view');
 
-  // 5. Prioritas 15: Kembali dari Tab Khatam / Juz / Bookmarks ke Tab Surat
+  // 5. Prioritas 20: Jika ada teks pencarian aktif di Index, bersihkan pencarian lebih dahulu
+  useBackButton(() => {
+    setSearchQuery('');
+  }, viewState === 'index' && !!searchQuery && searchQuery.trim() !== '', 20, 'quran_search_query');
+
+  // 6. Prioritas 15: Kembali dari Tab Khatam / Juz / Bookmarks ke Tab Surat
   useBackButton(() => {
     setIndexTab('surah');
   }, viewState === 'index' && indexTab !== 'surah', 15, 'quran_index_tab');
 
-  // 6. Prioritas 12: Menutup Al-Qur'an secara elegan dan kembali ke menu sebelumnya saat di Index Al-Qur'an
+  // 7. Prioritas 12: Menutup Al-Qur'an secara elegan dan kembali ke menu sebelumnya saat di Index Al-Qur'an
   useBackButton(() => {
     handleCloseQuran();
-  }, viewState === 'index' && indexTab === 'surah', 12, 'quran_modal_root');
+  }, viewState === 'index' && indexTab === 'surah' && (!searchQuery || searchQuery.trim() === ''), 12, 'quran_modal_root');
 
   // Lock body scroll & prevent iOS Safari native page zoom interference
   useEffect(() => {

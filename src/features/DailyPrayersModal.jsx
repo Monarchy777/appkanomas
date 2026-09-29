@@ -14,6 +14,7 @@ import {
   Home,
   ShieldCheck
 } from 'lucide-react';
+import { useBackButton } from '../hooks/useBackButton';
 
 const DAILY_PRAYERS_DATA = [
   // ==========================================
@@ -501,6 +502,10 @@ export default function DailyPrayersModal({ onClose }) {
   const [activeTab, setActiveTab] = useState('bukhari_muslim'); // 'bukhari_muslim' | 'semua' | 'harian' | 'sholat' | 'safar' | 'tanah_suci' | 'mustajab'
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+
+  // Navigasi Tombol Back HP Android untuk bersihkan pencarian atau kembali ke tab utama
+  useBackButton(() => setSearchQuery(''), !!searchQuery && searchQuery.trim() !== '', 20, 'daily_prayers_search');
+  useBackButton(() => setActiveTab('bukhari_muslim'), activeTab !== 'bukhari_muslim' && (!searchQuery || searchQuery.trim() === ''), 15, 'daily_prayers_tab');
 
   const bukhariMuslimCount = DAILY_PRAYERS_DATA.filter((d) => d.isBukhariMuslim).length;
 

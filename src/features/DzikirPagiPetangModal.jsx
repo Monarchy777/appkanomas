@@ -16,6 +16,7 @@ import {
   Sliders,
   ChevronRight
 } from 'lucide-react';
+import { useBackButton } from '../hooks/useBackButton';
 
 // =========================================================================
 // DATA DZIKIR PAGI & PETANG SESUAI SUNNAH NABI SHALLALLAHU 'ALAIHI WA SALLAM
@@ -385,6 +386,10 @@ export default function DzikirPagiPetangModal({ onClose }) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Navigasi Tombol Back HP Android untuk dialog internal
+  useBackButton(() => setShowSettingsModal(false), showSettingsModal, 40, 'dzikir_settings_modal');
+  useBackButton(() => setShowThemePicker(false), showThemePicker, 40, 'dzikir_theme_picker');
 
   // Active theme object
   const currentTheme = DZIKIR_THEMES[themeMode] || DZIKIR_THEMES.mushaf;
