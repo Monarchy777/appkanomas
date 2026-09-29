@@ -566,6 +566,33 @@ export function cleanWaqfParentheses(text) {
   return res;
 }
 
+// HELPER PEMFORMAT PARAGRAF TEKS TAFSIR: MEMBERI ENTER 1 BARIS DI ANTARA PARAGRAF AGAR ENAK DIBACA & TIDAK PADAT
+export function formatTafsirParagraphs(rawText) {
+  if (!rawText) return [];
+  const text = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+  const initialBlocks = text.split(/\n+/);
+  const result = [];
+
+  initialBlocks.forEach(block => {
+    const trimmed = block.trim();
+    if (!trimmed) return;
+
+    // Jika blok teks panjang (> 260 karakter), pecah berdasarkan pemisah alami (penomoran atau kata transisi)
+    const splitRegex = /(?<=[.?!;])\s+(?=(?:\(\d+\)|\d+\.|\b(?:Kemudian|Adapun|Selain itu|Di samping itu|Oleh karena itu|Dalam ayat ini|Firman Allah|Maksudnya|Diriwayatkan|Ibnu Katsir|Menurut|Pelajaran|Hikmah|Catatan)\b))/g;
+    if (trimmed.length > 260 && splitRegex.test(trimmed)) {
+      const parts = trimmed.split(splitRegex);
+      parts.forEach(p => {
+        const pt = p.trim();
+        if (pt) result.push(pt);
+      });
+    } else {
+      result.push(trimmed);
+    }
+  });
+
+  return result.length > 0 ? result : [text];
+}
+
 // FORMAT TRANSLITERASI LATIN SESUAI 3 STANDAR MUSHAF (KEMENAG RI, MADINAH UTSMANI, & MODERN POPULER)
 export function formatAyatLatin(rawLatin, mushafType = 'indonesia') {
   if (!rawLatin) return '';
@@ -1399,7 +1426,13 @@ export default function AlQuranModal({ onClose }) {
   const [showShareModal, setShowShareModal] = useState(null); // Ayat object for Share Card
   const [shareCardFormat, setShareCardFormat] = useState('portrait'); // 'portrait' | 'kotak'
   const [shareBgTheme, setShareBgTheme] = useState('mushaf'); // otomatis sinkron dengan tema bacaan aktif
-  const [shareMushafType, setShareMushafType] = useState('indonesia'); // Sinkronisasi standar mushaf aktif
+  const [shareMushafType, setShareMushafType] = useState(() => {
+    try {
+      return localStorage.getItem('kanomas_mushaf_type_v3') || localStorage.getItem('kanomas_mushaf_type') || 'indonesia';
+    } catch {
+      return 'indonesia';
+    }
+  }); // Sinkronisasi standar mushaf aktif
   const [shareShowLatin, setShareShowLatin] = useState(true); // Tampilkan transliterasi latin di kartu
   const [shareShowTranslation, setShareShowTranslation] = useState(true); // Tampilkan terjemahan di kartu
   const shareCardRef = useRef(null);
@@ -1589,7 +1622,7 @@ export default function AlQuranModal({ onClose }) {
 
   // Helper penyesuaian ukuran font & tata letak kartu share agar tidak terpotong & tidak tumpang tindih
   const getShareCardContentConfig = (ayat, targetMushaf, format, showLatin, showTrans) => {
-    if (!ayat) return { arabSize: 'text-lg', arabLineHeight: '2.1', latinSize: 'text-xs', latinLineHeight: '1.45', indoSize: 'text-xs', indoLineHeight: '1.4', containerClass: 'space-y-2 py-1' };
+    if (!ayat) return { arabSize: 'text-base sm:text-lg', arabLineHeight: '1.9', latinSize: 'text-xs', latinLineHeight: '1.4', indoSize: 'text-xs', indoLineHeight: '1.35', containerClass: 'space-y-1 py-0.5' };
     const arab = getCleanAyatArabForShare(ayat, targetMushaf) || '';
     const latin = showLatin ? (formatAyatLatin(ayat.teksLatin, targetMushaf) || '') : '';
     const indo = showTrans ? (formatAyatTranslation(ayat.teksIndonesia, targetMushaf) || '') : '';
@@ -1597,60 +1630,84 @@ export default function AlQuranModal({ onClose }) {
     const totalWeight = (arab.length * 1.5) + (latin.length * 0.7) + (indo.length * 0.5);
     const isSquare = format === 'kotak';
 
-    if (totalWeight > 550) {
-      // Ayat super panjang (misal Al-Baqarah 282 / ayat penuh satu halaman)
+    // Jika teks Latin & Terjemah keduanya nonaktif (hanya menampilkan teks Arab)
+    if (!showLatin && !showTrans) {
+      if (totalWeight > 350) {
+        return {
+          arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-base sm:text-lg',
+          arabLineHeight: '1.8',
+          latinSize: 'text-[9px]',
+          latinLineHeight: '1.3',
+          indoSize: 'text-[8.5px]',
+          indoLineHeight: '1.25',
+          containerClass: 'space-y-1 py-1'
+        };
+      }
       return {
-        arabSize: isSquare ? 'text-[11px] sm:text-[12px]' : 'text-sm sm:text-base',
-        arabLineHeight: isSquare ? '1.75' : '1.9',
-        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9.5px] sm:text-[10px]',
-        latinLineHeight: isSquare ? '1.25' : '1.38',
-        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[9px] sm:text-[9.5px]',
-        indoLineHeight: isSquare ? '1.22' : '1.35',
-        containerClass: isSquare ? 'space-y-0.5 py-0.5' : 'space-y-1 py-1'
+        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl',
+        arabLineHeight: '2.1',
+        latinSize: 'text-xs',
+        latinLineHeight: '1.4',
+        indoSize: 'text-xs',
+        indoLineHeight: '1.35',
+        containerClass: 'space-y-2 py-2'
       };
-    } else if (totalWeight > 380) {
+    }
+
+    if (totalWeight > 550) {
+      // Ayat super panjang (misal Al-Baqarah 282 / ayat panjang satu halaman)
+      return {
+        arabSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-xs sm:text-sm',
+        arabLineHeight: isSquare ? '1.5' : '1.65',
+        latinSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
+        latinLineHeight: isSquare ? '1.2' : '1.25',
+        indoSize: isSquare ? 'text-[6.5px] sm:text-[7px]' : 'text-[8px] sm:text-[8.5px]',
+        indoLineHeight: isSquare ? '1.18' : '1.2',
+        containerClass: isSquare ? 'space-y-0.5 py-0' : 'space-y-1 py-0.5'
+      };
+    } else if (totalWeight > 350) {
       // Ayat sangat panjang (misal Ayat Kursi atau > 3-4 baris teks)
       return {
-        arabSize: isSquare ? 'text-[12px] sm:text-[13px]' : 'text-base sm:text-lg',
-        arabLineHeight: isSquare ? '1.85' : '2.0',
-        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10.5px] sm:text-[11px]',
-        latinLineHeight: isSquare ? '1.3' : '1.45',
-        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[10px] sm:text-[10.5px]',
-        indoLineHeight: isSquare ? '1.28' : '1.4',
-        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2 py-1.5'
+        arabSize: isSquare ? 'text-[11px] sm:text-[11.5px]' : 'text-sm sm:text-base',
+        arabLineHeight: isSquare ? '1.6' : '1.75',
+        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
+        latinLineHeight: isSquare ? '1.25' : '1.3',
+        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
+        indoLineHeight: isSquare ? '1.22' : '1.28',
+        containerClass: isSquare ? 'space-y-0.5 py-0.5' : 'space-y-1.5 py-1'
       };
-    } else if (totalWeight > 220) {
+    } else if (totalWeight > 200) {
       // Ayat panjang (misal Al-Fatihah ayat 7)
       return {
-        arabSize: isSquare ? 'text-[13.5px] sm:text-[14.5px]' : 'text-lg sm:text-xl',
-        arabLineHeight: isSquare ? '1.92' : '2.1',
-        latinSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-xs sm:text-[12.5px]',
-        latinLineHeight: isSquare ? '1.35' : '1.5',
-        indoSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[11px] sm:text-xs',
-        indoLineHeight: isSquare ? '1.32' : '1.45',
-        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2.5 py-2'
+        arabSize: isSquare ? 'text-[12.5px] sm:text-[13px]' : 'text-base sm:text-lg',
+        arabLineHeight: isSquare ? '1.7' : '1.85',
+        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[10.5px]',
+        latinLineHeight: isSquare ? '1.3' : '1.35',
+        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9.5px] sm:text-[10px]',
+        indoLineHeight: isSquare ? '1.25' : '1.3',
+        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2 py-1'
       };
-    } else if (totalWeight > 100) {
+    } else if (totalWeight > 90) {
       // Ayat sedang (misal Al-Fatihah ayat 2, 5, 6)
       return {
-        arabSize: isSquare ? 'text-[15.5px] sm:text-[16.5px]' : 'text-xl sm:text-2xl',
-        arabLineHeight: isSquare ? '2.02' : '2.2',
-        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-[12.5px] sm:text-sm',
-        latinLineHeight: isSquare ? '1.4' : '1.55',
-        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-xs sm:text-[13px]',
-        indoLineHeight: isSquare ? '1.38' : '1.5',
-        containerClass: isSquare ? 'space-y-1.5 py-1' : 'space-y-3 py-2'
+        arabSize: isSquare ? 'text-[14px] sm:text-[14.5px]' : 'text-lg sm:text-xl',
+        arabLineHeight: isSquare ? '1.8' : '1.95',
+        latinSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[11px] sm:text-xs',
+        latinLineHeight: isSquare ? '1.35' : '1.4',
+        indoSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[11px]',
+        indoLineHeight: isSquare ? '1.3' : '1.35',
+        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2.5 py-1.5'
       };
     } else {
       // Ayat pendek (misal Al-Fatihah ayat 1, 3, 4)
       return {
-        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl',
-        arabLineHeight: isSquare ? '2.1' : '2.3',
-        latinSize: isSquare ? 'text-[11px] sm:text-xs' : 'text-sm sm:text-base',
-        latinLineHeight: isSquare ? '1.45' : '1.6',
-        indoSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-xs sm:text-sm',
-        indoLineHeight: isSquare ? '1.4' : '1.55',
-        containerClass: isSquare ? 'space-y-2 py-1' : 'space-y-3.5 py-2.5'
+        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl',
+        arabLineHeight: isSquare ? '1.9' : '2.1',
+        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-xs sm:text-sm',
+        latinLineHeight: isSquare ? '1.4' : '1.45',
+        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[11.5px] sm:text-xs',
+        indoLineHeight: isSquare ? '1.35' : '1.4',
+        containerClass: isSquare ? 'space-y-1.5 py-1' : 'space-y-3 py-2'
       };
     }
   };
@@ -1701,6 +1758,7 @@ export default function AlQuranModal({ onClose }) {
 
   const handleMushafTypeChange = (type) => {
     setMushafType(type);
+    setShareMushafType(type);
     try {
       localStorage.setItem('kanomas_mushaf_type_v3', type);
       localStorage.setItem('kanomas_mushaf_type', type);
@@ -2452,11 +2510,11 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleQuickShareWA = (ayat) => {
-    const currentMushaf = shareMushafType || mushafType;
+    const currentMushaf = mushafType;
     const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
-    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern Populer' : 'Kemenag RI';
     const text = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n_(Mushaf Standar ${mushafName})_\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
     if (navigator.share) {
       navigator.share({
@@ -2471,11 +2529,11 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleCopyAyat = (ayat) => {
-    const currentMushaf = shareMushafType || mushafType;
+    const currentMushaf = mushafType;
     const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
-    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern Populer' : 'Kemenag RI';
     const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat} (Mushaf Standar ${mushafName})\n\n${arabText}\n\n${latinText}\n\n"${indoText}"\n\n(Aplikasi Kanomas Tour & Travel)`;
     navigator.clipboard?.writeText(text);
     setCopiedAyatNum(ayat.nomorAyat);
@@ -4166,7 +4224,9 @@ export default function AlQuranModal({ onClose }) {
                                   color: currentTheme.arabicColor,
                                   lineHeight: dynamicArabicLineHeight + (spaciousMode ? 0.15 : 0),
                                   wordSpacing: spaciousMode ? '0.18em' : '0.04em',
-                                  textAlign: 'right',
+                                  textAlign: 'justify',
+                                  textAlignLast: 'right',
+                                  textJustify: 'auto',
                                   fontFeatureSettings: '"calt" 1, "liga" 1, "mkmk" 1, "mark" 1',
                                   fontSynthesis: 'none',
                                   fontWeight: 500,
@@ -4590,8 +4650,13 @@ export default function AlQuranModal({ onClose }) {
 
                   {/* Teks Arab Ayat */}
                   <p
-                    style={{ fontFamily: getActiveFontFamily() }}
-                    className={`${getArabicFontClass()} text-xl sm:text-2xl leading-loose text-right font-medium select-text ${
+                    style={{
+                      fontFamily: getActiveFontFamily(),
+                      textAlign: 'justify',
+                      textAlignLast: 'right',
+                      textJustify: 'auto'
+                    }}
+                    className={`${getArabicFontClass()} text-xl sm:text-2xl leading-loose font-medium select-text ${
                       isDark ? 'text-amber-100' : 'text-slate-900'
                     }`}
                     dir="rtl"
@@ -4600,12 +4665,28 @@ export default function AlQuranModal({ onClose }) {
                   </p>
 
                   {/* Transliterasi Latin */}
-                  <p className="text-xs sm:text-sm font-medium leading-relaxed italic text-emerald-800 dark:text-emerald-300 select-text">
+                  <p
+                    style={{
+                      textAlign: 'justify',
+                      textAlignLast: 'left',
+                      textJustify: 'inter-word',
+                      hyphens: 'auto'
+                    }}
+                    className="text-xs sm:text-sm font-medium leading-relaxed italic text-emerald-800 dark:text-emerald-300 select-text"
+                  >
                     {formatAyatLatin(showRincianModal.teksLatin, mushafType)}
                   </p>
 
                   {/* Terjemahan */}
-                  <p className="text-xs sm:text-sm font-normal leading-relaxed text-slate-700 dark:text-slate-200 select-text">
+                  <p
+                    style={{
+                      textAlign: 'justify',
+                      textAlignLast: 'left',
+                      textJustify: 'inter-word',
+                      hyphens: 'auto'
+                    }}
+                    className="text-xs sm:text-sm font-normal leading-relaxed text-slate-700 dark:text-slate-200 select-text"
+                  >
                     "{formatAyatTranslation(showRincianModal.teksIndonesia, mushafType)}"
                   </p>
                 </div>
@@ -4692,14 +4773,28 @@ export default function AlQuranModal({ onClose }) {
                         </span>
                       </div>
 
-                      <p
-                        style={{ fontSize: `${tafsirFontSize}px`, lineHeight: '1.8' }}
-                        className="whitespace-pre-line text-emerald-50 font-normal leading-relaxed select-text"
-                      >
-                        {tafsirSource === 'kemenag'
-                          ? (tafsirText || 'Tafsir Tahlili Kemenag RI untuk ayat ini sedang dipersiapkan.')
-                          : (tafsirRingkasText || tafsirText || 'Intisari makna ayat sesuai kaidah tafsir para ulama salaf.')}
-                      </p>
+                      <div className="space-y-3.5 sm:space-y-4">
+                        {formatTafsirParagraphs(
+                          tafsirSource === 'kemenag'
+                            ? (tafsirText || 'Tafsir Tahlili Kemenag RI untuk ayat ini sedang dipersiapkan.')
+                            : (tafsirRingkasText || tafsirText || 'Intisari makna ayat sesuai kaidah tafsir para ulama salaf.')
+                        ).map((paragraph, pIdx) => (
+                          <p
+                            key={`tafsir-p-${pIdx}`}
+                            style={{
+                              fontSize: `${tafsirFontSize}px`,
+                              lineHeight: '1.85',
+                              textAlign: 'justify',
+                              textAlignLast: 'left',
+                              textJustify: 'inter-word',
+                              hyphens: 'auto'
+                            }}
+                            className="text-emerald-50 font-normal leading-relaxed select-text"
+                          >
+                            {paragraph}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -4718,7 +4813,8 @@ export default function AlQuranModal({ onClose }) {
                       const activeTafsirContent = tafsirSource === 'kemenag' ? (tafsirText || '') : (tafsirRingkasText || tafsirText || '');
                       if (activeTafsirContent) {
                         const sourceLabel = tafsirSource === 'kemenag' ? 'Tafsir Tahlili Kemenag RI' : 'Tafsir Ringkas Tematik Madinah';
-                        navigator.clipboard?.writeText(`*${sourceLabel}*\nQS. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${showRincianModal.nomorAyat}\n\n${activeTafsirContent}\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_`);
+                        const formattedTafsir = formatTafsirParagraphs(activeTafsirContent).join('\n\n');
+                        navigator.clipboard?.writeText(`*${sourceLabel}*\nQS. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${showRincianModal.nomorAyat}\n\n${formattedTafsir}\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_`);
                         alert('Teks tafsir berhasil disalin!');
                       }
                     }}
@@ -5292,7 +5388,7 @@ export default function AlQuranModal({ onClose }) {
 
 
                     {/* Header Kartu: Q.S. Nama Surat : Ayat & Rujukan Mushaf */}
-                    <div className={`relative z-10 text-center flex-shrink-0 ${
+                    <div className={`relative z-20 text-center flex-shrink-0 ${
                       shareCardFormat === 'kotak' ? 'pt-0.5 mb-1.5' : 'pt-1 mb-2.5'
                     }`}>
                       <span className={`${
@@ -5322,7 +5418,7 @@ export default function AlQuranModal({ onClose }) {
                             ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
                             : 'bg-amber-100 text-amber-950 border-amber-300'
                         }`}>
-                          Mushaf Standar {shareMushafType === 'madinah' ? 'Madinah Utsmani' : shareMushafType === 'modern' ? 'Modern' : 'Kemenag RI'}
+                          Mushaf Standar {shareMushafType === 'madinah' ? 'Madinah Utsmani' : shareMushafType === 'modern' ? 'Modern Populer' : 'Kemenag RI'}
                         </span>
                         <div className={`${
                           shareCardFormat === 'kotak' ? 'w-5 sm:w-6' : 'w-6 sm:w-8'
@@ -5333,13 +5429,16 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Teks Arab, Latin, & Terjemahan Tengah (Auto Fit & Bebas Tumpang Tindih) */}
-                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center text-center my-auto min-h-0 w-full`}>
+                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center items-center text-center my-auto min-h-0 w-full overflow-hidden`}>
                       {/* 1. Teks Arab Ayat */}
                       <div className="px-1">
                         <p
                           style={{
                             fontFamily: getActiveFontFamily(shareMushafType),
-                            lineHeight: shareConfig.arabLineHeight
+                            lineHeight: shareConfig.arabLineHeight,
+                            textAlign: 'justify',
+                            textAlignLast: 'center',
+                            textJustify: 'auto'
                           }}
                           className={`${getArabicFontClass(shareMushafType)} ${shareConfig.arabSize} drop-shadow-md block w-full select-none ${
                             isShareDark ? 'text-amber-50' : 'text-slate-950 font-bold'
@@ -5361,7 +5460,13 @@ export default function AlQuranModal({ onClose }) {
                       {shareShowLatin && showShareModal.teksLatin && (
                         <div className="px-1 sm:px-2">
                           <p
-                            style={{ lineHeight: shareConfig.latinLineHeight }}
+                            style={{
+                              lineHeight: shareConfig.latinLineHeight,
+                              textAlign: 'justify',
+                              textAlignLast: 'center',
+                              textJustify: 'inter-word',
+                              hyphens: 'auto'
+                            }}
                             className={`${shareConfig.latinSize} font-medium italic drop-shadow-xs block w-full ${
                               isShareDark ? 'text-amber-200/90' : 'text-emerald-950 font-semibold'
                             }`}
@@ -5375,7 +5480,13 @@ export default function AlQuranModal({ onClose }) {
                       {shareShowTranslation && showShareModal.teksIndonesia && (
                         <div className="px-1 sm:px-2">
                           <p
-                            style={{ lineHeight: shareConfig.indoLineHeight }}
+                            style={{
+                              lineHeight: shareConfig.indoLineHeight,
+                              textAlign: 'justify',
+                              textAlignLast: 'center',
+                              textJustify: 'inter-word',
+                              hyphens: 'auto'
+                            }}
                             className={`${shareConfig.indoSize} font-medium drop-shadow-xs block w-full ${
                               isShareDark ? 'text-slate-100' : 'text-slate-800'
                             }`}
@@ -5389,7 +5500,7 @@ export default function AlQuranModal({ onClose }) {
                     {/* Footer Kartu: Kanomas Tour & Travel Official Branding */}
                     {shareCardFormat === 'portrait' ? (
                       /* Layout Khusus Format STORY (9:16) - Elegan 2-Tingkat di Tengah (Anti-Truncate & Bebas Titik-Titik) */
-                      <div className={`relative z-10 text-center border-t pt-2.5 mt-2 flex flex-col items-center justify-center gap-1.5 flex-shrink-0 ${
+                      <div className={`relative z-20 text-center border-t pt-2.5 mt-2 flex flex-col items-center justify-center gap-1.5 flex-shrink-0 ${
                         isShareDark ? 'border-white/20' : 'border-amber-900/20'
                       }`}>
                         <div className="flex items-center justify-center gap-2">
@@ -5424,7 +5535,7 @@ export default function AlQuranModal({ onClose }) {
                       </div>
                     ) : (
                       /* Layout Khusus Format KOTAK (1:1) - 1 Baris Horizontal yang Sudah Pas (Bebas Titik-Titik) */
-                      <div className={`relative z-10 text-center border-t pt-2 mt-1.5 flex items-center justify-between gap-1.5 flex-shrink-0 ${
+                      <div className={`relative z-20 text-center border-t pt-2 mt-1.5 flex items-center justify-between gap-1.5 flex-shrink-0 ${
                         isShareDark ? 'border-white/20' : 'border-amber-900/20'
                       }`}>
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -5615,13 +5726,13 @@ export default function AlQuranModal({ onClose }) {
                           type="button"
                           onClick={() => setShareBgTheme(style.id)}
                           style={style.bgStyle}
-                          className={`p-2 rounded-xl border text-left flex flex-col justify-end h-14 relative overflow-hidden transition active:scale-95 shadow-sm cursor-pointer ${
+                          className={`p-2 rounded-xl border text-center flex flex-col items-center justify-center h-14 relative overflow-hidden transition active:scale-95 shadow-sm cursor-pointer ${
                             shareBgTheme === style.id
                               ? 'ring-2 ring-amber-400 border-amber-400'
                               : 'border-slate-700 opacity-80 hover:opacity-100'
                           }`}
                         >
-                          <span className="text-xs font-black text-white drop-shadow-md leading-tight">
+                          <span className="text-xs font-black text-white drop-shadow-md leading-tight text-center w-full block">
                             {style.icon} {style.name}
                           </span>
                         </button>
