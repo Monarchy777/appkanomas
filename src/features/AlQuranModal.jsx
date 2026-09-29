@@ -215,11 +215,13 @@ const QARI_LIST = [
   { id: '06', name: 'Syaikh Yasser Al-Dosari' }
 ];
 
-// PALET TEMA PEMBACAAN DENGAN KONTRAS TINGGI TERJAMIN
+// PALET TEMA PEMBACAAN DENGAN KONTRAS TINGGI TERJAMIN & HARMONI MENYELURUH
 export const THEME_PALETTES = {
   mushaf: {
     id: 'mushaf',
     name: 'Hijau Kemenag',
+    desc: 'Mushaf Standar Indonesia',
+    motifTitle: 'Kubah & Bulan Bintang',
     type: 'color',
     bg: '#e8f9eb',
     arabicColor: '#000000',
@@ -230,11 +232,31 @@ export const THEME_PALETTES = {
     borderDivider: '#a7f3d0',
     highlightBg: 'bg-emerald-200/70 ring-2 ring-emerald-600',
     activeAudioBg: 'bg-emerald-200/60 ring-2 ring-emerald-500',
-    isDark: false
+    isDark: false,
+    headerBg: 'bg-gradient-to-r from-emerald-800 via-[#0a7c29] to-emerald-900 border-b border-emerald-700/50',
+    headerText: 'text-white',
+    headerAccent: 'text-amber-300',
+    bannerBg: 'bg-gradient-to-r from-emerald-800 via-[#0a7c29] to-emerald-900 border-emerald-400/40 text-white',
+    bannerBadge: 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold',
+    primaryBtn: 'bg-[#0a7c29] hover:bg-emerald-800 text-white font-bold',
+    primaryBtnActive: 'bg-emerald-900 text-white',
+    activeTab: 'bg-[#0a7c29] text-white border-emerald-600 shadow-xs',
+    accentText: 'text-[#0a7c29] dark:text-emerald-400',
+    accentBg: 'bg-emerald-100 dark:bg-emerald-950/80 text-[#0a7c29] dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700',
+    accentRing: 'focus:ring-2 ${currentTheme.accentRing}',
+    cardBorderHover: 'hover:border-emerald-500',
+    rollerHighlight: 'bg-emerald-500/15 border-emerald-500/40 text-[#0a7c29] dark:text-amber-300',
+    ayatBadgeBg: 'bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20',
+    toolbarBorder: 'border-emerald-300 dark:border-slate-700',
+    themeHex: '#0a7c29',
+    accentHex: '#f59e0b',
+    previewColors: ['#0a7c29', '#e8f9eb', '#f59e0b', '#064e3b']
   },
   light: {
     id: 'light',
     name: 'Putih Bersih',
+    desc: 'Kontras Terang & Modern',
+    motifTitle: 'Gerbang Mihrab & Bintang 8',
     type: 'color',
     bg: '#ffffff',
     arabicColor: '#000000',
@@ -243,13 +265,33 @@ export const THEME_PALETTES = {
     subHeaderBg: 'bg-slate-100 text-slate-900 border-slate-300',
     bismillahColor: '#0f172a',
     borderDivider: '#cbd5e1',
-    highlightBg: 'bg-amber-100 ring-2 ring-amber-400',
-    activeAudioBg: 'bg-emerald-50 ring-2 ring-emerald-500',
-    isDark: false
+    highlightBg: 'bg-teal-100 ring-2 ring-teal-400',
+    activeAudioBg: 'bg-teal-50 ring-2 ring-teal-500',
+    isDark: false,
+    headerBg: 'bg-gradient-to-r from-teal-800 via-[#0f766e] to-emerald-800 border-b border-teal-700/50',
+    headerText: 'text-white',
+    headerAccent: 'text-amber-300',
+    bannerBg: 'bg-gradient-to-r from-teal-800 via-[#0f766e] to-teal-900 border-teal-400/40 text-white',
+    bannerBadge: 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold',
+    primaryBtn: 'bg-[#0f766e] hover:bg-teal-800 text-white font-bold',
+    primaryBtnActive: 'bg-teal-900 text-white',
+    activeTab: 'bg-[#0f766e] text-white border-teal-600 shadow-xs',
+    accentText: 'text-[#0f766e] dark:text-teal-400',
+    accentBg: 'bg-teal-100 text-[#0f766e] border border-teal-300 dark:bg-teal-950/80 dark:text-teal-300 dark:border-teal-700',
+    accentRing: 'focus:ring-2 focus:ring-[#0f766e]',
+    cardBorderHover: 'hover:border-teal-500',
+    rollerHighlight: 'bg-teal-500/15 border-teal-500/40 text-[#0f766e]',
+    ayatBadgeBg: 'bg-gradient-to-br from-[#0f766e] via-[#115e59] to-[#042f2e] text-amber-300 border-2 border-slate-300 shadow-md ring-1 ring-teal-950/20',
+    toolbarBorder: 'border-teal-300 dark:border-slate-700',
+    themeHex: '#0f766e',
+    accentHex: '#f59e0b',
+    previewColors: ['#0f766e', '#ffffff', '#f59e0b', '#047857']
   },
   dark: {
     id: 'dark',
     name: 'Hitam Gelap',
+    desc: 'Obsidian Malam & Emas',
+    motifTitle: 'Bulan Sabit & Menara',
     type: 'color',
     bg: '#09111c',
     arabicColor: '#ffffff',
@@ -258,13 +300,33 @@ export const THEME_PALETTES = {
     subHeaderBg: 'bg-[#131f33] text-white border-slate-800',
     bismillahColor: '#34d399',
     borderDivider: '#1e293b',
-    highlightBg: 'bg-emerald-950/80 ring-2 ring-amber-400',
-    activeAudioBg: 'bg-emerald-900/50 ring-2 ring-emerald-400',
-    isDark: true
+    highlightBg: 'bg-amber-950/70 ring-2 ring-amber-400',
+    activeAudioBg: 'bg-amber-900/40 ring-2 ring-amber-400',
+    isDark: true,
+    headerBg: 'bg-gradient-to-r from-slate-950 via-[#0b1422] to-slate-950 border-b border-amber-500/30',
+    headerText: 'text-amber-100',
+    headerAccent: 'text-amber-400',
+    bannerBg: 'bg-gradient-to-r from-slate-950 via-[#111c2d] to-slate-950 border-amber-500/40 text-amber-100',
+    bannerBadge: 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-black',
+    primaryBtn: 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black',
+    primaryBtnActive: 'bg-amber-600 text-slate-950 font-black',
+    activeTab: 'bg-amber-500 text-slate-950 border-amber-400 shadow-xs font-black',
+    accentText: 'text-amber-400 dark:text-amber-300',
+    accentBg: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
+    accentRing: 'focus:ring-2 focus:ring-amber-500',
+    cardBorderHover: 'hover:border-amber-500',
+    rollerHighlight: 'bg-amber-500/15 border-amber-500/40 text-amber-300',
+    ayatBadgeBg: 'bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 text-amber-100 border-2 border-amber-400/50 shadow-md ring-1 ring-amber-400/20',
+    toolbarBorder: 'border-amber-500/40',
+    themeHex: '#09111c',
+    accentHex: '#f59e0b',
+    previewColors: ['#020617', '#f59e0b', '#09111c', '#ffffff']
   },
   sepia: {
     id: 'sepia',
     name: 'Kertas Sepia',
+    desc: 'Naskah Kuno & Terakota',
+    motifTitle: 'Kaligrafi & Rub-el-Hizb',
     type: 'color',
     bg: '#fbf6ea',
     arabicColor: '#1c1917',
@@ -274,12 +336,32 @@ export const THEME_PALETTES = {
     bismillahColor: '#78350f',
     borderDivider: '#fde68a',
     highlightBg: 'bg-amber-200/50 ring-2 ring-amber-500',
-    activeAudioBg: 'bg-emerald-100/50 ring-2 ring-emerald-600',
-    isDark: false
+    activeAudioBg: 'bg-amber-200/40 ring-2 ring-amber-600',
+    isDark: false,
+    headerBg: 'bg-gradient-to-r from-[#5f2c08] via-[#78350f] to-[#92400e] border-b border-amber-900/30',
+    headerText: 'text-amber-50',
+    headerAccent: 'text-amber-300',
+    bannerBg: 'bg-gradient-to-r from-[#78350f] via-[#854d0e] to-[#713f12] border-amber-400/40 text-amber-50',
+    bannerBadge: 'bg-amber-300 hover:bg-amber-200 text-amber-950 font-bold',
+    primaryBtn: 'bg-[#854d0e] hover:bg-[#78350f] text-white font-bold',
+    primaryBtnActive: 'bg-[#713f12] text-white',
+    activeTab: 'bg-[#854d0e] text-white border-amber-700 shadow-xs',
+    accentText: 'text-[#854d0e] dark:text-amber-500',
+    accentBg: 'bg-amber-100 text-[#78350f] border border-amber-300',
+    accentRing: 'focus:ring-2 focus:ring-[#854d0e]',
+    cardBorderHover: 'hover:border-amber-600',
+    rollerHighlight: 'bg-amber-700/15 border-amber-700/40 text-[#854d0e]',
+    ayatBadgeBg: 'bg-gradient-to-br from-[#92400e] via-[#78350f] to-[#451a03] text-amber-200 border-2 border-amber-400/50 shadow-md ring-1 ring-amber-900/30',
+    toolbarBorder: 'border-amber-300 dark:border-amber-700',
+    themeHex: '#78350f',
+    accentHex: '#d97706',
+    previewColors: ['#78350f', '#fbf6ea', '#d97706', '#1c1917']
   },
   navy: {
     id: 'navy',
     name: 'Biru Malam',
+    desc: 'Midnight Sapphire & Cyan',
+    motifTitle: 'Menara Kembar Nabawi',
     type: 'color',
     bg: '#071b2f',
     arabicColor: '#ffffff',
@@ -288,13 +370,33 @@ export const THEME_PALETTES = {
     subHeaderBg: 'bg-[#0c2946] text-white border-sky-900',
     bismillahColor: '#38bdf8',
     borderDivider: '#0e3a60',
-    highlightBg: 'bg-sky-950/80 ring-2 ring-amber-400',
+    highlightBg: 'bg-sky-950/80 ring-2 ring-sky-400',
     activeAudioBg: 'bg-sky-900/50 ring-2 ring-sky-400',
-    isDark: true
+    isDark: true,
+    headerBg: 'bg-gradient-to-r from-[#031120] via-[#071b2f] to-[#0c2847] border-b border-sky-500/30',
+    headerText: 'text-sky-100',
+    headerAccent: 'text-sky-300',
+    bannerBg: 'bg-gradient-to-r from-[#051c34] via-[#0c2e52] to-[#071d36] border-sky-400/40 text-sky-100',
+    bannerBadge: 'bg-sky-400 hover:bg-sky-300 text-slate-950 font-bold',
+    primaryBtn: 'bg-sky-600 hover:bg-sky-500 text-white font-bold',
+    primaryBtnActive: 'bg-sky-700 text-white',
+    activeTab: 'bg-sky-600 text-white border-sky-400 shadow-xs',
+    accentText: 'text-sky-400 dark:text-sky-300',
+    accentBg: 'bg-sky-500/20 text-sky-300 border border-sky-500/40',
+    accentRing: 'focus:ring-2 focus:ring-sky-500',
+    cardBorderHover: 'hover:border-sky-500',
+    rollerHighlight: 'bg-sky-500/15 border-sky-500/40 text-sky-300',
+    ayatBadgeBg: 'bg-gradient-to-br from-sky-700 via-sky-800 to-slate-900 text-sky-100 border-2 border-sky-400/50 shadow-md ring-1 ring-sky-400/20',
+    toolbarBorder: 'border-sky-500/40',
+    themeHex: '#071b2f',
+    accentHex: '#38bdf8',
+    previewColors: ['#031120', '#0284c7', '#38bdf8', '#ffffff']
   },
   cream: {
     id: 'cream',
     name: 'Krem Antik',
+    desc: 'Ottoman Heritage & Sage',
+    motifTitle: 'Lentera Ramadhan Fanous',
     type: 'color',
     bg: '#fdfbf7',
     arabicColor: '#18181b',
@@ -305,9 +407,161 @@ export const THEME_PALETTES = {
     borderDivider: '#e7e0d3',
     highlightBg: 'bg-amber-100 ring-2 ring-amber-400',
     activeAudioBg: 'bg-emerald-50 ring-2 ring-emerald-500',
-    isDark: false
+    isDark: false,
+    headerBg: 'bg-gradient-to-r from-[#173022] via-[#244533] to-[#2c533e] border-b border-emerald-900/30',
+    headerText: 'text-amber-50',
+    headerAccent: 'text-amber-300',
+    bannerBg: 'bg-gradient-to-r from-[#203c2c] via-[#284c39] to-[#1c3627] border-emerald-300/40 text-white',
+    bannerBadge: 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold',
+    primaryBtn: 'bg-[#244533] hover:bg-[#1b3527] text-white font-bold',
+    primaryBtnActive: 'bg-[#152a1f] text-white',
+    activeTab: 'bg-[#244533] text-white border-emerald-800 shadow-xs',
+    accentText: 'text-[#244533] dark:text-emerald-500',
+    accentBg: 'bg-stone-200/80 text-[#244533] border border-stone-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800',
+    accentRing: 'focus:ring-2 focus:ring-[#244533]',
+    cardBorderHover: 'hover:border-[#244533]',
+    rollerHighlight: 'bg-emerald-800/15 border-emerald-800/40 text-[#244533]',
+    ayatBadgeBg: 'bg-gradient-to-br from-[#244533] via-[#1b3527] to-[#12241b] text-amber-200 border-2 border-amber-500/40 shadow-md ring-1 ring-emerald-950/30',
+    toolbarBorder: 'border-stone-300 dark:border-stone-700',
+    themeHex: '#244533',
+    accentHex: '#d97706',
+    previewColors: ['#244533', '#fdfbf7', '#d97706', '#18181b']
   }
 };
+
+// ========================================================
+// KOMPONEN SILUET ORNAMEN ISLAMI RESMI (BULAN BINTANG, KALIGRAFI, KUBAH, MENARA, LENTERA FANOUS, MIHRAB)
+// ========================================================
+export function IslamicThemeMotif({ themeId, className = "w-16 h-16 pointer-events-none" }) {
+  switch (themeId) {
+    case 'mushaf':
+      // Kubah Masjid Agung dengan Bulan Sabit & Bintang + Siluet Kaligrafi Al-Qur'an
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <path d="M50 14 C48 14 47 18 45 22 C37 26 25 35 24 48 C23 58 26 68 28 72 L72 72 C74 68 77 58 76 48 C75 35 63 26 55 22 C53 18 52 14 50 14 Z" fill="currentColor" fillOpacity="0.85" />
+          <path d="M50 5 C52.5 5 54.5 7 54.5 9.5 C54.5 12 52.5 14 50 14 C48.5 14 47.2 13.3 46.4 12.2 C48.2 12 49.5 10.5 49.5 8.7 C49.5 7.5 48.9 6.4 47.9 5.8 C48.5 5.3 49.2 5 50 5 Z" fill="currentColor" />
+          <polygon points="50,2 50.8,3.8 52.8,4.1 51.3,5.5 51.7,7.4 50,6.5 48.3,7.4 48.7,5.5 47.2,4.1 49.2,3.8" fill="currentColor" />
+          <path d="M12 72 C12 60 18 52 24 50 L24 72 Z" fill="currentColor" fillOpacity="0.55" />
+          <path d="M88 72 C88 60 82 52 76 50 L76 72 Z" fill="currentColor" fillOpacity="0.55" />
+          <rect x="8" y="42" width="4" height="30" rx="1" fill="currentColor" fillOpacity="0.75" />
+          <polygon points="10,34 7,42 13,42" fill="currentColor" />
+          <rect x="88" y="42" width="4" height="30" rx="1" fill="currentColor" fillOpacity="0.75" />
+          <polygon points="90,34 87,42 93,42" fill="currentColor" />
+          <path d="M44 56 C44 50 50 46 50 46 C50 46 56 50 56 56 L56 72 L44 72 Z" fill="white" fillOpacity="0.25" />
+          <path d="M34 60 C34 55 38 52 38 52 C38 52 42 55 42 60 L42 72 L34 72 Z" fill="white" fillOpacity="0.2" />
+          <path d="M58 60 C58 55 62 52 62 52 C62 52 66 55 66 60 L66 72 L58 72 Z" fill="white" fillOpacity="0.2" />
+          <rect x="4" y="72" width="92" height="4" rx="2" fill="currentColor" />
+          <path d="M22 84 C28 80 40 80 50 82 C60 84 72 80 78 85 C73 88 62 86 50 86 C38 86 28 89 22 84 Z" fill="currentColor" fillOpacity="0.7" />
+          <circle cx="50" cy="89" r="1.5" fill="currentColor" />
+          <circle cx="56" cy="89" r="1.5" fill="currentColor" />
+          <circle cx="44" cy="89" r="1.5" fill="currentColor" />
+        </svg>
+      );
+    case 'dark':
+      // Bulan Sabit Besar Emas (Hilal) + Bintang-Bintang Geometris & Menara Malam
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <path d="M55 12 C33 12 15 30 15 52 C15 74 33 92 55 92 C65 92 74 88 81 82 C62 80 47 64 47 45 C47 30 57 17 71 13 C66 12 60.5 12 55 12 Z" fill="currentColor" />
+          <g transform="translate(68, 38) scale(0.95)">
+            <polygon points="0,-16 4,-4 16,0 4,4 0,16 -4,4 -16,0 -4,-4" fill="currentColor" />
+            <polygon points="-11,-11 0,-6 11,-11 6,0 11,11 0,6 -11,11 -6,0" fill="currentColor" fillOpacity="0.75" />
+            <circle cx="0" cy="0" r="3" fill="#ffffff" fillOpacity="0.9" />
+          </g>
+          <polygon points="32,22 33.5,26 38,27 34,29.5 35,34 31,31 27,34 28,29.5 24,27 28.5,26" fill="currentColor" fillOpacity="0.8" transform="scale(0.7) translate(10, 10)" />
+          <polygon points="76,68 77.5,72 82,73 78,75.5 79,80 75,77 71,80 72,75.5 68,73 72.5,72" fill="currentColor" fillOpacity="0.85" transform="scale(0.6) translate(40, 20)" />
+          <circle cx="28" cy="40" r="1.5" fill="currentColor" fillOpacity="0.6" />
+          <circle cx="82" cy="20" r="1.8" fill="currentColor" fillOpacity="0.8" />
+          <circle cx="70" cy="82" r="1.2" fill="currentColor" fillOpacity="0.5" />
+          <path d="M86 44 L90 40 L94 44 L92 44 L92 90 L88 90 L88 44 Z" fill="currentColor" fillOpacity="0.55" />
+          <circle cx="90" cy="38" r="1" fill="currentColor" />
+        </svg>
+      );
+    case 'navy':
+      // Menara Kembar Masjid Nabawi + Kubah Tengah + Langit Malam Bintang
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <path d="M22 18 L24 14 L26 18 L25.5 24 L27 26 L27 45 L28 47 L28 85 L20 85 L20 47 L21 45 L21 26 L22.5 24 Z" fill="currentColor" fillOpacity="0.8" />
+          <rect x="19" y="32" width="10" height="2" rx="0.5" fill="currentColor" />
+          <rect x="18" y="52" width="12" height="2" rx="0.5" fill="currentColor" />
+          <circle cx="24" cy="12" r="1.5" fill="currentColor" />
+          <path d="M78 18 L76 14 L74 18 L74.5 24 L73 26 L73 45 L72 47 L72 85 L80 85 L80 47 L79 45 L79 26 L77.5 24 Z" fill="currentColor" fillOpacity="0.8" />
+          <rect x="71" y="32" width="10" height="2" rx="0.5" fill="currentColor" />
+          <rect x="70" y="52" width="12" height="2" rx="0.5" fill="currentColor" />
+          <circle cx="76" cy="12" r="1.5" fill="currentColor" />
+          <path d="M50 34 C43 34 34 44 33 56 C33 67 36 78 37 85 L63 85 C64 78 67 67 67 56 C66 44 57 34 50 34 Z" fill="currentColor" fillOpacity="0.65" />
+          <path d="M50 26 L51.5 30 L50 34 L48.5 30 Z" fill="currentColor" />
+          <circle cx="50" cy="24" r="1.5" fill="currentColor" />
+          <path d="M46 66 C46 60 50 56 50 56 C50 56 54 60 54 66 L54 85 L46 85 Z" fill="white" fillOpacity="0.2" />
+          <rect x="10" y="85" width="80" height="3" rx="1.5" fill="currentColor" />
+          <polygon points="50,6 51.5,10 56,10.5 52.5,13.5 53.5,18 50,15.5 46.5,18 47.5,13.5 44,10.5 48.5,10" fill="currentColor" fillOpacity="0.9" transform="scale(0.8) translate(12, 0)" />
+          <circle cx="36" cy="18" r="1.5" fill="currentColor" fillOpacity="0.75" />
+          <circle cx="64" cy="18" r="1.5" fill="currentColor" fillOpacity="0.75" />
+          <circle cx="50" cy="15" r="1" fill="currentColor" fillOpacity="0.6" />
+        </svg>
+      );
+    case 'sepia':
+      // Kaligrafi Arab Bismillah & Ornamen Palmette Arabesque
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <path d="M50 8 C72 8 90 26 90 48 C90 70 72 88 50 88 C28 88 10 70 10 48 C10 26 28 8 50 8 Z" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" fill="none" opacity="0.4" />
+          <path d="M50 14 C69 14 84 29 84 48 C84 67 69 82 50 82 C31 82 16 67 16 48 C16 29 31 14 50 14 Z" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.3" />
+          <g transform="translate(50, 48)">
+            <rect x="-18" y="-18" width="36" height="36" rx="2" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.2" />
+            <rect x="-18" y="-18" width="36" height="36" rx="2" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.2" transform="rotate(45)" />
+            <path d="M0 -8 L0 6 M-5 -3 L-5 4 M5 -5 L5 5 M-8 2 C-4 8 4 8 8 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="0" cy="-11" r="1.2" fill="currentColor" />
+          </g>
+          <path d="M22 22 C26 16 34 18 36 24 C30 26 28 32 22 22 Z" fill="currentColor" fillOpacity="0.75" />
+          <path d="M78 22 C74 16 66 18 64 24 C70 26 72 32 78 22 Z" fill="currentColor" fillOpacity="0.75" />
+          <path d="M22 74 C26 80 34 78 36 72 C30 70 28 64 22 74 Z" fill="currentColor" fillOpacity="0.75" />
+          <path d="M78 74 C74 80 66 78 64 72 C70 70 72 64 78 74 Z" fill="currentColor" fillOpacity="0.75" />
+        </svg>
+      );
+    case 'cream':
+      // Lentera Ramadhan (Fanous) Bergelantungan + Rantai & Bulan Bintang
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <line x1="50" y1="0" x2="50" y2="22" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 2" />
+          <circle cx="50" cy="22" r="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <path d="M50 25 L64 36 L36 36 Z" fill="currentColor" />
+          <circle cx="50" cy="24" r="1.5" fill="currentColor" />
+          <path d="M37 36 L41 62 L59 62 L63 36 Z" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="47" y1="36" x2="48" y2="62" stroke="currentColor" strokeWidth="1" />
+          <line x1="53" y1="36" x2="52" y2="62" stroke="currentColor" strokeWidth="1" />
+          <path d="M50 45 C48 49 47 52 50 56 C53 52 52 49 50 45 Z" fill="#f59e0b" />
+          <path d="M40 62 L36 72 L64 72 L60 62 Z" fill="currentColor" />
+          <rect x="34" y="72" width="32" height="3" rx="1.5" fill="currentColor" />
+          <circle cx="50" cy="78" r="2" fill="currentColor" />
+          <path d="M22 28 C16 28 12 33 12 39 C12 45 16 50 22 50 C24 50 26 49 27 48 C23 47 20 43 20 39 C20 35 23 31 27 30 C26 29 24 28 22 28 Z" fill="currentColor" fillOpacity="0.8" />
+          <polygon points="27,24 28,26 30,26.5 28.5,28 29,30 27,29 25,30 25.5,28 24,26.5 26,26" fill="currentColor" fillOpacity="0.9" transform="scale(0.7) translate(12, 10)" />
+          <polygon points="80,32 81.5,36 86,37 82.5,40 83.5,44 80,41.5 76.5,44 77.5,40 74,37 78.5,36" fill="currentColor" fillOpacity="0.75" />
+          <circle cx="78" cy="56" r="1.5" fill="currentColor" fillOpacity="0.5" />
+        </svg>
+      );
+    case 'light':
+    default:
+      // Gerbang Lengkung Mihrab Masjid Suci + Rosette Bintang Delapan
+      return (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+          <path d="M20 90 L20 46 C20 30 34 16 50 16 C66 16 80 30 80 46 L80 90" stroke="currentColor" strokeWidth="2.5" fill="none" />
+          <path d="M26 90 L26 50 C26 40 38 32 50 24 C62 32 74 40 74 50 L74 90" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.5" />
+          <rect x="18" y="44" width="4" height="46" rx="1" fill="currentColor" fillOpacity="0.6" />
+          <rect x="78" y="44" width="4" height="46" rx="1" fill="currentColor" fillOpacity="0.6" />
+          <g transform="translate(50, 44) scale(0.85)">
+            <polygon points="0,-14 3.5,-3.5 14,0 3.5,3.5 0,14 -3.5,3.5 -14,0 -3.5,-3.5" fill="currentColor" />
+            <polygon points="-10,-10 0,-5 10,-10 5,0 10,10 0,5 -10,10 -5,0" fill="currentColor" fillOpacity="0.7" />
+            <circle cx="0" cy="0" r="3" fill="#ffffff" fillOpacity="0.8" />
+          </g>
+          <line x1="50" y1="16" x2="50" y2="24" stroke="currentColor" strokeWidth="1" />
+          <path d="M50 7 C52 7 53.5 8.5 53.5 10.5 C53.5 12.5 52 14 50 14 C48.8 14 47.7 13.4 47.1 12.5 C48.5 12.3 49.5 11.1 49.5 9.7 C49.5 8.7 49 7.8 48.2 7.3 C48.7 7.1 49.3 7 50 7 Z" fill="currentColor" />
+          <line x1="12" y1="90" x2="88" y2="90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      );
+  }
+}
+
+
+
 
 // ATURAN WARNA TAJWID IDENTIK PERSIS DENGAN MYQURAN (8 HUKUM RESMI)
 export const TAJWEED_THEME_RULES = {
@@ -1703,9 +1957,17 @@ export default function AlQuranModal({ onClose }) {
     return normalized.replace(/\u0640/g, '').trim();
   };
 
-  // Helper penyesuaian ukuran font & tata letak kartu share agar tidak terpotong & tidak tumpang tindih
+  // Helper penyesuaian ukuran font & tata letak kartu share agar 100% bebas terpotong & bebas tumpang tindih
   const getShareCardContentConfig = (ayat, targetMushaf, format, showLatin, showTrans) => {
-    if (!ayat) return { arabSize: 'text-base sm:text-lg', arabLineHeight: '1.9', latinSize: 'text-xs', latinLineHeight: '1.4', indoSize: 'text-xs', indoLineHeight: '1.35', containerClass: 'space-y-1 py-0.5' };
+    if (!ayat) return {
+      arabSize: 'text-base sm:text-lg',
+      arabLineHeight: '2.25',
+      latinSize: 'text-xs',
+      latinLineHeight: '1.55',
+      indoSize: 'text-xs',
+      indoLineHeight: '1.5',
+      containerClass: 'space-y-2 py-1'
+    };
     const arab = getCleanAyatArabForShare(ayat, targetMushaf) || '';
     const latin = showLatin ? (formatAyatLatin(ayat.teksLatin, targetMushaf) || '') : '';
     const indo = showTrans ? (formatAyatTranslation(ayat.teksIndonesia, targetMushaf) || '') : '';
@@ -1718,84 +1980,83 @@ export default function AlQuranModal({ onClose }) {
       if (totalWeight > 350) {
         return {
           arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-base sm:text-lg',
-          arabLineHeight: '1.8',
+          arabLineHeight: '2.15',
           latinSize: 'text-[9px]',
-          latinLineHeight: '1.3',
+          latinLineHeight: '1.45',
           indoSize: 'text-[8.5px]',
-          indoLineHeight: '1.25',
-          containerClass: 'space-y-1 py-1'
+          indoLineHeight: '1.4',
+          containerClass: 'space-y-1.5 py-1'
         };
       }
       return {
         arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl',
-        arabLineHeight: '2.1',
+        arabLineHeight: '2.3',
         latinSize: 'text-xs',
-        latinLineHeight: '1.4',
+        latinLineHeight: '1.5',
         indoSize: 'text-xs',
-        indoLineHeight: '1.35',
-        containerClass: 'space-y-2 py-2'
+        indoLineHeight: '1.45',
+        containerClass: 'space-y-2.5 py-2'
       };
     }
 
     if (totalWeight > 550) {
-      // Ayat super panjang (misal Al-Baqarah 282 / ayat panjang satu halaman)
+      // Ayat super panjang
       return {
-        arabSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-xs sm:text-sm',
-        arabLineHeight: isSquare ? '1.5' : '1.65',
-        latinSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
-        latinLineHeight: isSquare ? '1.2' : '1.25',
-        indoSize: isSquare ? 'text-[6.5px] sm:text-[7px]' : 'text-[8px] sm:text-[8.5px]',
-        indoLineHeight: isSquare ? '1.18' : '1.2',
-        containerClass: isSquare ? 'space-y-0.5 py-0' : 'space-y-1 py-0.5'
+        arabSize: isSquare ? 'text-[11px] sm:text-[11.5px]' : 'text-xs sm:text-sm',
+        arabLineHeight: isSquare ? '2.1' : '2.2',
+        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
+        latinLineHeight: isSquare ? '1.45' : '1.5',
+        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
+        indoLineHeight: isSquare ? '1.4' : '1.45',
+        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-1.5 py-1'
       };
     } else if (totalWeight > 350) {
-      // Ayat sangat panjang (misal Ayat Kursi atau > 3-4 baris teks)
+      // Ayat sangat panjang
       return {
-        arabSize: isSquare ? 'text-[11px] sm:text-[11.5px]' : 'text-sm sm:text-base',
-        arabLineHeight: isSquare ? '1.6' : '1.75',
-        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
-        latinLineHeight: isSquare ? '1.25' : '1.3',
-        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
-        indoLineHeight: isSquare ? '1.22' : '1.28',
-        containerClass: isSquare ? 'space-y-0.5 py-0.5' : 'space-y-1.5 py-1'
+        arabSize: isSquare ? 'text-[12px] sm:text-[12.5px]' : 'text-sm sm:text-base',
+        arabLineHeight: isSquare ? '2.15' : '2.25',
+        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[9.5px] sm:text-[10px]',
+        latinLineHeight: isSquare ? '1.5' : '1.55',
+        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
+        indoLineHeight: isSquare ? '1.42' : '1.48',
+        containerClass: isSquare ? 'space-y-1.5 py-0.5' : 'space-y-2 py-1'
       };
     } else if (totalWeight > 200) {
-      // Ayat panjang (misal Al-Fatihah ayat 7)
+      // Ayat panjang
       return {
-        arabSize: isSquare ? 'text-[12.5px] sm:text-[13px]' : 'text-base sm:text-lg',
-        arabLineHeight: isSquare ? '1.7' : '1.85',
-        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[10.5px]',
-        latinLineHeight: isSquare ? '1.3' : '1.35',
-        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9.5px] sm:text-[10px]',
-        indoLineHeight: isSquare ? '1.25' : '1.3',
-        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2 py-1'
+        arabSize: isSquare ? 'text-[13.5px] sm:text-[14px]' : 'text-base sm:text-lg',
+        arabLineHeight: isSquare ? '2.2' : '2.3',
+        latinSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[10.5px] sm:text-[11px]',
+        latinLineHeight: isSquare ? '1.52' : '1.6',
+        indoSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[10.5px]',
+        indoLineHeight: isSquare ? '1.45' : '1.5',
+        containerClass: isSquare ? 'space-y-1.5 py-1' : 'space-y-2.5 py-1.5'
       };
     } else if (totalWeight > 90) {
-      // Ayat sedang (misal Al-Fatihah ayat 2, 5, 6)
+      // Ayat sedang
       return {
-        arabSize: isSquare ? 'text-[14px] sm:text-[14.5px]' : 'text-lg sm:text-xl',
-        arabLineHeight: isSquare ? '1.8' : '1.95',
-        latinSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[11px] sm:text-xs',
-        latinLineHeight: isSquare ? '1.35' : '1.4',
-        indoSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[11px]',
-        indoLineHeight: isSquare ? '1.3' : '1.35',
-        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-2.5 py-1.5'
+        arabSize: isSquare ? 'text-[15px] sm:text-[16px]' : 'text-lg sm:text-xl',
+        arabLineHeight: isSquare ? '2.25' : '2.35',
+        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-[11.5px] sm:text-xs',
+        latinLineHeight: isSquare ? '1.55' : '1.65',
+        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[11px] sm:text-[11.5px]',
+        indoLineHeight: isSquare ? '1.48' : '1.55',
+        containerClass: isSquare ? 'space-y-2 py-1' : 'space-y-3 py-2'
       };
     } else {
-      // Ayat pendek (misal Al-Fatihah ayat 1, 3, 4)
+      // Ayat pendek
       return {
-        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl',
-        arabLineHeight: isSquare ? '1.9' : '2.1',
-        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-xs sm:text-sm',
-        latinLineHeight: isSquare ? '1.4' : '1.45',
-        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[11.5px] sm:text-xs',
-        indoLineHeight: isSquare ? '1.35' : '1.4',
-        containerClass: isSquare ? 'space-y-1.5 py-1' : 'space-y-3 py-2'
+        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl',
+        arabLineHeight: isSquare ? '2.3' : '2.4',
+        latinSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-xs sm:text-sm',
+        latinLineHeight: isSquare ? '1.6' : '1.7',
+        indoSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-[11.5px] sm:text-xs',
+        indoLineHeight: isSquare ? '1.5' : '1.6',
+        containerClass: isSquare ? 'space-y-2.5 py-1.5' : 'space-y-3.5 py-2.5'
       };
     }
   };
 
-  // Save Preferences
   const handleThemeChange = (mode) => {
     setThemeMode(mode);
     try {
@@ -2593,7 +2854,7 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleQuickShareWA = (ayat) => {
-    const currentMushaf = mushafType;
+    const currentMushaf = (showShareModal ? shareMushafType : null) || mushafType;
     const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
@@ -2612,7 +2873,7 @@ export default function AlQuranModal({ onClose }) {
   };
 
   const handleCopyAyat = (ayat) => {
-    const currentMushaf = mushafType;
+    const currentMushaf = (showShareModal ? shareMushafType : null) || mushafType;
     const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
@@ -2800,7 +3061,7 @@ export default function AlQuranModal({ onClose }) {
           /* ======================================================== */
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Index Header */}
-            <div className="bg-[#0a7c29] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-md flex-shrink-0 z-20">
+            <div className={`${currentTheme.headerBg} ${currentTheme.headerText} px-4 py-3 flex items-center justify-between gap-3 shadow-md flex-shrink-0 z-20`}>
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleCloseQuran}
@@ -2844,7 +3105,7 @@ export default function AlQuranModal({ onClose }) {
             <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y w-full max-w-full px-3 sm:px-6 py-3.5 space-y-4 select-none">
               {/* BANNER TERAKHIR DIBACA (COMPACT & SLIM SESUAI INSTRUKSI) */}
               {lastReadPosition && (
-                <div className="w-full max-w-lg mx-auto px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-800 via-[#0a7c29] to-emerald-900 text-white shadow-xs border border-emerald-400/40 flex items-center justify-between gap-2.5 animate-in fade-in duration-200">
+                <div className={`w-full max-w-lg mx-auto px-3.5 py-2 rounded-2xl ${currentTheme.bannerBg} shadow-xs border flex items-center justify-between gap-2.5 animate-in fade-in duration-200`}>
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
                       <Pin className="w-3.5 h-3.5 fill-current" />
@@ -2867,7 +3128,7 @@ export default function AlQuranModal({ onClose }) {
                       const surah = SURAH_LIST.find((s) => s.nomor === lastReadPosition.surahNomor) || SURAH_LIST[0];
                       handleOpenSurah(surah, lastReadPosition.ayatNomor);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-xs active:scale-95 transition shrink-0 cursor-pointer"
+                    className={`px-3 py-1.5 rounded-xl ${currentTheme.bannerBadge} text-xs flex items-center gap-1 shadow-xs active:scale-95 transition shrink-0 cursor-pointer`}
                     title="Lanjut Membaca"
                   >
                     <span>Lanjut</span>
@@ -3108,7 +3369,7 @@ export default function AlQuranModal({ onClose }) {
                                 e.stopPropagation();
                                 handleOpenSurah(surah, quickAyatNum);
                               }}
-                              className="px-2.5 py-1 rounded-xl bg-[#0a7c29] hover:bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer"
+                              className={`px-2.5 py-1 rounded-xl ${currentTheme.primaryBtn} text-[11px] font-bold flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer`}
                               title={`Buka & Baca QS. ${surah.namaLatin} Ayat ${quickAyatNum}`}
                             >
                               <span>Baca</span>
@@ -3131,7 +3392,7 @@ export default function AlQuranModal({ onClose }) {
                     onClick={() => setIndexTab(indexTab === 'surah' ? 'none' : 'surah')}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs border cursor-pointer ${
                       indexTab === 'surah'
-                        ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-xs'
+                        ? `${currentTheme.activeTab} font-black`
                         : isDark
                         ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
                         : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -3147,7 +3408,7 @@ export default function AlQuranModal({ onClose }) {
                     onClick={() => setIndexTab(indexTab === 'juz' ? 'none' : 'juz')}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs border cursor-pointer ${
                       indexTab === 'juz'
-                        ? 'bg-[#0a7c29] text-white border-emerald-600 shadow-xs'
+                        ? `${currentTheme.activeTab} font-black`
                         : isDark
                         ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
                         : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -3203,7 +3464,7 @@ export default function AlQuranModal({ onClose }) {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
-                            <span className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-[#0a7c29] dark:text-emerald-300 font-mono font-black text-xs flex items-center justify-center flex-shrink-0 border border-emerald-300 dark:border-emerald-700">
+                            <span className={`w-8 h-8 rounded-xl ${currentTheme.accentBg} font-mono font-black text-xs flex items-center justify-center flex-shrink-0`}>
                               {surah.nomor}
                             </span>
                             <div className="min-w-0">
@@ -3221,7 +3482,7 @@ export default function AlQuranModal({ onClose }) {
                               </p>
                             </div>
                           </div>
-                          <span className="font-quran-lpmq text-xl text-[#0a7c29] dark:text-emerald-400 font-bold flex-shrink-0" dir="rtl">
+                          <span className={`font-quran-lpmq text-xl ${currentTheme.accentText} font-bold flex-shrink-0`} dir="rtl">
                             {surah.nama}
                           </span>
                         </div>
@@ -3230,7 +3491,7 @@ export default function AlQuranModal({ onClose }) {
                         <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
                           <button
                             onClick={() => handleOpenSurah(surah, 1)}
-                            className="flex-1 py-1.5 px-3 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1 active:scale-95 transition shadow-2xs"
+                            className={`flex-1 py-1.5 px-3 rounded-xl ${currentTheme.primaryBtn} font-black text-xs flex items-center justify-center gap-1 active:scale-95 transition shadow-2xs`}
                           >
                             <span>Baca Surat</span>
                           </button>
@@ -3258,7 +3519,7 @@ export default function AlQuranModal({ onClose }) {
                       className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:border-emerald-500 hover:shadow-md transition space-y-3 flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#0a7c29] to-emerald-700 text-amber-300 font-black text-xs shadow-xs">
+                        <span className={`px-3 py-1 rounded-xl ${currentTheme.headerBg} text-amber-300 font-black text-xs shadow-xs`}>
                           JUZ {juzItem.juz}
                         </span>
                         <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
@@ -3279,7 +3540,7 @@ export default function AlQuranModal({ onClose }) {
 
                       <button
                         onClick={() => handleOpenJuz(juzItem)}
-                        className="w-full py-2 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition shadow-2xs"
+                        className={`w-full py-2 rounded-xl ${currentTheme.primaryBtn} font-black text-xs flex items-center justify-center gap-1.5 active:scale-95 transition shadow-2xs`}
                       >
                         <span>Buka Juz {juzItem.juz}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -3293,7 +3554,7 @@ export default function AlQuranModal({ onClose }) {
               {indexTab === 'khatam' && (
                 <div className="space-y-4">
                   {/* Top Bar: Buat Target Baru */}
-                  <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-700 via-[#0a7c29] to-emerald-900 text-white shadow-md flex items-center justify-between gap-3">
+                  <div className="p-4 rounded-3xl ${currentTheme.bannerBg} shadow-md flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-sm sm:text-base font-black flex items-center gap-2">
                         <Target className="w-5 h-5 text-amber-300" />
@@ -3418,7 +3679,7 @@ export default function AlQuranModal({ onClose }) {
                                   const juzObj = JUZ_LIST.find((j) => j.juz === nextJuzNum);
                                   if (juzObj) handleOpenJuz(juzObj);
                                 }}
-                                className="px-4 py-1.5 rounded-xl bg-[#0a7c29] hover:bg-emerald-800 text-white font-black text-xs flex items-center gap-1 active:scale-95 transition shadow-2xs"
+                                className={`px-4 py-1.5 rounded-xl ${currentTheme.primaryBtn} font-black text-xs flex items-center gap-1 active:scale-95 transition shadow-2xs`}
                               >
                                 <span>Lanjut Baca Khataman</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
@@ -3580,7 +3841,7 @@ export default function AlQuranModal({ onClose }) {
             }}
           >
             {/* Header Reader */}
-            <div className="bg-[#0a7c29] text-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 shadow-md flex-shrink-0 z-20">
+            <div className={`${currentTheme.headerBg} ${currentTheme.headerText} px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 shadow-md flex-shrink-0 z-20`}>
               {/* Tombol Back ke Index Daftar Surat */}
               <button
                 onClick={() => setViewState('index')}
@@ -3659,9 +3920,7 @@ export default function AlQuranModal({ onClose }) {
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-95 ${
                   selectedSurah.nomor <= 1
                     ? 'opacity-20 cursor-not-allowed'
-                    : isDark
-                    ? 'text-emerald-300 hover:bg-white/10'
-                    : 'text-[#0a7c29] hover:bg-emerald-100/50'
+                    : `${currentTheme.accentText} hover:bg-white/10`
                 }`}
                 title="Surat Sebelumnya"
               >
@@ -3900,7 +4159,7 @@ export default function AlQuranModal({ onClose }) {
                                   style={{ verticalAlign: 'middle', lineHeight: 1 }}
                                   title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
                                 >
-                                  <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
+                                  <span className={`relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl ${currentTheme.ayatBadgeBg} font-mono text-xs sm:text-sm font-black whitespace-nowrap`}>
                                     {ayat.nomorAyat}
                                   </span>
                                 </span>
@@ -3940,7 +4199,7 @@ export default function AlQuranModal({ onClose }) {
                                   style={{ verticalAlign: 'middle', lineHeight: 1 }}
                                   title={`Ayat ${ayat.nomorAyat} - Klik untuk loncat ayat (Maks: ${selectedSurah.jumlahAyat})`}
                                 >
-                                  <span className="relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl bg-gradient-to-br from-[#0a7c29] via-[#0b6623] to-[#064e1c] text-amber-300 font-mono text-xs sm:text-sm font-black border-2 border-slate-300 shadow-md ring-1 ring-emerald-950/20 whitespace-nowrap">
+                                  <span className={`relative inline-flex items-center justify-center px-3.5 py-1 rounded-xl ${currentTheme.ayatBadgeBg} font-mono text-xs sm:text-sm font-black whitespace-nowrap`}>
                                     {ayat.nomorAyat}
                                   </span>
                                 </span>
@@ -4075,14 +4334,14 @@ export default function AlQuranModal({ onClose }) {
                                   {isAudioPlaying ? (
                                     <Pause className="w-4 h-4 text-white" />
                                   ) : (
-                                    <Play className="w-4 h-4 text-[#0a7c29] dark:text-emerald-400" />
+                                    <Play className={`w-4 h-4 ${currentTheme.accentText}`} />
                                   )}
                                 </button>
 
                                 {/* TAFSIR */}
                                 <button
                                   onClick={() => handleOpenRincian(ayat)}
-                                  className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-emerald-50 text-[#0a7c29] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0"
+                                  className={`w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800/90 hover:bg-white/10 ${currentTheme.accentText} border border-slate-200 dark:border-slate-700 flex items-center justify-center transition active:scale-95 shadow-2xs shrink-0`}
                                   title="Buka Tafsir & Rincian Ayat"
                                 >
                                   <BookOpen className="w-4 h-4 stroke-[2.3]" />
@@ -4161,72 +4420,179 @@ export default function AlQuranModal({ onClose }) {
         {/* POPUP PEMILIH SUASANA & BACKGROUND (WARNA POLOS ISLAMI) */}
         {/* ======================================================== */}
         {showThemePicker && (
-          <div className="p-3.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-2xl z-30 flex-shrink-0 animate-in slide-in-from-top duration-200 relative">
-            <div className="max-w-2xl mx-auto space-y-3">
-              <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+          <div className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-2xl z-30 flex-shrink-0 animate-in slide-in-from-top duration-200 relative">
+            <div className="max-w-2xl mx-auto space-y-3.5">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-[#0a7c29] dark:text-emerald-400" />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    Pilihan Warna Background Bacaan (Polos & Nyaman)
-                  </span>
+                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center ${currentTheme.accentBg}`}>
+                    <Palette className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">
+                      Pilihan Tema Al-Qur'an & Siluet Islami
+                    </h3>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      Menyelaraskan seluruh warna: header, tombol utama, kartu surat, badge ayat, dan background bacaan.
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowThemePicker(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1"
+                  className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Pilihan 6 Warna Polos Nyaman */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {/* Grid 6 Pilihan Tema Berornamen Siluet Nuansa Islam */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {[
-                  { id: 'mushaf', name: 'Hijau Kemenag', desc: 'Standar Mushaf', color: '#e8f9eb', textColor: '#022c22', border: '#a7f3d0' },
-                  { id: 'light', name: 'Putih Bersih', desc: 'Terang & Kontras', color: '#ffffff', textColor: '#0f172a', border: '#e2e8f0' },
-                  { id: 'sepia', name: 'Kertas Sepia', desc: 'Nyaman di Mata', color: '#fbf6ea', textColor: '#854d0e', border: '#fde68a' },
-                  { id: 'dark', name: 'Hitam Gelap', desc: 'Malam / AMOLED', color: '#09111c', textColor: '#ffffff', border: '#334155' },
-                  { id: 'navy', name: 'Biru Malam', desc: 'Nuansa Tenang', color: '#071b2f', textColor: '#7dd3fc', border: '#1e3a8a' },
-                  { id: 'cream', name: 'Krem Antik', desc: 'Mushaf Klasik', color: '#fdfbf7', textColor: '#18181b', border: '#e7e0d3' }
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      handleThemeChange(item.id);
-                      setShowThemePicker(false);
-                    }}
-                    style={{ backgroundColor: item.color, borderColor: item.border }}
-                    className={`p-3 rounded-2xl border text-left transition flex items-center gap-3 shadow-2xs active:scale-95 ${
-                      themeMode === item.id
-                        ? 'ring-2 ring-[#0a7c29] shadow-md scale-102'
-                        : 'opacity-90 hover:opacity-100 hover:scale-101'
-                    }`}
-                  >
-                    <span
-                      style={{ backgroundColor: item.textColor }}
-                      className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold"
+                  {
+                    id: 'mushaf',
+                    name: 'Hijau Kemenag',
+                    motif: 'Kubah & Bulan Bintang ☪',
+                    desc: 'Standar Mushaf Resmi RI',
+                    palette: THEME_PALETTES.mushaf
+                  },
+                  {
+                    id: 'dark',
+                    name: 'Hitam Gelap',
+                    motif: 'Bulan Sabit & Menara 🌙',
+                    desc: 'Obsidian Malam & Emas',
+                    palette: THEME_PALETTES.dark
+                  },
+                  {
+                    id: 'navy',
+                    name: 'Biru Malam',
+                    motif: 'Menara Kembar Nabawi 🕌',
+                    desc: 'Sapphire & Cyan Syahdu',
+                    palette: THEME_PALETTES.navy
+                  },
+                  {
+                    id: 'sepia',
+                    name: 'Kertas Sepia',
+                    motif: 'Kaligrafi & Rub-el-Hizb ۞',
+                    desc: 'Naskah Kuno & Hangat',
+                    palette: THEME_PALETTES.sepia
+                  },
+                  {
+                    id: 'cream',
+                    name: 'Krem Antik',
+                    motif: 'Lentera Fanous Ramadhan 🏮',
+                    desc: 'Ottoman Heritage & Sage',
+                    palette: THEME_PALETTES.cream
+                  },
+                  {
+                    id: 'light',
+                    name: 'Putih Bersih',
+                    motif: 'Gerbang Mihrab Suci 🏛️',
+                    desc: 'Kontras Terang & Modern',
+                    palette: THEME_PALETTES.light
+                  }
+                ].map((item) => {
+                  const isSelected = themeMode === item.id;
+                  const pal = item.palette;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        handleThemeChange(item.id);
+                        setShowThemePicker(false);
+                      }}
+                      style={{
+                        backgroundColor: pal.bg,
+                        borderColor: isSelected ? pal.themeHex : pal.borderDivider
+                      }}
+                      className={`relative p-3 rounded-2xl border-2 text-left transition-all overflow-hidden flex flex-col justify-between group active:scale-95 cursor-pointer shadow-xs ${
+                        isSelected
+                          ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-md scale-102'
+                          : 'opacity-90 hover:opacity-100 hover:scale-101 hover:shadow-sm'
+                      }`}
                     >
-                      {themeMode === item.id ? '✓' : ''}
-                    </span>
-                    <div className="min-w-0 text-left">
-                      <span style={{ color: item.textColor }} className="text-xs font-black block leading-tight">
-                        {item.name}
-                      </span>
-                      <span style={{ color: item.textColor }} className="text-[10px] opacity-75 block leading-tight">
-                        {item.desc}
-                      </span>
-                    </div>
-                  </button>
-                ))}
+                      {/* Siluet Ornamen Islami di Sudut Kanan Kartu */}
+                      <div
+                        style={{ color: pal.themeHex }}
+                        className="absolute -right-2 -bottom-2 w-16 h-16 opacity-20 pointer-events-none transition-transform group-hover:scale-115 group-hover:opacity-30"
+                      >
+                        <IslamicThemeMotif themeId={item.id} className="w-full h-full" />
+                      </div>
+
+                      {/* Baris Atas: Checkmark / Indikator & Nama Motif */}
+                      <div className="flex items-center justify-between gap-1.5 mb-2 relative z-10">
+                        <span
+                          style={{
+                            backgroundColor: pal.themeHex,
+                            color: pal.isDark ? '#000000' : '#ffffff'
+                          }}
+                          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 shadow-xs ${
+                            isSelected ? 'ring-2 ring-white/80' : 'opacity-70'
+                          }`}
+                        >
+                          {isSelected ? '✓' : ''}
+                        </span>
+
+                        <span
+                          style={{
+                            color: pal.arabicColor,
+                            borderColor: pal.borderDivider,
+                            backgroundColor: pal.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'
+                          }}
+                          className="text-[9px] font-bold px-2 py-0.5 rounded-full border truncate max-w-[125px]"
+                        >
+                          {item.motif}
+                        </span>
+                      </div>
+
+                      {/* Tengah: Nama & Deskripsi */}
+                      <div className="relative z-10 mb-2.5">
+                        <h4
+                          style={{ color: pal.arabicColor }}
+                          className="text-xs sm:text-sm font-black leading-tight"
+                        >
+                          {item.name}
+                        </h4>
+                        <p
+                          style={{ color: pal.arabicColor }}
+                          className="text-[10px] opacity-75 mt-0.5 leading-tight"
+                        >
+                          {item.desc}
+                        </p>
+                      </div>
+
+                      {/* Bawah: Color Swatch Strip (Pratinjau Koordinasi Warna Lengkap) */}
+                      <div className="relative z-10 pt-1.5 border-t border-black/10 dark:border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {pal.previewColors.map((colorHex, cIdx) => (
+                            <span
+                              key={cIdx}
+                              style={{ backgroundColor: colorHex }}
+                              className="w-3.5 h-3.5 rounded-full border border-black/20 dark:border-white/20 shadow-2xs inline-block"
+                              title={`Warna Elemen ${cIdx + 1}`}
+                            />
+                          ))}
+                        </div>
+                        <span
+                          style={{ color: pal.themeHex }}
+                          className="text-[9px] font-bold uppercase tracking-wider font-mono"
+                        >
+                          {isSelected ? 'Aktif' : 'Pilih'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              <p className="text-[10px] text-slate-500 text-center italic">
-                * Background foto pemandangan & Ka’bah asli dapat dipilih saat membagikan ayat (fitur Share Card).
-              </p>
+              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-1 pt-1">
+                <span>* Warna tema langsung diaplikasikan ke header, daftar surat/juz, tombol baca, dan reader.</span>
+                <span className="italic">Foto Ka'bah & Masjid dapat dipilih di Share Card</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ======================================================== */}
+                {/* ======================================================== */}
         {/* MODAL POPUP PILIH SURAT (114 SURAH LENGKAP)              */}
         {/* ======================================================== */}
         {showSurahPicker && (
@@ -5049,11 +5415,11 @@ export default function AlQuranModal({ onClose }) {
                     }`}>
                       <div
                         ref={shareCardRef}
-                        style={activeShareStyle.bgStyle}
-                        className={`w-full relative transition-all flex flex-col justify-between overflow-hidden ${
+                        style={{ ...activeShareStyle.bgStyle, boxSizing: 'border-box' }}
+                        className={`w-full relative transition-all flex flex-col justify-between ${
                           shareCardFormat === 'kotak'
-                            ? 'aspect-square p-3.5 sm:p-4.5'
-                            : 'aspect-[9/16] pt-5 pb-7 sm:pt-6 sm:pb-8 px-4 sm:px-5'
+                            ? 'min-h-[400px] sm:min-h-[420px] p-4 sm:p-5'
+                            : 'min-h-[600px] sm:min-h-[640px] pt-6 pb-8 px-4 sm:px-6'
                         }`}
                       >
                         {/* Background Foto Asli & Overlay (Khusus Tipe Photo) - Full Bleed 100% Edge-to-Edge */}
@@ -5117,17 +5483,18 @@ export default function AlQuranModal({ onClose }) {
                       </div>
                     </div>
 
-                    {/* Teks Arab, Latin, & Terjemahan Tengah (Auto Fit & Bebas Tumpang Tindih) */}
-                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center items-center text-center my-auto min-h-0 w-full overflow-hidden`}>
+                    {/* Teks Arab, Latin, & Terjemahan Tengah (Auto Fit, Center Simetris, & Bebas Tumpang Tindih) */}
+                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center items-center text-center my-auto w-full py-1.5`}>
                       {/* 1. Teks Arab Ayat */}
-                      <div className="px-1">
+                      <div className="px-1.5 w-full">
                         <p
                           style={{
                             fontFamily: getActiveFontFamily(shareMushafType),
                             lineHeight: shareConfig.arabLineHeight,
-                            textAlign: 'justify',
-                            textAlignLast: 'center',
-                            textJustify: 'auto'
+                            textAlign: 'center',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            direction: 'rtl'
                           }}
                           className={`${getArabicFontClass(shareMushafType)} ${shareConfig.arabSize} drop-shadow-md block w-full select-none ${
                             isShareDark ? 'text-amber-50' : 'text-slate-950 font-bold'
@@ -5140,24 +5507,23 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* Pembatas Hiasan Halus */}
                       {(shareShowLatin || shareShowTranslation) && (
-                        <div className={`w-10 sm:w-12 h-px mx-auto my-0.5 sm:my-1 opacity-50 ${
-                          isShareDark ? 'bg-amber-400/50' : 'bg-amber-700/50'
+                        <div className={`w-12 sm:w-16 h-0.5 rounded-full mx-auto my-2 sm:my-2.5 opacity-60 ${
+                          isShareDark ? 'bg-amber-400/60' : 'bg-amber-700/60'
                         }`} />
                       )}
 
                       {/* 2. Teks Transliterasi Latin */}
                       {shareShowLatin && showShareModal.teksLatin && (
-                        <div className="px-1 sm:px-2">
+                        <div className="px-1.5 sm:px-2.5 w-full">
                           <p
                             style={{
                               lineHeight: shareConfig.latinLineHeight,
-                              textAlign: 'justify',
-                              textAlignLast: 'center',
-                              textJustify: 'inter-word',
-                              hyphens: 'auto'
+                              textAlign: 'center',
+                              wordBreak: 'break-word',
+                              overflowWrap: 'break-word'
                             }}
-                            className={`${shareConfig.latinSize} font-medium italic drop-shadow-xs block w-full ${
-                              isShareDark ? 'text-amber-200/90' : 'text-emerald-950 font-semibold'
+                            className={`${shareConfig.latinSize} font-medium italic drop-shadow-xs block w-full leading-normal ${
+                              isShareDark ? 'text-amber-200/95' : 'text-emerald-950 font-semibold'
                             }`}
                           >
                             {formatAyatLatin(showShareModal.teksLatin, shareMushafType)}
@@ -5167,14 +5533,13 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* 3. Teks Terjemahan Bahasa Indonesia */}
                       {shareShowTranslation && showShareModal.teksIndonesia && (
-                        <div className="px-1 sm:px-2">
+                        <div className="px-1.5 sm:px-2.5 w-full mt-1 sm:mt-1.5">
                           <p
                             style={{
                               lineHeight: shareConfig.indoLineHeight,
-                              textAlign: 'justify',
-                              textAlignLast: 'center',
-                              textJustify: 'inter-word',
-                              hyphens: 'auto'
+                              textAlign: 'center',
+                              wordBreak: 'break-word',
+                              overflowWrap: 'break-word'
                             }}
                             className={`${shareConfig.indoSize} font-medium drop-shadow-xs block w-full ${
                               isShareDark ? 'text-slate-100' : 'text-slate-800'
