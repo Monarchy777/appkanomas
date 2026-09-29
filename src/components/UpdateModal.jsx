@@ -59,10 +59,19 @@ export default function UpdateModal({
 
   if (!isOpen) return null;
 
-  const handleDownloadApk = () => {
+  const handleDownloadApk = (e) => {
     const apkUrl = remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk';
     try {
-      window.open(apkUrl, '_system');
+      const a = document.createElement('a');
+      a.href = apkUrl;
+      a.download = 'Kanomas.apk';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch {}
+      }, 500);
     } catch {
       window.location.href = apkUrl;
     }
@@ -89,8 +98,7 @@ export default function UpdateModal({
   return (
     <div
       onClick={(e) => {
-        // Jika pembaruan wajib, jangan izinkan tutup modal via klik backdrop
-        if (!effectiveIsMandatory && e.target === e.currentTarget) {
+        if (e.target === e.currentTarget) {
           onClose();
         }
       }}
@@ -112,19 +120,18 @@ export default function UpdateModal({
               <Sparkles className="w-5 h-5 text-amber-300" />
             )}
             <h3 className="text-base font-black">
-              {effectiveIsMandatory ? 'Pembaruan Wajib Aplikasi' : 'Pembaruan Aplikasi Kanomas'}
+              {effectiveIsMandatory ? 'Pembaruan Tersedia' : 'Pembaruan Aplikasi Kanomas'}
             </h3>
           </div>
 
-          {/* Tombol X hanya jika BUKAN pembaruan wajib */}
-          {!effectiveIsMandatory && (
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition active:scale-95"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          {/* Tombol X selalu dapat ditutup */}
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
+            title="Tutup / Nanti Saja"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Content */}
@@ -192,17 +199,22 @@ export default function UpdateModal({
 
               {/* Tombol Aksi Update Utama */}
               <div className="space-y-2 pt-1">
-                <button
+                <a
+                  href={remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk'}
+                  download="Kanomas.apk"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={handleDownloadApk}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm tracking-wide uppercase flex items-center justify-center gap-2 shadow-lg transition active:scale-95 text-center"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm tracking-wide uppercase flex items-center justify-center gap-2 shadow-lg transition active:scale-95 text-center cursor-pointer no-underline"
                 >
                   <Download className="w-5 h-5" />
                   <span>UNDUH & PASANG APK TERBARU</span>
-                </button>
+                </a>
 
                 <button
+                  type="button"
                   onClick={handleHotReload}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95"
+                  className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
                   <span>Perbarui & Muat Ulang Versi Web</span>
@@ -223,28 +235,34 @@ export default function UpdateModal({
                   Versi aktif: v{APP_BUILD_VERSION} (Rilis Terbaru 2026)
                 </span>
               </div>
-              <button
+              <a
+                href={remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk'}
+                download="Kanomas.apk"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={handleDownloadApk}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition active:scale-95 cursor-pointer no-underline"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Unduh Ulang File APK ({remoteInfo?.apkSize || '22.7 MB'})</span>
-              </button>
+                <span>Unduh Ulang File APK ({remoteInfo?.apkSize || '23.8 MB'})</span>
+              </a>
             </div>
           )}
         </div>
 
-        {/* Footer (Tombol Tutup disembunyikan jika Pembaruan Wajib) */}
-        {!effectiveIsMandatory && (
-          <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition active:scale-95"
-            >
-              Tutup
-            </button>
-          </div>
-        )}
+        {/* Footer (Selalu ada tombol Tutup / Lanjutkan agar pengguna tidak terkunci) */}
+        <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <span className="text-[11px] text-slate-500 font-medium">
+            Aplikasi Resmi Kanomas Tour & Travel
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition active:scale-95 cursor-pointer"
+          >
+            Lanjutkan ke Aplikasi
+          </button>
+        </div>
       </div>
     </div>
   );
