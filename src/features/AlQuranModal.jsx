@@ -1589,49 +1589,68 @@ export default function AlQuranModal({ onClose }) {
 
   // Helper penyesuaian ukuran font & tata letak kartu share agar tidak terpotong & tidak tumpang tindih
   const getShareCardContentConfig = (ayat, targetMushaf, format, showLatin, showTrans) => {
-    if (!ayat) return { arabSize: 'text-xl', arabLineHeight: '2.3', latinSize: 'text-xs', indoSize: 'text-xs', containerClass: 'space-y-3 py-2', cardMinHeight: 'min-h-[380px]' };
+    if (!ayat) return { arabSize: 'text-lg', arabLineHeight: '2.1', latinSize: 'text-xs', latinLineHeight: '1.45', indoSize: 'text-xs', indoLineHeight: '1.4', containerClass: 'space-y-2 py-1' };
     const arab = getCleanAyatArabForShare(ayat, targetMushaf) || '';
     const latin = showLatin ? (formatAyatLatin(ayat.teksLatin, targetMushaf) || '') : '';
     const indo = showTrans ? (formatAyatTranslation(ayat.teksIndonesia, targetMushaf) || '') : '';
 
-    const totalWeight = (arab.length * 1.6) + (latin.length * 0.8) + (indo.length * 0.6);
+    const totalWeight = (arab.length * 1.5) + (latin.length * 0.7) + (indo.length * 0.5);
     const isSquare = format === 'kotak';
 
     if (totalWeight > 550) {
-      // Ayat sangat panjang
+      // Ayat super panjang (misal Al-Baqarah 282 / ayat penuh satu halaman)
       return {
-        arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-sm sm:text-base',
-        arabLineHeight: '2.05',
-        latinSize: 'text-[9px] sm:text-[9.5px]',
-        indoSize: 'text-[8.5px] sm:text-[9px]',
+        arabSize: isSquare ? 'text-[11px] sm:text-[12px]' : 'text-xs sm:text-[13px]',
+        arabLineHeight: isSquare ? '1.75' : '1.85',
+        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[8px] sm:text-[8.5px]',
+        latinLineHeight: isSquare ? '1.25' : '1.32',
+        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[7.5px] sm:text-[8px]',
+        indoLineHeight: isSquare ? '1.22' : '1.28',
+        containerClass: 'space-y-0.5 py-0.5'
+      };
+    } else if (totalWeight > 380) {
+      // Ayat sangat panjang (misal Ayat Kursi atau > 3-4 baris teks)
+      return {
+        arabSize: isSquare ? 'text-[12px] sm:text-[13px]' : 'text-sm sm:text-base',
+        arabLineHeight: isSquare ? '1.85' : '1.95',
+        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[9px] sm:text-[9.5px]',
+        latinLineHeight: isSquare ? '1.3' : '1.4',
+        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[8.5px] sm:text-[9px]',
+        indoLineHeight: isSquare ? '1.28' : '1.35',
+        containerClass: 'space-y-1 py-0.5'
+      };
+    } else if (totalWeight > 220) {
+      // Ayat panjang (misal Al-Fatihah ayat 7)
+      return {
+        arabSize: isSquare ? 'text-[13.5px] sm:text-[14.5px]' : 'text-base sm:text-lg',
+        arabLineHeight: isSquare ? '1.92' : '2.05',
+        latinSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[10px] sm:text-[10.5px]',
+        latinLineHeight: isSquare ? '1.35' : '1.45',
+        indoSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[9.5px] sm:text-[10px]',
+        indoLineHeight: isSquare ? '1.32' : '1.4',
+        containerClass: 'space-y-1 py-0.5'
+      };
+    } else if (totalWeight > 100) {
+      // Ayat sedang (misal Al-Fatihah ayat 2, 5, 6)
+      return {
+        arabSize: isSquare ? 'text-[15.5px] sm:text-[16.5px]' : 'text-lg sm:text-xl',
+        arabLineHeight: isSquare ? '2.02' : '2.15',
+        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-[11px] sm:text-xs',
+        latinLineHeight: isSquare ? '1.4' : '1.5',
+        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[10.5px] sm:text-[11px]',
+        indoLineHeight: isSquare ? '1.38' : '1.45',
         containerClass: 'space-y-1.5 py-1'
       };
-    } else if (totalWeight > 320) {
-      // Ayat panjang
-      return {
-        arabSize: isSquare ? 'text-sm sm:text-base' : 'text-base sm:text-lg',
-        arabLineHeight: '2.15',
-        latinSize: 'text-[10px] sm:text-[10.5px]',
-        indoSize: 'text-[9.5px] sm:text-[10px]',
-        containerClass: 'space-y-2 py-1'
-      };
-    } else if (totalWeight > 140) {
-      // Ayat sedang
-      return {
-        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-lg sm:text-xl',
-        arabLineHeight: '2.25',
-        latinSize: 'text-xs sm:text-[12px]',
-        indoSize: 'text-[10.5px] sm:text-xs',
-        containerClass: 'space-y-2.5 py-1.5'
-      };
     } else {
-      // Ayat pendek
+      // Ayat pendek (misal Al-Fatihah ayat 1, 3, 4)
       return {
-        arabSize: isSquare ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl',
-        arabLineHeight: '2.35',
-        latinSize: 'text-xs sm:text-sm',
-        indoSize: 'text-xs sm:text-sm',
-        containerClass: 'space-y-3 py-2'
+        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl',
+        arabLineHeight: isSquare ? '2.1' : '2.25',
+        latinSize: isSquare ? 'text-[11px] sm:text-xs' : 'text-xs sm:text-sm',
+        latinLineHeight: isSquare ? '1.45' : '1.55',
+        indoSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-xs sm:text-[13px]',
+        indoLineHeight: isSquare ? '1.4' : '1.5',
+        containerClass: 'space-y-2 py-1'
       };
     }
   };
@@ -5238,14 +5257,18 @@ export default function AlQuranModal({ onClose }) {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
                   {/* PREVIEW KARTU AYAT LIVE (FULL BLEED RECTANGULAR POSTER DENGAN BINGKAI ISLAMI MEWAH) */}
                   <div className="w-full flex justify-center py-1">
-                    <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-slate-700/60 max-w-[360px] w-full mx-auto bg-black flex justify-center">
+                    <div className={`rounded-3xl overflow-hidden shadow-2xl ring-1 ring-slate-700/60 w-full mx-auto bg-black flex justify-center ${
+                      shareCardFormat === 'kotak'
+                        ? 'max-w-[380px] sm:max-w-[400px]'
+                        : 'max-w-[320px] sm:max-w-[340px]'
+                    }`}>
                       <div
                         ref={shareCardRef}
                         style={activeShareStyle.bgStyle}
                         className={`w-full relative transition-all flex flex-col justify-between overflow-hidden ${
                           shareCardFormat === 'kotak'
-                            ? 'aspect-square p-5 sm:p-6'
-                            : 'aspect-[9/16] p-6 sm:p-7'
+                            ? 'aspect-square p-3.5 sm:p-4.5'
+                            : 'aspect-[9/16] p-4.5 sm:p-5 px-3.5 sm:px-4.5'
                         }`}
                       >
                         {/* Background Foto Asli & Overlay (Khusus Tipe Photo) - Full Bleed 100% Edge-to-Edge */}
@@ -5269,36 +5292,38 @@ export default function AlQuranModal({ onClose }) {
 
 
                     {/* Header Kartu: Q.S. Nama Surat : Ayat & Rujukan Mushaf */}
-                    <div className="relative z-10 text-center pt-1 mb-2">
-                      <span className={`text-[10px] uppercase font-black tracking-widest block mb-0.5 ${
+                    <div className="relative z-10 text-center pt-0.5 mb-1.5 flex-shrink-0">
+                      <span className={`text-[8.5px] sm:text-[9px] uppercase font-black tracking-widest block mb-0.5 ${
                         isShareDark ? 'text-amber-300/90' : 'text-amber-900/90'
                       }`}>
                         KUTIPAN AYAT SUCI AL-QUR'AN
                       </span>
-                      <h2 className={`text-xl sm:text-2xl font-black tracking-wide font-serif drop-shadow-md ${
+                      <h2 className={`${
+                        shareCardFormat === 'kotak' ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl'
+                      } font-black tracking-wide font-serif drop-shadow-md leading-tight ${
                         isShareDark ? 'text-amber-300' : 'text-amber-950'
                       }`}>
                         Q.S. {selectedSurah.namaLatin} : {showShareModal.nomorAyat}
                       </h2>
-                      <div className="flex items-center justify-center gap-2 mt-1">
-                        <div className={`w-8 h-0.5 rounded-full ${
+                      <div className="flex items-center justify-center gap-1.5 mt-1">
+                        <div className={`w-5 sm:w-6 h-0.5 rounded-full ${
                           isShareDark ? 'bg-amber-400/70' : 'bg-amber-600/70'
                         }`} />
-                        <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+                        <span className={`text-[8px] sm:text-[8.5px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border whitespace-nowrap ${
                           isShareDark
                             ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
                             : 'bg-amber-100 text-amber-950 border-amber-300'
                         }`}>
                           Mushaf Standar {shareMushafType === 'madinah' ? 'Madinah Utsmani' : shareMushafType === 'modern' ? 'Modern' : 'Kemenag RI'}
                         </span>
-                        <div className={`w-8 h-0.5 rounded-full ${
+                        <div className={`w-5 sm:w-6 h-0.5 rounded-full ${
                           isShareDark ? 'bg-amber-400/70' : 'bg-amber-600/70'
                         }`} />
                       </div>
                     </div>
 
                     {/* Teks Arab, Latin, & Terjemahan Tengah (Auto Fit & Bebas Tumpang Tindih) */}
-                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center text-center my-auto`}>
+                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center text-center my-auto min-h-0 w-full`}>
                       {/* 1. Teks Arab Ayat */}
                       <div className="px-1">
                         <p
@@ -5317,16 +5342,16 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* Pembatas Hiasan Halus */}
                       {(shareShowLatin || shareShowTranslation) && (
-                        <div className={`w-12 h-px mx-auto my-1 opacity-50 ${
+                        <div className={`w-10 sm:w-12 h-px mx-auto my-0.5 sm:my-1 opacity-50 ${
                           isShareDark ? 'bg-amber-400/50' : 'bg-amber-700/50'
                         }`} />
                       )}
 
                       {/* 2. Teks Transliterasi Latin */}
                       {shareShowLatin && showShareModal.teksLatin && (
-                        <div className="px-2">
+                        <div className="px-1 sm:px-2">
                           <p
-                            style={{ lineHeight: '1.65' }}
+                            style={{ lineHeight: shareConfig.latinLineHeight }}
                             className={`${shareConfig.latinSize} font-medium italic drop-shadow-xs block w-full ${
                               isShareDark ? 'text-amber-200/90' : 'text-emerald-950 font-semibold'
                             }`}
@@ -5338,9 +5363,9 @@ export default function AlQuranModal({ onClose }) {
 
                       {/* 3. Teks Terjemahan Bahasa Indonesia */}
                       {shareShowTranslation && showShareModal.teksIndonesia && (
-                        <div className="px-2">
+                        <div className="px-1 sm:px-2">
                           <p
-                            style={{ lineHeight: '1.65' }}
+                            style={{ lineHeight: shareConfig.indoLineHeight }}
                             className={`${shareConfig.indoSize} font-medium drop-shadow-xs block w-full ${
                               isShareDark ? 'text-slate-100' : 'text-slate-800'
                             }`}
@@ -5352,29 +5377,29 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Footer Kartu: Kanomas Tour & Travel Official Branding */}
-                    <div className={`relative z-10 text-center border-t pt-3 mt-2 flex items-center justify-between ${
+                    <div className={`relative z-10 text-center border-t pt-2 mt-1.5 flex items-center justify-between gap-1.5 flex-shrink-0 ${
                       isShareDark ? 'border-white/20' : 'border-amber-900/20'
                     }`}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
                         <img
                           src={KANOMAS_LOGO_BASE64}
                           alt="Kanomas"
-                          className="w-7 h-7 rounded-xl object-contain bg-white/10 p-0.5 shadow-sm"
+                          className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg object-contain bg-white/10 p-0.5 shadow-xs flex-shrink-0"
                         />
-                        <div className="text-left">
-                          <span className={`text-xs font-black block leading-tight ${
+                        <div className="text-left min-w-0">
+                          <span className={`text-[9.5px] sm:text-[10.5px] font-black block leading-tight truncate ${
                             isShareDark ? 'text-amber-200' : 'text-amber-950'
                           }`}>
                             Kanomas Tour & Travel
                           </span>
-                          <span className={`text-[9px] block ${
+                          <span className={`text-[7.5px] sm:text-[8px] block truncate ${
                             isShareDark ? 'text-slate-300' : 'text-slate-600'
                           }`}>
                             Izin Resmi Kemenag RI
                           </span>
                         </div>
                       </div>
-                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold border ${
+                      <span className={`text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full font-mono font-bold whitespace-nowrap flex-shrink-0 border ${
                         isShareDark
                           ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
                           : 'bg-emerald-800 text-white border-emerald-900'
