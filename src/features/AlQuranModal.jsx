@@ -448,33 +448,21 @@ export function getAyatPageNumber(surahNomor, ayatNomor) {
 }
 
 // FUNGSI PEMANJANG HURUF / KASHIDA (TATWEEL)
-// Mengurai ligatur bertumpuk vertikal (seperti Lam di atas Ha pada 'لَهُمْ' menjadi sejajar mendatar 'لَـهُمْ' di depan, serta Ta pada 'فَتَـحْنَا' dan 'تَـجْرِي')
+// Mengurai ligatur bertumpuk vertikal (seperti Lam di atas Ha pada 'لَهُمْ' menjadi sejajar mendatar 'لَـهُمْ')
 // Menjaga keaslian kaidah Rasm Utsmani dan 100% kompatibel dengan mesin warna tajwid.
-export function applyKashidaToArabic(text, mode = 'unstack') {
+export function applyKashidaToArabic(text, mode = 'off') {
   if (!text || mode === 'off') return text || '';
   let res = text;
 
-  // 1. Lam + Ha (له / لہ -> لـه) agar huruf Lam selalu berada di DEPAN pada garis dasar dan TIDAK menindih di atas Ha
-  res = res.replace(/([\u0644][\u064B-\u065F\u0670\u06E1]*)([\u0647\u06C1])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+  // 1. Lam + Ha (له -> لـه) agar huruf Lam selalu berada di DEPAN pada garis dasar dan TIDAK menindih di atas Ha (hanya jika tanpa sukun)
+  res = res.replace(/([\u0644][\u064B-\u0651\u0670]?)([\u0647\u06C1])/g, (m, p1, p2) => p1 + '\u0640' + p2);
 
   // 2. Ta + Ha/Jim/Kha (تح / تج / تخ -> تـح / تـج / تـخ) agar gigi Ta jelas terpisah di depan kepala jim/ha
-  res = res.replace(/([\u062A][\u064B-\u065F\u0670\u06E1]*)([\u062D\u062C\u062E])/g, (m, p1, p2) => p1 + '\u0640' + p2);
+  res = res.replace(/([\u062A][\u064B-\u0651\u0670]?)([\u062D\u062C\u062E])/g, (m, p1, p2) => p1 + '\u0640' + p2);
 
-  // 3. Gigi Ba/Tha/Nun/Ya + Jim/Ha/Kha (misal يَـحْزُنُهُمُ, نَـحْنُ, بِـحَمْدِ, يَـجْعَلُونَ)
-  res = res.replace(/([\u0628\u062B\u0646\u064A\u0649][\u064B-\u065F\u0670\u06E1]*)([\u062D\u062C\u062E])/g, (m, p1, p2) => p1 + '\u0640' + p2);
-
-  // 4. Gigi Ba/Ta/Tha/Nun/Ya + Mim (misal بِـسْمِ, تَـمْشِي, نَـعَمْ, ثُـمَّ)
-  res = res.replace(/([\u0628\u062A\u062B\u0646\u064A][\u064B-\u065F\u0670\u06E1]*)([\u0645])/g, (m, p1, p2) => p1 + '\u0640' + p2);
-
-  // 5. Sin/Shin + Mim (misal بِسْـمِ) agar Mim tidak tenggelam di bawah lengkungan Sin
-  res = res.replace(/([\u0633\u0634][\u064B-\u065F\u0670\u06E1]*)([\u0645])/g, (m, p1, p2) => p1 + '\u0640' + p2);
-
-  // 6. Ya/Alif Maqsura + Ha (misal عَلَيْـهِمْ, إِلَيْـهِ, فِيـهِمْ, بَيْنَـهُمْ)
-  res = res.replace(/([\u064A\u0649][\u064B-\u065F\u0670\u06E1]*)([\u0647\u06C1])/g, (m, p1, p2) => p1 + '\u0640' + p2);
-
-  // 7. Mode Ekstra: Elongasi sambungan menyeluruh antarkata agar huruf lebih lapang dan renggang
+  // 3. Mode Ekstra: Elongasi sambungan menyeluruh antarkata jika dipilih
   if (mode === 'extra') {
-    res = res.replace(/([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A][\u064B-\u065F\u0670\u06E1]*)(\u0640?)([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A])/g, (m, p1, t, p2) => p1 + '\u0640' + p2);
+    res = res.replace(/([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A][\u064B-\u0651\u0670]?)(\u0640?)([\u0628\u062A\u062B\u062C\u062D\u062E\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063A\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u064A])/g, (m, p1, t, p2) => p1 + '\u0640' + p2);
   }
 
   return res;
@@ -534,26 +522,32 @@ export function convertToUthmaniMadinah(text) {
     .replace(/\u06D5/g, '')
     .replace(/\u08D6/g, '')
     .replace(/[\u06EA\u06EB\u06DF\u06E0\u06EC]/g, '')
-    // Konversi tanda sukun bulat Kemenag ke kepala Kha' Utsmani (\u06E1)
-    .replace(/\u0652/g, '\u06E1')
-    // Dhommah terbalik Kemenag (U+0657) -> Dhammah biasa + Wawu kecil Utsmani (ُۥ / \u064F\u06E5)
-    .replace(/\u0657/g, '\u064F\u06E5')
-    // Kasrah berdiri Kemenag (U+0656) -> Kasrah biasa + Ya kecil Utsmani (ِۦ / \u0650\u06E6)
-    .replace(/\u0656/g, '\u0650\u06E6')
-    // Small madda Tanzil/Kemenag -> Madda standar Utsmani
-    .replace(/\u06E4/g, '\u0653')
-    // Meem iqlab Tanzil -> Small high meem Utsmani
-    .replace(/\u06ED/g, '\u06E2')
-    // Alif washal pada alif lam ta'rif: اَلْـ -> ٱلْـ dan اَلـ -> ٱلـ
-    .replace(/(^|\s)ا([َُِ]?)ل([\u06E1\u0651])/g, '$1ٱل$3')
-    // Alif washal pada nama Allah: اللّٰه -> ٱللَّهِ
+    // 1. Alif washal pada nama Allah & variasinya
     .replace(/(^|\s)الل[ّٰ]+هِ/g, '$1ٱللَّهِ')
     .replace(/(^|\s)الل[ّٰ]+هُ/g, '$1ٱللَّهُ')
     .replace(/(^|\s)الل[ّٰ]+هَ/g, '$1ٱللَّهَ')
-    // Ar-Rahman di Madinah: الرَّحْمٰنِ -> ٱلرَّحْمَـٰنِ
-    .replace(/الرَّحْم[َٰ]*نِ/g, 'ٱلرَّحْمَـٰنِ')
-    // Ar-Rahim di Madinah: الرَّحِيْمِ -> ٱلرَّحِيمِ
-    .replace(/الرَّحِي[ِْ]*مِ/g, 'ٱلرَّحِيمِ');
+    .replace(/(^|\s)لِلّٰهِ/g, '$1لِلَّهِ')
+    // 2. Ar-Rahman & Ar-Rahim di Madinah
+    .replace(/(^|\s)الرَّح[\u0652\u06E1]?م[َٰ]*نِ/g, '$1ٱلرَّحْمَٰنِ')
+    .replace(/(^|\s)الرَّحِي[\u0652\u06E1]?مِ/g, '$1ٱلرَّحِيمِ')
+    // 3. Alif washal pada alif lam ta'rif: (^|\s)ال -> (^|\s)ٱل
+    .replace(/(^|\s)ا[َُِ]?ل/g, '$1ٱل')
+    // 4. Konversi tanda sukun bulat Kemenag ke kepala Kha' Utsmani (\u06E1)
+    .replace(/\u0652/g, '\u06E1')
+    // 5. Dhommah terbalik Kemenag (U+0657) -> Dhammah biasa + Wawu kecil Utsmani (ُۥ / \u064F\u06E5)
+    .replace(/\u0657/g, '\u064F\u06E5')
+    // 6. Kasrah berdiri Kemenag (U+0656) -> Kasrah biasa + Ya kecil Utsmani (ِۦ / \u0650\u06E6)
+    .replace(/\u0656/g, '\u0650\u06E6')
+    // 7. Small madda Tanzil/Kemenag -> Madda standar Utsmani
+    .replace(/\u06E4/g, '\u0653')
+    // 8. Meem iqlab Tanzil -> Small high meem Utsmani
+    .replace(/\u06ED/g, '\u06E2')
+    // 9. Hamzah qath'i pada kata umum
+    .replace(/(^|\s)اِيَّا/g, '$1إِيَّا')
+    .replace(/(^|\s)اَنْعَمۡ/g, '$1أَنۡعَمۡ')
+    .replace(/(^|\s)اِهۡدِ/g, '$1ٱهۡدِ')
+    // 10. Hapus seluruh karakter tatweel \u0640
+    .replace(/\u0640/g, '');
 
   return normalizeQuranText(res, true);
 }
@@ -1360,16 +1354,16 @@ export default function AlQuranModal({ onClose }) {
   };
 
   // Pemanjang Huruf & Sambungan Sejajar (Kashida / Tatweel):
-  // Nilai: 'unstack' (Sejajar/Rekomendasi - Lam di depan Ha, Ta di depan Ha/Jim), 'extra' (Ekstra Panjang), 'off' (Asli Rapat)
+  // Nilai: 'off' (Standar Otentik Rasm Utsmani Murni tanpa tatweel), 'unstack' (Sejajar/Rekomendasi - Lam di depan Ha), 'extra' (Ekstra Panjang)
   const [kashidaMode, setKashidaMode] = useState(() => {
     try {
       const saved = localStorage.getItem('kanomas_quran_kashida');
       if (saved === 'off' || saved === 'extra' || saved === 'unstack') return saved;
       if (saved === 'false') return 'off';
       if (saved === 'true') return 'unstack';
-      return 'unstack'; // Default 'unstack' (Sejajar & Rapi, Lam di depan Ha)
+      return 'off'; // Default 'off' (Standar Otentik Rasm Utsmani Murni)
     } catch {
-      return 'unstack';
+      return 'off';
     }
   });
 
@@ -1573,10 +1567,29 @@ export default function AlQuranModal({ onClose }) {
     return applyKashidaToArabic(normalized, kashidaMode);
   };
 
+  // Helper teks Arab ayat khusus Kartu Share: Murni Rasm Utsmani tanpa Tatweel buatan (\u0640)
+  // Mencegah kerusakan garis minus/strip pada canvas dan gambar unduhan
+  const getCleanAyatArabForShare = (ayat, targetMushaf = mushafType) => {
+    if (!ayat) return '';
+    const isMadinah = (targetMushaf === 'madinah' || targetMushaf === 'modern');
+    let raw = '';
+    if (isMadinah) {
+      if (ayat.teksArabMadinah && ayat.teksArabMadinah.trim().length > 0) {
+        raw = ayat.teksArabMadinah;
+      } else {
+        raw = convertToUthmaniMadinah(ayat.teksArab || '');
+      }
+    } else {
+      raw = ayat.teksArab || '';
+    }
+    const normalized = normalizeQuranText(raw, isMadinah);
+    return normalized.replace(/\u0640/g, '').trim();
+  };
+
   // Helper penyesuaian ukuran font & tata letak kartu share agar tidak terpotong & tidak tumpang tindih
   const getShareCardContentConfig = (ayat, targetMushaf, format, showLatin, showTrans) => {
     if (!ayat) return { arabSize: 'text-xl', arabLineHeight: '2.3', latinSize: 'text-xs', indoSize: 'text-xs', containerClass: 'space-y-3 py-2', cardMinHeight: 'min-h-[380px]' };
-    const arab = getAyatArabText(ayat, targetMushaf) || '';
+    const arab = getCleanAyatArabForShare(ayat, targetMushaf) || '';
     const latin = showLatin ? (formatAyatLatin(ayat.teksLatin, targetMushaf) || '') : '';
     const indo = showTrans ? (formatAyatTranslation(ayat.teksIndonesia, targetMushaf) || '') : '';
 
@@ -2210,6 +2223,15 @@ export default function AlQuranModal({ onClose }) {
     setIsGeneratingImage(true);
     setShareFeedback('🎨 Sedang merender gambar kartu ayat HD...');
     try {
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (fontErr) {
+          console.warn('Wait for document.fonts.ready warning:', fontErr);
+        }
+      }
+      await new Promise(r => setTimeout(r, 200));
+
       const canvas = await html2canvas(shareCardRef.current, {
         scale: 2.5, // Resolusi tinggi tajam (HD)
         useCORS: true,
@@ -2233,7 +2255,7 @@ export default function AlQuranModal({ onClose }) {
   const handleShareCardImage = async (ayat) => {
     if (!ayat) return;
     const currentMushaf = shareMushafType || mushafType;
-    const arabText = getAyatArabText(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
     const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
@@ -2377,7 +2399,7 @@ export default function AlQuranModal({ onClose }) {
 
   const handleQuickShareWA = (ayat) => {
     const currentMushaf = shareMushafType || mushafType;
-    const arabText = getAyatArabText(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
     const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
@@ -2396,7 +2418,7 @@ export default function AlQuranModal({ onClose }) {
 
   const handleCopyAyat = (ayat) => {
     const currentMushaf = shareMushafType || mushafType;
-    const arabText = getAyatArabText(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
     const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
@@ -5250,7 +5272,7 @@ export default function AlQuranModal({ onClose }) {
                           }`}
                           dir="rtl"
                         >
-                          {getAyatArabText(showShareModal, shareMushafType)}
+                          {getCleanAyatArabForShare(showShareModal, shareMushafType)}
                         </p>
                       </div>
 
