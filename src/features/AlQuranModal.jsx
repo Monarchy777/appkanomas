@@ -992,6 +992,13 @@ export function convertToUthmaniMadinah(text) {
   return normalizeQuranText(res, true);
 }
 
+// HELPER KONVERSI NOMOR AYAT KE ANGKA ARAB MUSHAF (١, ٢, ٣, ...)
+export function toArabicDigits(num) {
+  if (!num && num !== 0) return '';
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).replace(/[0-9]/g, d => arabicDigits[d]);
+}
+
 // HELPER BERSIHKAN TANDA KURUNG HARAKAT WAQAF (AMAN UNTUK TENGAH MAUPUN AKHIR AYAT)
 export function cleanWaqfParentheses(text) {
   if (!text) return '';
@@ -2128,8 +2135,8 @@ export default function AlQuranModal({ onClose }) {
   };
 
   // Helper teks Arab ayat khusus Kartu Share: Murni Rasm Utsmani tanpa Tatweel buatan (\u0640)
-  // Mencegah kerusakan garis minus/strip pada canvas dan gambar unduhan
-  const getCleanAyatArabForShare = (ayat, targetMushaf = mushafType) => {
+  // Mencegah kerusakan garis minus/strip pada canvas dan gambar unduhan, dan menyertakan nomor ayat Arab otentik ﴿...﴾
+  const getCleanAyatArabForShare = (ayat, targetMushaf = mushafType, includeAyatNumber = true) => {
     if (!ayat) return '';
     const isMadinah = (targetMushaf === 'madinah' || targetMushaf === 'modern');
     let raw = '';
@@ -2143,21 +2150,26 @@ export default function AlQuranModal({ onClose }) {
       raw = ayat.teksArab || '';
     }
     const normalized = normalizeQuranText(raw, isMadinah);
-    return normalized.replace(/\u0640/g, '').trim();
+    let cleaned = normalized.replace(/\u0640/g, '').trim();
+    if (includeAyatNumber && ayat.nomorAyat) {
+      if (!/[﴿۝\u06DD]/.test(cleaned)) {
+        cleaned += ` ﴿${toArabicDigits(ayat.nomorAyat)}﴾`;
+      }
+    }
+    return cleaned;
   };
 
   // Helper penyesuaian ukuran font & tata letak kartu share agar 100% bebas terpotong & bebas tumpang tindih
   const getShareCardContentConfig = (ayat, targetMushaf, format, showLatin, showTrans) => {
     if (!ayat) return {
       arabSize: 'text-base sm:text-lg',
-      arabLineHeight: '2.25',
+      arabLineHeight: '2.4',
       latinSize: 'text-xs',
-      latinLineHeight: '1.55',
+      latinLineHeight: '1.6',
       indoSize: 'text-xs',
-      indoLineHeight: '1.5',
-      containerClass: 'space-y-2 py-1'
+      indoLineHeight: '1.55',
     };
-    const arab = getCleanAyatArabForShare(ayat, targetMushaf) || '';
+    const arab = getCleanAyatArabForShare(ayat, targetMushaf, true) || '';
     const latin = showLatin ? (formatAyatLatin(ayat.teksLatin, targetMushaf) || '') : '';
     const indo = showTrans ? (formatAyatTranslation(ayat.teksIndonesia, targetMushaf) || '') : '';
 
@@ -2168,80 +2180,63 @@ export default function AlQuranModal({ onClose }) {
     if (!showLatin && !showTrans) {
       if (totalWeight > 350) {
         return {
-          arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-base sm:text-lg',
-          arabLineHeight: '2.15',
-          latinSize: 'text-[9px]',
-          latinLineHeight: '1.45',
-          indoSize: 'text-[8.5px]',
-          indoLineHeight: '1.4',
-          containerClass: 'space-y-1.5 py-1'
+          arabSize: isSquare ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl',
+          arabLineHeight: '2.35',
+          latinSize: 'text-[11px]',
+          latinLineHeight: '1.55',
+          indoSize: 'text-[10px]',
+          indoLineHeight: '1.5'
         };
       }
       return {
-        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl',
-        arabLineHeight: '2.3',
+        arabSize: isSquare ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl',
+        arabLineHeight: '2.45',
         latinSize: 'text-xs',
-        latinLineHeight: '1.5',
+        latinLineHeight: '1.6',
         indoSize: 'text-xs',
-        indoLineHeight: '1.45',
-        containerClass: 'space-y-2.5 py-2'
+        indoLineHeight: '1.55'
       };
     }
 
     if (totalWeight > 550) {
       // Ayat super panjang
       return {
-        arabSize: isSquare ? 'text-[11px] sm:text-[11.5px]' : 'text-xs sm:text-sm',
-        arabLineHeight: isSquare ? '2.1' : '2.2',
-        latinSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
-        latinLineHeight: isSquare ? '1.45' : '1.5',
-        indoSize: isSquare ? 'text-[7px] sm:text-[7.5px]' : 'text-[8.5px] sm:text-[9px]',
-        indoLineHeight: isSquare ? '1.4' : '1.45',
-        containerClass: isSquare ? 'space-y-1 py-0.5' : 'space-y-1.5 py-1'
+        arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-sm sm:text-base',
+        arabLineHeight: isSquare ? '2.3' : '2.35',
+        latinSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-[10.5px] sm:text-[11px]',
+        latinLineHeight: isSquare ? '1.55' : '1.6',
+        indoSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-[10px] sm:text-[10.5px]',
+        indoLineHeight: isSquare ? '1.5' : '1.55'
       };
     } else if (totalWeight > 350) {
       // Ayat sangat panjang
       return {
-        arabSize: isSquare ? 'text-[12px] sm:text-[12.5px]' : 'text-sm sm:text-base',
-        arabLineHeight: isSquare ? '2.15' : '2.25',
-        latinSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[9.5px] sm:text-[10px]',
-        latinLineHeight: isSquare ? '1.5' : '1.55',
-        indoSize: isSquare ? 'text-[7.5px] sm:text-[8px]' : 'text-[9px] sm:text-[9.5px]',
-        indoLineHeight: isSquare ? '1.42' : '1.48',
-        containerClass: isSquare ? 'space-y-1.5 py-0.5' : 'space-y-2 py-1'
+        arabSize: isSquare ? 'text-sm sm:text-base' : 'text-base sm:text-lg',
+        arabLineHeight: isSquare ? '2.35' : '2.4',
+        latinSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-[11px] sm:text-xs',
+        latinLineHeight: isSquare ? '1.58' : '1.65',
+        indoSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-[10.5px] sm:text-[11px]',
+        indoLineHeight: isSquare ? '1.52' : '1.58'
       };
-    } else if (totalWeight > 200) {
-      // Ayat panjang
+    } else if (totalWeight > 180) {
+      // Ayat sedang/panjang
       return {
-        arabSize: isSquare ? 'text-[13.5px] sm:text-[14px]' : 'text-base sm:text-lg',
-        arabLineHeight: isSquare ? '2.2' : '2.3',
-        latinSize: isSquare ? 'text-[8.5px] sm:text-[9px]' : 'text-[10.5px] sm:text-[11px]',
-        latinLineHeight: isSquare ? '1.52' : '1.6',
-        indoSize: isSquare ? 'text-[8px] sm:text-[8.5px]' : 'text-[10px] sm:text-[10.5px]',
-        indoLineHeight: isSquare ? '1.45' : '1.5',
-        containerClass: isSquare ? 'space-y-1.5 py-1' : 'space-y-2.5 py-1.5'
-      };
-    } else if (totalWeight > 90) {
-      // Ayat sedang
-      return {
-        arabSize: isSquare ? 'text-[15px] sm:text-[16px]' : 'text-lg sm:text-xl',
-        arabLineHeight: isSquare ? '2.25' : '2.35',
-        latinSize: isSquare ? 'text-[9.5px] sm:text-[10px]' : 'text-[11.5px] sm:text-xs',
-        latinLineHeight: isSquare ? '1.55' : '1.65',
-        indoSize: isSquare ? 'text-[9px] sm:text-[9.5px]' : 'text-[11px] sm:text-[11.5px]',
-        indoLineHeight: isSquare ? '1.48' : '1.55',
-        containerClass: isSquare ? 'space-y-2 py-1' : 'space-y-3 py-2'
+        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-lg sm:text-xl',
+        arabLineHeight: isSquare ? '2.4' : '2.45',
+        latinSize: isSquare ? 'text-[11px] sm:text-xs' : 'text-xs sm:text-[13px]',
+        latinLineHeight: isSquare ? '1.6' : '1.68',
+        indoSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-[11px] sm:text-xs',
+        indoLineHeight: isSquare ? '1.55' : '1.6'
       };
     } else {
       // Ayat pendek
       return {
         arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl',
-        arabLineHeight: isSquare ? '2.3' : '2.4',
-        latinSize: isSquare ? 'text-[10.5px] sm:text-[11px]' : 'text-xs sm:text-sm',
-        latinLineHeight: isSquare ? '1.6' : '1.7',
-        indoSize: isSquare ? 'text-[10px] sm:text-[10.5px]' : 'text-[11.5px] sm:text-xs',
-        indoLineHeight: isSquare ? '1.5' : '1.6',
-        containerClass: isSquare ? 'space-y-2.5 py-1.5' : 'space-y-3.5 py-2.5'
+        arabLineHeight: isSquare ? '2.45' : '2.5',
+        latinSize: isSquare ? 'text-xs sm:text-[13px]' : 'text-xs sm:text-sm',
+        latinLineHeight: isSquare ? '1.65' : '1.7',
+        indoSize: isSquare ? 'text-[11px] sm:text-xs' : 'text-xs sm:text-sm',
+        indoLineHeight: isSquare ? '1.6' : '1.62'
       };
     }
   };
@@ -2900,10 +2895,10 @@ export default function AlQuranModal({ onClose }) {
   const handleShareCardImage = async (ayat) => {
     if (!ayat) return;
     const currentMushaf = shareMushafType || mushafType;
-    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf, true);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
-    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern' : 'Kemenag RI';
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah (Rasm Utsmani)' : currentMushaf === 'modern' ? 'Modern (Ejaan Populer)' : 'Indonesia (Kemenag RI)';
     const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n_(Mushaf Standar ${mushafName})_\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
 
     const canvas = await generateCardCanvas();
@@ -2982,6 +2977,13 @@ export default function AlQuranModal({ onClose }) {
   // 3. Unduh File Gambar Kartu Ayat (HD PNG)
   const handleDownloadCardImage = async (ayat) => {
     if (!ayat) return;
+    const currentMushaf = (showShareModal ? shareMushafType : null) || mushafType;
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf, true);
+    const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
+    const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah (Rasm Utsmani)' : currentMushaf === 'modern' ? 'Modern (Ejaan Populer)' : 'Indonesia (Kemenag RI)';
+    const captionText = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n_(Mushaf Standar ${mushafName})_\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
+
     const canvas = await generateCardCanvas();
     if (!canvas) {
       alert('Gagal membuat gambar kartu ayat.');
@@ -3030,7 +3032,7 @@ export default function AlQuranModal({ onClose }) {
       setPreviewCardData({
         dataUrl,
         blob,
-        captionText: `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*`,
+        captionText,
         ayat,
         fileName
       });
@@ -3044,16 +3046,15 @@ export default function AlQuranModal({ onClose }) {
 
   const handleQuickShareWA = (ayat) => {
     const currentMushaf = (showShareModal ? shareMushafType : null) || mushafType;
-    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf, true);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
-    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern Populer' : 'Kemenag RI';
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah (Rasm Utsmani)' : currentMushaf === 'modern' ? 'Modern (Ejaan Populer)' : 'Indonesia (Kemenag RI)';
     const text = `*Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: Ayat ${ayat.nomorAyat}*\n_(Mushaf Standar ${mushafName})_\n\n${arabText}\n\n_${latinText}_\n\n"${indoText}"\n\n📌 _Dibagikan melalui Aplikasi Kanomas Tour & Travel_\nhttps://appkanomas.mediasosial.net`;
     if (navigator.share) {
       navigator.share({
         title: `Q.S. ${selectedSurah.namaLatin}: Ayat ${ayat.nomorAyat}`,
-        text: text,
-        url: 'https://appkanomas.mediasosial.net'
+        text: text
       }).catch(() => {});
     } else {
       const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -3063,11 +3064,11 @@ export default function AlQuranModal({ onClose }) {
 
   const handleCopyAyat = (ayat) => {
     const currentMushaf = (showShareModal ? shareMushafType : null) || mushafType;
-    const arabText = getCleanAyatArabForShare(ayat, currentMushaf);
+    const arabText = getCleanAyatArabForShare(ayat, currentMushaf, true);
     const latinText = formatAyatLatin(ayat.teksLatin, currentMushaf);
     const indoText = formatAyatTranslation(ayat.teksIndonesia, currentMushaf);
-    const mushafName = currentMushaf === 'madinah' ? 'Madinah Utsmani' : currentMushaf === 'modern' ? 'Modern Populer' : 'Kemenag RI';
-    const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat} (Mushaf Standar ${mushafName})\n\n${arabText}\n\n${latinText}\n\n"${indoText}"\n\n(Aplikasi Kanomas Tour & Travel)`;
+    const mushafName = currentMushaf === 'madinah' ? 'Madinah (Rasm Utsmani)' : currentMushaf === 'modern' ? 'Modern (Ejaan Populer)' : 'Indonesia (Kemenag RI)';
+    const text = `Q.S. ${selectedSurah.namaLatin} [${selectedSurah.nomor}]: ${ayat.nomorAyat} (Mushaf Standar ${mushafName})\n\n${arabText}\n\n${latinText}\n\n"${indoText}"\n\n(Aplikasi Kanomas Tour & Travel)\nhttps://appkanomas.mediasosial.net`;
     navigator.clipboard?.writeText(text);
     setCopiedAyatNum(ayat.nomorAyat);
     setTimeout(() => setCopiedAyatNum(null), 2000);
@@ -5705,16 +5706,16 @@ export default function AlQuranModal({ onClose }) {
                   <div className="w-full flex justify-center py-1">
                     <div className={`rounded-3xl overflow-hidden shadow-2xl ring-1 ring-slate-700/60 w-full mx-auto bg-black flex justify-center ${
                       shareCardFormat === 'kotak'
-                        ? 'max-w-[380px] sm:max-w-[400px]'
-                        : 'max-w-[330px] sm:max-w-[350px]'
+                        ? 'max-w-[420px] sm:max-w-[440px]'
+                        : 'max-w-[380px] sm:max-w-[400px]'
                     }`}>
                       <div
                         ref={shareCardRef}
                         style={{ ...activeShareStyle.bgStyle, boxSizing: 'border-box' }}
                         className={`w-full relative transition-all flex flex-col justify-between ${
                           shareCardFormat === 'kotak'
-                            ? 'min-h-[400px] sm:min-h-[420px] p-4 sm:p-5'
-                            : 'min-h-[600px] sm:min-h-[640px] pt-6 pb-8 px-4 sm:px-6'
+                            ? 'min-h-[460px] h-auto p-4 sm:p-5'
+                            : 'min-h-[640px] h-auto pt-6 pb-7 px-4 sm:px-5'
                         }`}
                       >
                         {/* Background Foto Asli & Overlay (Khusus Tipe Photo) - Full Bleed 100% Edge-to-Edge */}
@@ -5730,7 +5731,7 @@ export default function AlQuranModal({ onClose }) {
                           />
                         )}
                         {activeShareStyle.imageUrl && (
-                          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/85 pointer-events-none" />
+                          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/65 to-black/85 pointer-events-none" />
                         )}
 
                         {/* Decorative Islamic Radial Glow */}
@@ -5739,7 +5740,7 @@ export default function AlQuranModal({ onClose }) {
 
                     {/* Header Kartu: Q.S. Nama Surat : Ayat & Rujukan Mushaf */}
                     <div className={`relative z-20 text-center flex-shrink-0 ${
-                      shareCardFormat === 'kotak' ? 'pt-0.5 mb-1.5' : 'pt-1 mb-2.5'
+                      shareCardFormat === 'kotak' ? 'pt-0.5 mb-2' : 'pt-1 mb-3'
                     }`}>
                       <span className={`${
                         shareCardFormat === 'kotak' ? 'text-[8.5px] sm:text-[9px]' : 'text-[9.5px] sm:text-[10px]'
@@ -5750,12 +5751,12 @@ export default function AlQuranModal({ onClose }) {
                       </span>
                       <h2 className={`${
                         shareCardFormat === 'kotak' ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl'
-                      } font-black tracking-wide font-serif drop-shadow-md leading-tight ${
+                      } font-black tracking-wide font-serif leading-tight ${
                         isShareDark ? 'text-amber-300' : 'text-amber-950'
                       }`}>
                         Q.S. {selectedSurah.namaLatin} : {showShareModal.nomorAyat}
                       </h2>
-                      <div className="flex items-center justify-center gap-1.5 mt-1">
+                      <div className="flex items-center justify-center gap-1.5 mt-1.5">
                         <div className={`${
                           shareCardFormat === 'kotak' ? 'w-5 sm:w-6' : 'w-6 sm:w-8'
                         } h-0.5 rounded-full ${
@@ -5763,12 +5764,12 @@ export default function AlQuranModal({ onClose }) {
                         }`} />
                         <span className={`${
                           shareCardFormat === 'kotak' ? 'text-[8px] sm:text-[8.5px]' : 'text-[8.5px] sm:text-[9px]'
-                        } uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border whitespace-nowrap ${
+                        } uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border whitespace-nowrap ${
                           isShareDark
                             ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
                             : 'bg-amber-100 text-amber-950 border-amber-300'
                         }`}>
-                          Mushaf Standar {shareMushafType === 'madinah' ? 'Madinah Utsmani' : shareMushafType === 'modern' ? 'Modern Populer' : 'Kemenag RI'}
+                          Mushaf Standar {shareMushafType === 'madinah' ? 'Madinah (Rasm Utsmani)' : shareMushafType === 'modern' ? 'Modern (Ejaan Populer)' : 'Indonesia (Kemenag RI)'}
                         </span>
                         <div className={`${
                           shareCardFormat === 'kotak' ? 'w-5 sm:w-6' : 'w-6 sm:w-8'
@@ -5779,71 +5780,97 @@ export default function AlQuranModal({ onClose }) {
                     </div>
 
                     {/* Teks Arab, Latin, & Terjemahan Tengah (Auto Fit, Center Simetris, & Bebas Tumpang Tindih) */}
-                    <div className={`relative z-10 ${shareConfig.containerClass} flex-1 flex flex-col justify-center items-center text-center my-auto w-full py-1.5`}>
-                      {/* 1. Teks Arab Ayat */}
-                      <div className="px-1.5 w-full">
-                        <p
-                          style={{
-                            fontFamily: getActiveFontFamily(shareMushafType),
-                            lineHeight: shareConfig.arabLineHeight,
-                            textAlign: 'center',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word',
-                            direction: 'rtl'
-                          }}
-                          className={`${getArabicFontClass(shareMushafType)} ${shareConfig.arabSize} drop-shadow-md block w-full select-none ${
-                            isShareDark ? 'text-amber-50' : 'text-slate-950 font-bold'
-                          }`}
-                          dir="rtl"
-                        >
-                          {getCleanAyatArabForShare(showShareModal, shareMushafType)}
-                        </p>
+                    <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center w-full my-auto py-2">
+                      <div
+                        className={`w-full rounded-2xl p-3 sm:p-4 backdrop-blur-[2px] transition-all ${
+                          isShareDark ? 'bg-black/30 ring-1 ring-white/10' : 'bg-white/45 ring-1 ring-amber-900/10'
+                        }`}
+                      >
+                        {/* 1. Teks Arab Ayat */}
+                        <div style={{ paddingBottom: (shareShowLatin || shareShowTranslation) ? '12px' : '0px', width: '100%' }}>
+                          <p
+                            style={{
+                              fontFamily: getActiveFontFamily(shareMushafType),
+                              lineHeight: shareConfig.arabLineHeight,
+                              textAlign: 'center',
+                              wordBreak: 'normal',
+                              overflowWrap: 'break-word',
+                              whiteSpace: 'normal',
+                              direction: 'rtl'
+                            }}
+                            className={`${getArabicFontClass(shareMushafType)} ${shareConfig.arabSize} block w-full select-none ${
+                              isShareDark ? 'text-amber-50' : 'text-slate-950 font-bold'
+                            }`}
+                            dir="rtl"
+                          >
+                            {getCleanAyatArabForShare(showShareModal, shareMushafType, true)}
+                          </p>
+                        </div>
+
+                        {/* Pembatas Hiasan Halus */}
+                        {(shareShowLatin || shareShowTranslation) && (
+                          <div
+                            style={{
+                              width: '54px',
+                              height: '2px',
+                              margin: '8px auto 12px auto',
+                              borderRadius: '9999px',
+                              opacity: 0.7
+                            }}
+                            className={isShareDark ? 'bg-amber-400/60' : 'bg-amber-700/60'}
+                          />
+                        )}
+
+                        {/* 2. Teks Transliterasi Latin */}
+                        {shareShowLatin && showShareModal.teksLatin && (
+                          <div
+                            style={{
+                              paddingBottom: shareShowTranslation ? '10px' : '2px',
+                              width: '100%'
+                            }}
+                          >
+                            <p
+                              style={{
+                                lineHeight: shareConfig.latinLineHeight,
+                                textAlign: 'center',
+                                wordBreak: 'normal',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal'
+                              }}
+                              className={`${shareConfig.latinSize} font-medium italic block w-full leading-normal ${
+                                isShareDark ? 'text-amber-200/95' : 'text-emerald-950 font-semibold'
+                              }`}
+                            >
+                              {formatAyatLatin(showShareModal.teksLatin, shareMushafType)}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* 3. Teks Terjemahan Bahasa Indonesia */}
+                        {shareShowTranslation && showShareModal.teksIndonesia && (
+                          <div
+                            style={{
+                              paddingTop: shareShowLatin ? '4px' : '0px',
+                              width: '100%'
+                            }}
+                          >
+                            <p
+                              style={{
+                                lineHeight: shareConfig.indoLineHeight,
+                                textAlign: 'center',
+                                wordBreak: 'normal',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal'
+                              }}
+                              className={`${shareConfig.indoSize} font-medium block w-full ${
+                                isShareDark ? 'text-slate-100' : 'text-slate-800'
+                              }`}
+                            >
+                              "{formatAyatTranslation(showShareModal.teksIndonesia, shareMushafType)}"
+                            </p>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Pembatas Hiasan Halus */}
-                      {(shareShowLatin || shareShowTranslation) && (
-                        <div className={`w-12 sm:w-16 h-0.5 rounded-full mx-auto my-2 sm:my-2.5 opacity-60 ${
-                          isShareDark ? 'bg-amber-400/60' : 'bg-amber-700/60'
-                        }`} />
-                      )}
-
-                      {/* 2. Teks Transliterasi Latin */}
-                      {shareShowLatin && showShareModal.teksLatin && (
-                        <div className="px-1.5 sm:px-2.5 w-full">
-                          <p
-                            style={{
-                              lineHeight: shareConfig.latinLineHeight,
-                              textAlign: 'center',
-                              wordBreak: 'break-word',
-                              overflowWrap: 'break-word'
-                            }}
-                            className={`${shareConfig.latinSize} font-medium italic drop-shadow-xs block w-full leading-normal ${
-                              isShareDark ? 'text-amber-200/95' : 'text-emerald-950 font-semibold'
-                            }`}
-                          >
-                            {formatAyatLatin(showShareModal.teksLatin, shareMushafType)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* 3. Teks Terjemahan Bahasa Indonesia */}
-                      {shareShowTranslation && showShareModal.teksIndonesia && (
-                        <div className="px-1.5 sm:px-2.5 w-full mt-1 sm:mt-1.5">
-                          <p
-                            style={{
-                              lineHeight: shareConfig.indoLineHeight,
-                              textAlign: 'center',
-                              wordBreak: 'break-word',
-                              overflowWrap: 'break-word'
-                            }}
-                            className={`${shareConfig.indoSize} font-medium drop-shadow-xs block w-full ${
-                              isShareDark ? 'text-slate-100' : 'text-slate-800'
-                            }`}
-                          >
-                            "{formatAyatTranslation(showShareModal.teksIndonesia, shareMushafType)}"
-                          </p>
-                        </div>
-                      )}
                     </div>
 
                     {/* Footer Kartu: Kanomas Tour & Travel Official Branding */}
