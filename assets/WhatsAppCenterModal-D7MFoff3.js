@@ -1,4 +1,4 @@
-import{i,j as a}from"./index-CvX_Sv7L.js";import{r as l,G as T,X as S,y as x,z as b,a2 as B}from"./vendor-icons-wmtkA3KQ.js";import"./vendor-react-fq9l8ngy.js";import"./vendor-capacitor-c_pVEujX.js";const g=[{id:"lead_welcome",category:"Pendaftaran",title:"Konfirmasi Pendaftaran Calon Jamaah",template:`*Assalamu'alaikum Warahmatullahi Wabarakatuh* Bapak/Ibu {NAMA_JAMAAH},
+import{i,j as a}from"./index-VmcbTd_2.js";import{r as l,G as T,X as S,y as x,z as b,a2 as B}from"./vendor-icons-wmtkA3KQ.js";import"./vendor-react-fq9l8ngy.js";import"./vendor-capacitor-c_pVEujX.js";const g=[{id:"lead_welcome",category:"Pendaftaran",title:"Konfirmasi Pendaftaran Calon Jamaah",template:`*Assalamu'alaikum Warahmatullahi Wabarakatuh* Bapak/Ibu {NAMA_JAMAAH},
 
 Terima kasih atas kepercayaannya memilih *PT Kanomas Artha Wisata (Cabang Tasikmalaya)* untuk rencana ibadah ke Baitullah.
 
