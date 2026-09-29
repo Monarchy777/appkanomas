@@ -3,9 +3,9 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 /**
  * Single source of truth for Kanomas Application Build Version
  */
-export const APP_BUILD_VERSION = '2026.2.0';
-export const APP_BUILD_CODE = 2031;
-export const APP_RELEASE_DATE = '28 September 2026';
+export const APP_BUILD_VERSION = '2026.2.1';
+export const APP_BUILD_CODE = 2032;
+export const APP_RELEASE_DATE = '29 September 2026';
 
 /**
  * Compare two semver-like version strings (e.g., '2026.1.3' vs '2026.1.1').

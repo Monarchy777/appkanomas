@@ -69,8 +69,8 @@ Options -Indexes
   Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, HEAD"
   Header always set Access-Control-Allow-Headers "*"
 
-  # Pastikan file JSON (version.json) dan APK selalu fresh & bebas CORS
-  <FilesMatch "\.(json|apk)$">
+  # Pastikan file JSON (version.json), Service Worker (sw.js), dan APK selalu fresh & bebas CORS
+  <FilesMatch "(sw\.js|\.json|\.apk)$">
     Header always set Access-Control-Allow-Origin "*"
     Header always set Access-Control-Allow-Methods "GET, OPTIONS, HEAD"
     Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
