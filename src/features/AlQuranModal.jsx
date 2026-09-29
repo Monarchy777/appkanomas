@@ -1600,32 +1600,29 @@ export default function AlQuranModal({ onClose }) {
     if (totalWeight > 550) {
       // Ayat sangat panjang
       return {
-        arabSize: isSquare ? 'text-sm sm:text-base' : 'text-base sm:text-lg',
-        arabLineHeight: '2.1',
-        latinSize: 'text-[9.5px] sm:text-[10px]',
-        indoSize: 'text-[9px] sm:text-[9.5px]',
-        containerClass: 'space-y-1.5 py-1',
-        cardMinHeight: isSquare ? 'min-h-[440px]' : 'min-h-[600px]'
+        arabSize: isSquare ? 'text-xs sm:text-sm' : 'text-sm sm:text-base',
+        arabLineHeight: '2.05',
+        latinSize: 'text-[9px] sm:text-[9.5px]',
+        indoSize: 'text-[8.5px] sm:text-[9px]',
+        containerClass: 'space-y-1.5 py-1'
       };
     } else if (totalWeight > 320) {
       // Ayat panjang
       return {
-        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-lg sm:text-xl',
+        arabSize: isSquare ? 'text-sm sm:text-base' : 'text-base sm:text-lg',
         arabLineHeight: '2.15',
-        latinSize: 'text-[10.5px] sm:text-[11px]',
-        indoSize: 'text-[10px] sm:text-[10.5px]',
-        containerClass: 'space-y-2 py-1.5',
-        cardMinHeight: isSquare ? 'min-h-[400px]' : 'min-h-[550px]'
+        latinSize: 'text-[10px] sm:text-[10.5px]',
+        indoSize: 'text-[9.5px] sm:text-[10px]',
+        containerClass: 'space-y-2 py-1'
       };
     } else if (totalWeight > 140) {
       // Ayat sedang
       return {
-        arabSize: isSquare ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl',
+        arabSize: isSquare ? 'text-base sm:text-lg' : 'text-lg sm:text-xl',
         arabLineHeight: '2.25',
-        latinSize: 'text-xs sm:text-[12.5px]',
-        indoSize: 'text-[11px] sm:text-xs',
-        containerClass: 'space-y-2.5 py-2',
-        cardMinHeight: isSquare ? 'min-h-[370px]' : 'min-h-[510px]'
+        latinSize: 'text-xs sm:text-[12px]',
+        indoSize: 'text-[10.5px] sm:text-xs',
+        containerClass: 'space-y-2.5 py-1.5'
       };
     } else {
       // Ayat pendek
@@ -1634,8 +1631,7 @@ export default function AlQuranModal({ onClose }) {
         arabLineHeight: '2.35',
         latinSize: 'text-xs sm:text-sm',
         indoSize: 'text-xs sm:text-sm',
-        containerClass: 'space-y-3 py-2.5',
-        cardMinHeight: isSquare ? 'min-h-[350px]' : 'min-h-[470px]'
+        containerClass: 'space-y-3 py-2'
       };
     }
   };
@@ -5240,33 +5236,46 @@ export default function AlQuranModal({ onClose }) {
 
                 {/* Body: Preview Kartu Ayat & Pilihan Background Dinamis / Polos */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
-                  {/* PREVIEW KARTU AYAT LIVE (ANTI TERPOTONG & ANTI TUMPANG TINDIH) */}
-                  <div
-                    ref={shareCardRef}
-                    style={activeShareStyle.bgStyle}
-                    className={`w-full rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl relative transition-all border ${activeShareStyle.borderColor} ${
-                      shareCardFormat === 'kotak'
-                        ? `${shareConfig.cardMinHeight} max-w-[360px] sm:max-w-[400px] mx-auto`
-                        : `${shareConfig.cardMinHeight} aspect-[9/16] max-w-[300px] sm:max-w-[330px] mx-auto`
-                    }`}
-                  >
-                    {/* Background Foto Asli & Overlay (Khusus Tipe Photo) */}
-                    {activeShareStyle.imageUrl && (
-                      <img
-                        src={activeShareStyle.imageUrl}
-                        alt={activeShareStyle.name}
-                        className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-3xl"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    {activeShareStyle.imageUrl && (
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/75 to-black/90 pointer-events-none rounded-3xl" />
-                    )}
+                  {/* PREVIEW KARTU AYAT LIVE (FULL BLEED RECTANGULAR POSTER DENGAN BINGKAI ISLAMI MEWAH) */}
+                  <div className="w-full flex justify-center py-1">
+                    <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-slate-700/60 max-w-[360px] w-full mx-auto bg-black flex justify-center">
+                      <div
+                        ref={shareCardRef}
+                        style={activeShareStyle.bgStyle}
+                        className={`w-full relative transition-all flex flex-col justify-between overflow-hidden ${
+                          shareCardFormat === 'kotak'
+                            ? 'aspect-square p-5 sm:p-6'
+                            : 'aspect-[9/16] p-6 sm:p-7'
+                        }`}
+                      >
+                        {/* Background Foto Asli & Overlay (Khusus Tipe Photo) - Full Bleed 100% Edge-to-Edge */}
+                        {activeShareStyle.imageUrl && (
+                          <img
+                            src={activeShareStyle.imageUrl}
+                            alt={activeShareStyle.name}
+                            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                        {activeShareStyle.imageUrl && (
+                          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/85 pointer-events-none" />
+                        )}
 
-                    {/* Decorative Islamic Radial Glow */}
-                    <div className="absolute inset-0 bg-radial from-amber-400/10 to-transparent pointer-events-none rounded-3xl" />
+                        {/* Decorative Islamic Radial Glow */}
+                        <div className="absolute inset-0 bg-radial from-amber-400/10 to-transparent pointer-events-none" />
+
+                        {/* Bingkai Hiasan Islami Mewah di Dalam Gambar (Inner Frame) */}
+                        <div className={`absolute inset-3 sm:inset-3.5 rounded-2xl border pointer-events-none z-10 ${
+                          isShareDark ? 'border-amber-400/40' : 'border-amber-700/40'
+                        }`}>
+                          <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-amber-300/80" />
+                          <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-amber-300/80" />
+                          <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-amber-300/80" />
+                          <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-amber-300/80" />
+                        </div>
 
                     {/* Header Kartu: Q.S. Nama Surat : Ayat & Rujukan Mushaf */}
                     <div className="relative z-10 text-center pt-1 mb-2">
@@ -5383,6 +5392,8 @@ export default function AlQuranModal({ onClose }) {
                       </span>
                     </div>
                   </div>
+                </div>
+              </div>
 
                   {/* KONTROL 1: STANDAR MUSHAF PENULISAN */}
                   <div className="space-y-1 pt-1">
