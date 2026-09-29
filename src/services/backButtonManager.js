@@ -8,12 +8,35 @@ class BackButtonManager {
     this.lastBackPressTime = 0;
     this.exitToastCallback = null;
     this.hasInitialized = false;
+    this.fallbackHandler = null;
+
+    if (typeof window !== 'undefined') {
+      this.ensureRootGuard();
+    }
+  }
+
+  // Pastikan browser history selalu memiliki buffer (Root Guard)
+  // Ini mencegah Android Chrome / WebView langsung menutup / meminimize aplikasi saat tombol Back ditekan
+  ensureRootGuard() {
+    if (typeof window === 'undefined' || !window.history) return;
+    try {
+      const currentState = window.history.state;
+      if (!currentState || !currentState.kanomasActive) {
+        window.history.replaceState({ kanomasBase: true }, '');
+        window.history.pushState({ kanomasActive: true }, '');
+      }
+    } catch (e) {
+      console.warn('ensureRootGuard warning:', e);
+    }
   }
 
   init(showExitToast) {
     if (showExitToast) this.exitToastCallback = showExitToast;
     if (this.hasInitialized) return;
     this.hasInitialized = true;
+
+    // Pasang guard state di awal
+    this.ensureRootGuard();
 
     // 1. Browser / Mobile Web / PWA popstate listener
     if (typeof window !== 'undefined') {
@@ -26,7 +49,15 @@ class BackButtonManager {
       });
     }
 
-    // 2. Capacitor Native Android Hardware Back Button listener
+    // 2. Document "backbutton" event (Cordova / Capacitor Android WebView)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('backbutton', (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        this.handleBackEvent(false);
+      });
+    }
+
+    // 3. Capacitor Native Android Hardware Back Button listener
     try {
       if (Capacitor.isNativePlatform()) {
         CapApp.addListener('backButton', () => {
@@ -36,6 +67,10 @@ class BackButtonManager {
     } catch (e) {
       console.warn('Capacitor backButton listener init warning:', e);
     }
+  }
+
+  setFallbackHandler(fn) {
+    this.fallbackHandler = fn;
   }
 
   pushHandler(id, fn, { priority = 10, pushHistory = true } = {}) {
@@ -81,6 +116,7 @@ class BackButtonManager {
   }
 
   handleBackEvent(calledFromPopstate = false) {
+    // 1. Jika ada handler di stack (modal, drawer, sub-view, dsb.)
     if (this.stack.length > 0) {
       // Pop the highest priority (topmost) handler
       const top = this.stack.pop();
@@ -93,6 +129,12 @@ class BackButtonManager {
             this.isSilentPop = false;
           }
         }
+
+        // Jika dipanggil dari popstate, segera pastikan buffer history tetap ada
+        if (calledFromPopstate) {
+          this.ensureRootGuard();
+        }
+
         try {
           top.fn();
         } catch (err) {
@@ -102,7 +144,23 @@ class BackButtonManager {
       }
     }
 
-    // Nothing in stack: user is at root/home level
+    // 2. Jika stack kosong, periksa apakah fallback handler (misal kembali dari tab selain home) bisa menangani
+    if (this.fallbackHandler && typeof this.fallbackHandler === 'function') {
+      try {
+        const handled = this.fallbackHandler();
+        if (handled) {
+          if (calledFromPopstate) {
+            this.ensureRootGuard();
+          }
+          return true;
+        }
+      } catch (err) {
+        console.error('Error executing fallback back handler:', err);
+      }
+    }
+
+    // 3. User sudah di level paling dasar (Home utama dan tidak ada modal/sub-menu):
+    // Terapkan Double Back to Exit (Konfirmasi 2 detik)
     const now = Date.now();
     if (now - this.lastBackPressTime < 2000) {
       if (Capacitor.isNativePlatform()) {
@@ -116,15 +174,13 @@ class BackButtonManager {
       if (this.exitToastCallback) {
         this.exitToastCallback('Tekan sekali lagi untuk keluar dari Aplikasi Kanomas');
       }
-      // PWA / Web: Push root guard state so double back is needed to exit
-      if (typeof window !== 'undefined' && window.history) {
-        try {
-          window.history.pushState({ kanomasRoot: true }, '');
-        } catch {}
-      }
+
+      // Pastikan history guard terpasang kembali agar klik pertama tidak langsung keluar
+      this.ensureRootGuard();
       return true;
     }
   }
 }
 
 export const backButtonManager = new BackButtonManager();
+
