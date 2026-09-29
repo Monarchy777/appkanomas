@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanomas-cache-v8-native-svg-card';
+const CACHE_NAME = 'kanomas-cache-v11-logo-compact-autofit';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const PRECACHE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_ASSETS).catch((err) => {
@@ -15,14 +16,13 @@ self.addEventListener('install', (event) => {
       });
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
     }).then(() => self.clients.claim())
   );
