@@ -1,8 +1,8 @@
 {
-  "version": "2026.2.3",
-  "versionCode": 2034,
+  "version": "2026.2.4",
+  "versionCode": 2035,
   "releaseDate": "29 September 2026",
-  "title": "Aplikasi Kanomas - Navigasi Back Android & Mode Mitra Syiar",
+  "title": "Aplikasi Kanomas - Navigasi Back Android Native & Auto-Download APK",
   "notes": [
     "Perbaikan tombol hardware back Android (mundur 1 langkah pada surat, modal, dan tab).",
     "Pencegahan keluar/minimize aplikasi tanpa sengaja dengan Continuous Root Guard.",
@@ -10,5 +10,5 @@
     "Otomatis refresh cache PWA v13 untuk performa instan."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
-  "apkSize": "23.8 MB"
+  "apkSize": "29.5 MB"
 }
