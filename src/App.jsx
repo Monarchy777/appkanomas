@@ -50,11 +50,16 @@ export default function App() {
   const [dbData, setDbData] = useState(() => db.getAll());
   const [prayerInfo, setPrayerInfo] = useState(() => calculatePrayerTimes('tasikmalaya'));
 
-  // Auto-Lock Referral Code: Parse from URL (?ref=... or ?mitra=...) & persist in localStorage
+  // Auto-Lock Referral Code: Parse from URL (?ref=... or ?mitra=... or hash) & persist in localStorage
   const [persistedReferralCode, setPersistedReferralCode] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const queryRef = urlParams.get('ref') || urlParams.get('mitra');
+      let queryRef = urlParams.get('ref') || urlParams.get('mitra');
+      if (!queryRef && window.location.hash.includes('?')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        const hashParams = new URLSearchParams(hashQuery);
+        queryRef = hashParams.get('ref') || hashParams.get('mitra');
+      }
       if (queryRef) {
         const cleanRef = queryRef.trim().toUpperCase();
         localStorage.setItem('kanomas_referral_code', cleanRef);
@@ -339,6 +344,7 @@ export default function App() {
               onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
               onBookPackage={(pkg) => setBookingPackage(pkg)}
               onOpenSavings={() => setShowSavings(true)}
+              referralCode={persistedReferralCode}
             />
           )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Send, CheckCircle, ShieldCheck, Phone, User, Calendar, MapPin, Tag } from 'lucide-react';
+import { X, Send, CheckCircle, ShieldCheck, Phone, User, Calendar, MapPin, Tag, Lock, Unlock } from 'lucide-react';
 import { db } from '../services/db';
 
 export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
@@ -8,8 +8,11 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
   const [city, setCity] = useState('Tasikmalaya');
   const [paxCount, setPaxCount] = useState(1);
   const [mitraCode, setMitraCode] = useState(defaultMitraCode || '');
+  const [isLocked, setIsLocked] = useState(Boolean(defaultMitraCode));
   const [notes, setNotes] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const matchedMitra = mitraCode ? db.getMitra().find(m => m.code === mitraCode) : null;
 
   const packageName = pkg ? pkg.title : 'Konsultasi Paket Khusus';
 
@@ -33,13 +36,16 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
   };
 
   const getWaUrl = () => {
+    const mitraText = matchedMitra
+      ? `${mitraCode} (Binaan Resmi: ${matchedMitra.name})`
+      : (mitraCode || 'Tidak Ada (Langsung Pusat)');
     const text = `*Form Pendaftaran & Booking Jamaah - Kanomas*\n\n` +
       `👤 *Nama:* ${name}\n` +
       `📱 *No. WhatsApp:* ${phone}\n` +
       `🏙 *Kota Asal:* ${city}\n` +
       `🕋 *Pilihan Paket:* ${packageName}\n` +
       `👥 *Jumlah Pax:* ${paxCount} Orang\n` +
-      `🎟 *Kode Mitra Syiar:* ${mitraCode || 'Tidak Ada'}\n` +
+      `🎟 *Kode Mitra Syiar:* ${mitraText}\n` +
       `📝 *Catatan:* ${notes || '-'}\n\n` +
       `_Bismillah, mohon konfirmasi ketersediaan seat dan jadwal manasik._`;
     return `https://wa.me/628112113363?text=${encodeURIComponent(text)}`;
@@ -172,24 +178,55 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-slate-700 font-semibold">Kode Referral Mitra</label>
                     {mitraCode && (
-                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" /> Terkunci
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                          isLocked
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-amber-100 text-amber-800 border border-amber-300'
+                        }`}>
+                          {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
+                          {isLocked ? 'Terkunci Otomatis' : 'Dapat Diedit'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsLocked(prev => !prev)}
+                          className="text-[10px] text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                        >
+                          {isLocked ? 'Ubah' : 'Kunci'}
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Contoh: KANOMAS-SYIAR-01"
-                    value={mitraCode}
-                    onChange={(e) => setMitraCode(e.target.value.toUpperCase())}
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-slate-900 font-mono uppercase focus:outline-none shadow-xs font-bold ${
-                      mitraCode ? 'bg-emerald-50/50 border-emerald-400 text-emerald-900' : 'bg-white border-slate-300 focus:border-amber-500'
-                    }`}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly={isLocked}
+                      placeholder="Contoh: KANOMAS-SYIAR-01"
+                      value={mitraCode}
+                      onChange={(e) => setMitraCode(e.target.value.toUpperCase())}
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-slate-900 font-mono uppercase focus:outline-none shadow-xs font-bold transition ${
+                        isLocked
+                          ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 cursor-not-allowed'
+                          : 'bg-white border-slate-300 focus:border-amber-500'
+                      }`}
+                    />
+                    {isLocked && (
+                      <Lock className="w-4 h-4 text-emerald-600 absolute right-3 top-3" />
+                    )}
+                  </div>
                   {mitraCode && (
-                    <span className="text-[10px] text-emerald-600 mt-1 block">
-                      Pendaftaran Anda dibimbing oleh Mitra Syiar resmi Kanomas ({mitraCode}).
-                    </span>
+                    <div className="mt-1.5 p-2 rounded-xl bg-emerald-50 border border-emerald-200/70 text-[10px] text-emerald-800 leading-snug">
+                      <p className="font-bold flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0" />
+                        <span>Pendaftaran dibimbing oleh Mitra Syiar Resmi:</span>
+                      </p>
+                      <p className="pl-4 text-emerald-950 font-semibold">
+                        {matchedMitra ? `${matchedMitra.name} (${matchedMitra.city})` : `Mitra Kode ${mitraCode}`}
+                      </p>
+                      <p className="pl-4 text-[9.5px] text-emerald-700">
+                        Hak komisi dan data jamaah otomatis tercatat atas nama mitra di atas.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>

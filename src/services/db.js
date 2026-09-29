@@ -187,18 +187,17 @@ class KanomasDatabase {
       accountNumber: withdrawalData.accountNumber || '-',
       accountHolder: withdrawalData.accountHolder || withdrawalData.mitraName,
       requestDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      status: 'Selesai (Ditransfer)',
+      status: withdrawalData.status || 'Pending',
       transferProofUrl: '',
       notes: withdrawalData.notes || 'Pencairan Komisi Syiar Kanomas'
     };
 
-    // Update mitra commissions
+    // Update mitra commissions: deduct from pending
     const mitra = this.data.mitra.map(m => {
       if (m.id === withdrawalData.mitraId || m.code === withdrawalData.mitraCode) {
         const payVal = Math.min(amount, m.commissionPending || 0);
         return {
           ...m,
-          commissionPaid: (m.commissionPaid || 0) + payVal,
           commissionPending: Math.max(0, (m.commissionPending || 0) - payVal)
         };
       }
@@ -208,6 +207,33 @@ class KanomasDatabase {
     const withdrawals = [newWd, ...(this.data.withdrawals || [])];
     this.save({ ...this.data, mitra, withdrawals });
     return newWd;
+  }
+
+  updateWithdrawalStatus(id, newStatus, transferProofUrl = '') {
+    let updatedMitra = this.data.mitra;
+    const withdrawals = (this.data.withdrawals || []).map(w => {
+      if (w.id === id) {
+        // If transitioning to Cair, add to commissionPaid
+        if ((newStatus === 'Cair' || newStatus === 'Selesai (Ditransfer)') && w.status !== 'Cair' && w.status !== 'Selesai (Ditransfer)') {
+          updatedMitra = updatedMitra.map(m => {
+            if (m.id === w.mitraId || m.code === w.mitraCode) {
+              return {
+                ...m,
+                commissionPaid: (m.commissionPaid || 0) + w.amount
+              };
+            }
+            return m;
+          });
+        }
+        return {
+          ...w,
+          status: newStatus,
+          transferProofUrl: transferProofUrl || w.transferProofUrl
+        };
+      }
+      return w;
+    });
+    this.save({ ...this.data, mitra: updatedMitra, withdrawals });
   }
 
   // Jamaah Aktif CRUD

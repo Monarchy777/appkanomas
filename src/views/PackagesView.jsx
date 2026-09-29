@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plane, Hotel, Calendar, Clock, Tag, Search, Filter, Users, CheckCircle2, ChevronRight, Phone } from 'lucide-react';
+import { Plane, Hotel, Calendar, Clock, Tag, Search, Filter, Users, CheckCircle2, ChevronRight, Phone, ShieldCheck } from 'lucide-react';
+import { db } from '../services/db';
 
-export default function PackagesView({ packages, onOpenPackageDetail, onBookPackage, onOpenSavings }) {
+export default function PackagesView({ packages, onOpenPackageDetail, onBookPackage, onOpenSavings, referralCode }) {
   const [activeCategory, setActiveCategory] = useState('semua');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -35,6 +36,31 @@ export default function PackagesView({ packages, onOpenPackageDetail, onBookPack
 
   return (
     <div className="space-y-6 pb-24 mx-3 sm:mx-6 mt-3 max-w-5xl mx-auto">
+      {/* Auto-Lock Referral Banner */}
+      {referralCode && (() => {
+        const mitra = db.getMitra().find(m => m.code === referralCode);
+        return (
+          <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#0c1f33] via-[#0f2d47] to-[#081524] border border-amber-400/40 text-white flex items-center justify-between gap-3 text-xs shadow-lg">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-md">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 space-y-0.5">
+                <p className="font-extrabold text-xs sm:text-sm text-amber-300 truncate">
+                  Dibimbing Mitra Syiar Resmi: {mitra ? mitra.name : referralCode}
+                </p>
+                <p className="text-[11px] text-slate-300">
+                  Kode Referral: <strong className="font-mono text-white tracking-wider">{referralCode}</strong> • Hak komisi & pendaftaran otomatis terkunci
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shrink-0">
+              🔒 Terkunci
+            </span>
+          </div>
+        );
+      })()}
+
       {/* Header Banner (Putih Bersih dengan Aksen Kanomas) */}
       <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
