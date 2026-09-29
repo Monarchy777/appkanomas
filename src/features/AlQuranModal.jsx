@@ -560,10 +560,194 @@ export function IslamicThemeMotif({ themeId, className = "w-16 h-16 pointer-even
   }
 }
 
+// ========================================================
+// ORNAMEN SUDUT MUSHAF ISLAMI (ISLAMIC CORNER FLOURISH)
+// ========================================================
+export function IslamicCornerFlourish({ position = 'top-left', className = 'w-6 h-6', color = 'currentColor' }) {
+  const rotation = {
+    'top-left': 'rotate-0',
+    'top-right': 'rotate-90',
+    'bottom-right': 'rotate-180',
+    'bottom-left': '-rotate-90'
+  }[position] || 'rotate-0';
 
+  const positionClasses = {
+    'top-left': 'top-0 left-0',
+    'top-right': 'top-0 right-0',
+    'bottom-right': 'bottom-0 right-0',
+    'bottom-left': 'bottom-0 left-0'
+  }[position] || 'top-0 left-0';
 
+  return (
+    <div className={`absolute ${positionClasses} pointer-events-none transform ${rotation} select-none z-10`}>
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ color }}>
+        {/* Garis Bingkai Ganda Siku Mushaf */}
+        <path d="M2 38 L2 6 C2 3.79 3.79 2 6 2 L38 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.8" />
+        <path d="M5 38 L5 8 C5 6.34 6.34 5 8 5 L38 5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeDasharray="1.5 2" strokeOpacity="0.55" />
+        {/* Rosette Bintang 8 Rub-el-Hizb di Sudut */}
+        <g transform="translate(10, 10) scale(0.65)">
+          <rect x="-5" y="-5" width="10" height="10" fill="currentColor" fillOpacity="0.85" />
+          <rect x="-5" y="-5" width="10" height="10" fill="currentColor" fillOpacity="0.85" transform="rotate(45)" />
+          <circle cx="0" cy="0" r="1.5" fill="#ffffff" fillOpacity="0.9" />
+        </g>
+        {/* Sulur Arabesque Islimi Menuju ke Dalam Kotak */}
+        <path d="M10 17 C12 21 16 23 20 22 C17 19 18 15 15 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeOpacity="0.75" fill="none" />
+        <path d="M17 10 C21 12 23 16 22 20 C19 17 15 18 13 15" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeOpacity="0.75" fill="none" />
+        <circle cx="21" cy="21" r="1.5" fill="currentColor" fillOpacity="0.8" />
+        <circle cx="26" cy="2" r="1.2" fill="currentColor" fillOpacity="0.6" />
+        <circle cx="2" cy="26" r="1.2" fill="currentColor" fillOpacity="0.6" />
+      </svg>
+    </div>
+  );
+}
 
-// ATURAN WARNA TAJWID IDENTIK PERSIS DENGAN MYQURAN (8 HUKUM RESMI)
+// ========================================================
+// MAHKOTA KUBAH MIHRAB KALIGRAFI ISLAMI UNTUK BOX WINDOW
+// ========================================================
+export function IslamicMihrabWindowArch({ themeId, currentTheme }) {
+  const accentColor = currentTheme?.accentHex || '#f59e0b';
+  const themeHex = currentTheme?.themeHex || '#0a7c29';
+  const isDark = currentTheme?.isDark;
+
+  return (
+    <div className="relative w-full overflow-hidden select-none -mb-1">
+      <div className="relative w-full flex flex-col items-center">
+        {/* Aksen Puncak Kubah (Simbol Benda Tema + Lencana Motif) */}
+        <div className="flex items-center justify-center -mb-1 relative z-20">
+          <div
+            style={{
+              borderColor: `${accentColor}70`,
+              backgroundColor: isDark ? '#0f172a' : '#ffffff'
+            }}
+            className="px-3 py-0.5 rounded-full border shadow-sm flex items-center gap-1.5 backdrop-blur-md"
+          >
+            {/* Ikon Benda Tema */}
+            <div style={{ color: accentColor }} className="w-4 h-4 flex items-center justify-center shrink-0">
+              <IslamicThemeMotif themeId={themeId} className="w-4 h-4" />
+            </div>
+            <span
+              style={{ color: isDark ? '#f8fafc' : '#0f172a' }}
+              className="text-[10px] font-black uppercase tracking-wider font-mono"
+            >
+              {currentTheme?.motifTitle || currentTheme?.name || "Al-Qur'an"}
+            </span>
+            <span style={{ color: accentColor }} className="text-xs leading-none">۞</span>
+          </div>
+        </div>
+
+        {/* Lengkungan Kubah Mihrab dengan Kaligrafi Bismillahir Rahmanir Rahim */}
+        <div
+          style={{
+            borderColor: `${themeHex}40`,
+            background: isDark
+              ? `linear-gradient(180deg, ${themeHex}30 0%, rgba(15, 23, 42, 0.95) 100%)`
+              : `linear-gradient(180deg, ${themeHex}18 0%, rgba(255, 255, 255, 0.98) 100%)`
+          }}
+          className="w-full pt-3 pb-2 px-3 rounded-t-3xl border-t-2 border-x-2 relative overflow-hidden flex flex-col items-center justify-center text-center shadow-xs"
+        >
+          {/* Siluet Vektor Lengkungan Kubah Ogive Mihrab */}
+          <svg
+            viewBox="0 0 500 56"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full pointer-events-none opacity-25"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 56 L120 56 C160 56 190 35 220 18 C238 8 245 4 250 2 C255 4 262 8 280 18 C310 35 340 56 380 56 L500 56"
+              stroke={accentColor}
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M0 56 L140 56 C175 56 200 40 225 24 C240 14 246 9 250 7 C254 9 260 14 275 24 C300 40 325 56 360 56 L500 56"
+              stroke={accentColor}
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              fill="none"
+            />
+            <g transform="translate(60, 32) scale(0.8)">
+              <polygon points="0,-10 2.5,-2.5 10,0 2.5,2.5 0,10 -2.5,2.5 -10,0 -2.5,-2.5" fill={accentColor} />
+              <polygon points="-7,-7 0,-3.5 7,-7 3.5,0 7,7 0,3.5 -7,7 -3.5,0" fill={accentColor} />
+            </g>
+            <g transform="translate(440, 32) scale(0.8)">
+              <polygon points="0,-10 2.5,-2.5 10,0 2.5,2.5 0,10 -2.5,2.5 -10,0 -2.5,-2.5" fill={accentColor} />
+              <polygon points="-7,-7 0,-3.5 7,-7 3.5,0 7,7 0,3.5 -7,7 -3.5,0" fill={accentColor} />
+            </g>
+          </svg>
+
+          {/* Kaligrafi Arab Bismillahir Rahmanir Rahim Asli */}
+          <div className="relative z-10 flex items-center justify-center gap-2">
+            <span style={{ color: accentColor }} className="text-xs opacity-80">✦</span>
+            <span
+              style={{
+                color: isDark ? '#ffffff' : themeHex,
+                textShadow: isDark ? `0 0 12px ${accentColor}40` : 'none'
+              }}
+              className="font-arabic text-base sm:text-lg font-bold tracking-normal leading-tight"
+              dir="rtl"
+            >
+              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </span>
+            <span style={{ color: accentColor }} className="text-xs opacity-80">✦</span>
+          </div>
+
+          {/* Subtitle Terjemahan Kaligrafi & Makna Lengkungan */}
+          <div className="relative z-10 flex items-center justify-center gap-2 mt-0.5">
+            <div style={{ backgroundColor: `${accentColor}50` }} className="h-px w-8 sm:w-16" />
+            <span
+              style={{ color: isDark ? '#cbd5e1' : '#475569' }}
+              className="text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase font-mono"
+            >
+              Penelusuran Cepat Al-Qur'anul Karim
+            </span>
+            <div style={{ backgroundColor: `${accentColor}50` }} className="h-px w-8 sm:w-16" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================
+// WATERMARK KALIGRAFI & BENDA ISLAMI UNTUK LATAR INNER WINDOW
+// ========================================================
+export function IslamicThemeWatermark({ themeId, currentTheme, className = "absolute inset-0 pointer-events-none overflow-hidden" }) {
+  const accentColor = currentTheme?.accentHex || '#f59e0b';
+  const themeHex = currentTheme?.themeHex || '#0a7c29';
+  const isDark = currentTheme?.isDark;
+
+  return (
+    <div className={className} aria-hidden="true">
+      {/* Watermark Kaligrafi Arab Tengah */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] dark:opacity-[0.08]">
+        <span
+          style={{ color: isDark ? '#ffffff' : themeHex }}
+          className="font-arabic text-6xl sm:text-7xl font-bold select-none whitespace-nowrap tracking-wide"
+          dir="rtl"
+        >
+          القرآن الكريم
+        </span>
+      </div>
+
+      {/* Aksen Benda Tematik Siluet di Sudut Kanan Bawah */}
+      <div
+        style={{ color: accentColor }}
+        className="absolute -right-3 -bottom-3 w-28 h-28 opacity-[0.08] dark:opacity-[0.14] pointer-events-none"
+      >
+        <IslamicThemeMotif themeId={themeId} className="w-full h-full" />
+      </div>
+
+      {/* Aksen Benda Tematik Siluet di Sudut Kiri Atas */}
+      <div
+        style={{ color: themeHex }}
+        className="absolute -left-3 -top-3 w-24 h-24 opacity-[0.06] dark:opacity-[0.1] pointer-events-none transform -scale-x-100"
+      >
+        <IslamicThemeMotif themeId={themeId} className="w-full h-full" />
+      </div>
+    </div>
+  );
+}
 export const TAJWEED_THEME_RULES = {
   mushaf: {
     madd246: '#00ac51',          // Madd 2-4-6 Harakat (Hijau Segar MyQuran)
@@ -3103,18 +3287,30 @@ export default function AlQuranModal({ onClose }) {
 
             {/* Index Main Scrollable Area (Terkunci dari geser horizontal: overflow-x-hidden touch-pan-y) */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y w-full max-w-full px-3 sm:px-6 py-3.5 space-y-4 select-none">
-              {/* BANNER TERAKHIR DIBACA (COMPACT & SLIM SESUAI INSTRUKSI) */}
+              {/* BANNER TERAKHIR DIBACA (BERAKSEN KALIGRAFI ISLAMI & CORNER FLOURISH) */}
               {lastReadPosition && (
-                <div className={`w-full max-w-lg mx-auto px-3.5 py-2 rounded-2xl ${currentTheme.bannerBg} shadow-xs border flex items-center justify-between gap-2.5 animate-in fade-in duration-200`}>
-                  <div className="flex items-center gap-2.5 min-w-0">
+                <div
+                  style={{ borderColor: `${currentTheme.accentHex || '#f59e0b'}50` }}
+                  className={`w-full max-w-lg mx-auto px-3.5 py-2.5 rounded-2xl ${currentTheme.bannerBg} shadow-sm border relative overflow-hidden flex items-center justify-between gap-2.5 animate-in fade-in duration-200`}
+                >
+                  {/* Ornamen Sudut Mushaf */}
+                  <IslamicCornerFlourish position="top-left" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
+                  <IslamicCornerFlourish position="bottom-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
+
+                  {/* Watermark Kaligrafi Iqra Halus */}
+                  <div className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none opacity-10">
+                    <span className="font-arabic text-4xl font-bold" dir="rtl">اقْرَأْ</span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 min-w-0 relative z-10">
                     <div className="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
                       <Pin className="w-3.5 h-3.5 fill-current" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">Terakhir:</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">Terakhir Dibaca:</span>
                         <h4 className="text-xs sm:text-sm font-black truncate">
-                          QS. {lastReadPosition.surahName} : {lastReadPosition.ayatNomor}
+                          QS. {lastReadPosition.surahName} : Ayat {lastReadPosition.ayatNomor}
                         </h4>
                       </div>
                       <p className="text-[10px] text-emerald-100/90 truncate">
@@ -3128,7 +3324,7 @@ export default function AlQuranModal({ onClose }) {
                       const surah = SURAH_LIST.find((s) => s.nomor === lastReadPosition.surahNomor) || SURAH_LIST[0];
                       handleOpenSurah(surah, lastReadPosition.ayatNomor);
                     }}
-                    className={`px-3 py-1.5 rounded-xl ${currentTheme.bannerBadge} text-xs flex items-center gap-1 shadow-xs active:scale-95 transition shrink-0 cursor-pointer`}
+                    className={`px-3 py-1.5 rounded-xl ${currentTheme.bannerBadge} text-xs flex items-center gap-1 shadow-xs active:scale-95 transition shrink-0 cursor-pointer relative z-10`}
                     title="Lanjut Membaca"
                   >
                     <span>Lanjut</span>
@@ -3137,249 +3333,209 @@ export default function AlQuranModal({ onClose }) {
                 </div>
               )}
 
-              {/* ======================================================== */}
-              {/* 2. PILIHAN UTAMA: TARGET KHATAMAN & CATATAN PENANDA */}
-              <div className="w-full max-w-lg mx-auto grid grid-cols-2 gap-2.5">
-                {/* Pilihan 1: Program Khataman */}
-                <button
-                  type="button"
-                  onClick={() => setIndexTab(indexTab === 'khatam' ? 'surah' : 'khatam')}
-                  className={`p-3 rounded-2xl border text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
-                    indexTab === 'khatam'
-                      ? `${currentTheme.activeTab} ring-2 ring-white/50 shadow-md`
-                      : isDark
-                      ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-emerald-500'
-                      : 'bg-white border-slate-200/90 text-slate-800 hover:border-emerald-500'
+              {/* 2. MODEL ANGKA SCROLL ATAS-BAWAH DENGAN MAHKOTA KUBAH MIHRAB & AKSEN KALIGRAFI ISLAMI */}
+              <div className="w-full max-w-lg mx-auto">
+                {/* Mahkota Lengkungan Kubah Mihrab Kaligrafi di Atas Box Window */}
+                <IslamicMihrabWindowArch themeId={themeMode} currentTheme={currentTheme} />
+
+                {/* Box Window Utama Inner Window Berornamen Sudut & Watermark Islami */}
+                <div
+                  style={{ borderColor: `${currentTheme.themeHex}40` }}
+                  className={`relative w-full rounded-b-3xl p-3 sm:p-3.5 border-2 border-t-0 shadow-xl backdrop-blur-md transition-all overflow-hidden ${
+                    isDark
+                      ? 'bg-slate-900/90 shadow-slate-950/50'
+                      : 'bg-white/95 shadow-md'
                   }`}
                 >
-                  <div className="flex items-center justify-between w-full mb-1.5">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'khatam' ? 'bg-amber-400 text-slate-950' : `${currentTheme.accentBg} ${currentTheme.accentText}`}`}>
-                      <Target className="w-4 h-4" />
-                    </div>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'khatam' ? 'bg-white/20 text-white' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}`}>
-                      {khatamanSessions.length} Target
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-black leading-tight">Target Khataman</h4>
-                    <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'khatam' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {khatamanSessions.length > 0 ? `${khatamanSessions[0].completedJuz.length}/30 Juz selesai` : 'Atur target baca Al-Qur\'an'}
-                    </p>
-                  </div>
-                </button>
+                  {/* 4 Sudut Ornamen Mushaf Islami (Islamic Corner Flourish) */}
+                  <IslamicCornerFlourish position="top-left" color={currentTheme.accentHex || '#f59e0b'} className="w-6 h-6" />
+                  <IslamicCornerFlourish position="top-right" color={currentTheme.accentHex || '#f59e0b'} className="w-6 h-6" />
+                  <IslamicCornerFlourish position="bottom-left" color={currentTheme.accentHex || '#f59e0b'} className="w-6 h-6" />
+                  <IslamicCornerFlourish position="bottom-right" color={currentTheme.accentHex || '#f59e0b'} className="w-6 h-6" />
 
-                {/* Pilihan 2: Catatan User Atas Ayat & Penanda */}
-                <button
-                  type="button"
-                  onClick={() => setIndexTab(indexTab === 'bookmarks' ? 'surah' : 'bookmarks')}
-                  className={`p-3 rounded-2xl border text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
-                    indexTab === 'bookmarks'
-                      ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-300 shadow-md'
-                      : isDark
-                      ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-amber-500'
-                      : 'bg-white border-slate-200/90 text-slate-800 hover:border-amber-500'
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full mb-1.5">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'bookmarks' ? 'bg-slate-950 text-amber-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'}`}>
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'bookmarks' ? 'bg-slate-950/20 text-slate-950' : 'bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'}`}>
-                      {Object.keys(userNotes).length + bookmarks.length} Item
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-black leading-tight">Catatan & Penanda</h4>
-                    <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'bookmarks' ? 'text-slate-900 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {Object.keys(userNotes).length} Catatan • {bookmarks.length} Disimpan
-                    </p>
-                  </div>
-                </button>
-              </div>
+                  {/* Watermark Kaligrafi & Benda Tema di Inner Window */}
+                  <IslamicThemeWatermark themeId={themeMode} currentTheme={currentTheme} />
 
-              {/* 3. MODEL ANGKA SCROLL ATAS-BAWAH (PENGGANTI 1/2 LINGKARAN) */}
-              <div className={`w-full max-w-lg mx-auto rounded-3xl p-3 sm:p-3.5 border shadow-xl backdrop-blur-md transition-all ${
-                isDark
-                  ? 'bg-slate-900/90 border-slate-700/80 shadow-slate-950/50'
-                  : 'bg-white/95 border-slate-200/90 shadow-xs'
-              }`}>
-                {/* BARIS 1: KIRI JUZ & KANAN AYAT */}
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-2.5">
-                  {/* Kolom Kiri: JUZ */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-between mb-1 px-1">
-                      <div className="flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-emerald-500" />
-                        <span className="text-[11px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                          Juz
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-400/30">
-                        Juz {wheelJuzNum} / 30
-                      </span>
-                    </div>
-                    <QuranRollerPicker
-                      items={Array.from({ length: 30 }, (_, i) => i + 1)}
-                      value={wheelJuzNum}
-                      onChange={(newJuz) => {
-                        setWheelJuzNum(newJuz);
-                        const targetJuzData = JUZ_LIST[newJuz - 1];
-                        if (targetJuzData) {
-                          setQuickSurahNum(targetJuzData.surahNomor);
-                          setQuickAyatNum(targetJuzData.ayat || 1);
-                        }
-                      }}
-                      itemHeight={38}
-                      visibleCount={3}
-                      isDark={isDark}
-                      highlightBg={currentTheme.rollerHighlight}
-                      renderItem={(juzNum, isSelected) => (
-                        <span
-                          className={`font-mono transition-all ${
-                            isSelected
-                              ? 'text-lg font-black ${currentTheme.accentText} scale-110 drop-shadow-xs'
-                              : 'text-sm font-semibold text-slate-400 dark:text-slate-500'
-                          }`}
-                        >
-                          {juzNum}
-                        </span>
-                      )}
-                    />
-                  </div>
-
-                  {/* Kolom Kanan: AYAT */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-between mb-1 px-1">
-                      <div className="flex items-center gap-1.5">
-                        <Bookmark className="w-3.5 h-3.5 text-amber-500" />
-                        <span className="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                          Ayat
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-400/30">
-                        {quickAyatNum} / {currentQuickSurah.jumlahAyat}
-                      </span>
-                    </div>
-                    <QuranRollerPicker
-                      items={Array.from({ length: currentQuickSurah.jumlahAyat }, (_, i) => i + 1)}
-                      value={quickAyatNum}
-                      onChange={(newAyat) => {
-                        setQuickAyatNum(newAyat);
-                      }}
-                      onItemClick={(ayatNum, item, wasActive) => {
-                        if (wasActive) {
-                          handleOpenSurah(currentQuickSurah, ayatNum);
-                        }
-                      }}
-                      itemHeight={38}
-                      visibleCount={3}
-                      isDark={isDark}
-                      highlightBg="bg-amber-500/15 border-amber-500/40"
-                      renderItem={(ayatNum, isSelected) => (
-                        <span
-                          className={`font-mono transition-all ${
-                            isSelected
-                              ? 'text-lg font-black text-amber-600 dark:text-amber-300 scale-110 drop-shadow-xs'
-                              : 'text-sm font-semibold text-slate-400 dark:text-slate-500'
-                          }`}
-                        >
-                          {ayatNum}
-                        </span>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                {/* BARIS 2: TENGAH NO & NAMA SURAT */}
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between mb-1 px-1">
-                    <div className="flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-sky-500" />
-                      <span className="text-[11px] font-black uppercase tracking-wider text-sky-700 dark:text-sky-400">
-                        Surat
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-800 dark:text-sky-300 border border-sky-400/30 truncate max-w-[200px]">
-                      QS. {quickSurahNum}: {currentQuickSurah.namaLatin}
-                    </span>
-                  </div>
-                  <QuranRollerPicker
-                    items={SURAH_LIST}
-                    value={quickSurahNum}
-                    getValue={(s) => s.nomor}
-                    onChange={(newSurahNomor, surahObj) => {
-                      setQuickSurahNum(newSurahNomor);
-                      if (surahObj) {
-                        if (surahObj.juz) setWheelJuzNum(surahObj.juz);
-                        if (quickAyatNum > surahObj.jumlahAyat) setQuickAyatNum(1);
-                      }
-                    }}
-                    onItemClick={(surahNomor, surahObj, wasActive) => {
-                      if (wasActive) {
-                        handleOpenSurah(surahObj || currentQuickSurah, quickAyatNum);
-                      }
-                    }}
-                    itemHeight={44}
-                    visibleCount={3}
-                    isDark={isDark}
-                    highlightBg="bg-gradient-to-r from-emerald-500/15 via-sky-500/15 to-emerald-500/15 border-sky-400/40"
-                    renderItem={(surah, isSelected) => (
-                      <div className="w-full flex items-center justify-between px-3 gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span
-                            className={`w-6 h-6 rounded-lg text-xs font-mono font-bold flex items-center justify-center shrink-0 ${
-                              isSelected
-                                ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                                : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                            }`}
-                          >
-                            {surah.nomor}
+                  <div className="relative z-10">
+                    {/* BARIS 1: KIRI JUZ & KANAN AYAT */}
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-2.5">
+                      {/* Kolom Kiri: JUZ */}
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-1 px-1">
+                          <div className="flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                              Juz
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-400/30">
+                            Juz {wheelJuzNum} / 30
                           </span>
-                          <div className="min-w-0 text-left">
-                            <p
-                              className={`text-xs sm:text-sm truncate leading-tight ${
+                        </div>
+                        <QuranRollerPicker
+                          items={Array.from({ length: 30 }, (_, i) => i + 1)}
+                          value={wheelJuzNum}
+                          onChange={(newJuz) => {
+                            setWheelJuzNum(newJuz);
+                            const targetJuzData = JUZ_LIST[newJuz - 1];
+                            if (targetJuzData) {
+                              setQuickSurahNum(targetJuzData.surahNomor);
+                              setQuickAyatNum(targetJuzData.ayat || 1);
+                            }
+                          }}
+                          itemHeight={38}
+                          visibleCount={3}
+                          isDark={isDark}
+                          highlightBg={currentTheme.rollerHighlight}
+                          renderItem={(juzNum, isSelected) => (
+                            <span
+                              className={`font-mono transition-all ${
                                 isSelected
-                                  ? 'font-black text-slate-900 dark:text-white'
-                                  : 'font-semibold text-slate-500 dark:text-slate-400'
+                                  ? `text-lg font-black ${currentTheme.accentText} scale-110 drop-shadow-xs`
+                                  : 'text-sm font-semibold text-slate-400 dark:text-slate-500'
                               }`}
                             >
-                              {surah.namaLatin}
-                            </p>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-none mt-0.5 truncate">
-                              {surah.arti} • {surah.jumlahAyat} ayat
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span
-                            className={`font-quran-lpmq text-sm sm:text-base font-bold ${
-                              isSelected
-                                ? 'text-[#0a7c29] dark:text-amber-300'
-                                : 'text-slate-400 dark:text-slate-500'
-                            }`}
-                            dir="rtl"
-                          >
-                            {surah.nama}
-                          </span>
-                          {isSelected && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenSurah(surah, quickAyatNum);
-                              }}
-                              className={`px-2.5 py-1 rounded-xl ${currentTheme.primaryBtn} text-[11px] font-bold flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer`}
-                              title={`Buka & Baca QS. ${surah.namaLatin} Ayat ${quickAyatNum}`}
-                            >
-                              <span>Baca</span>
-                              <ArrowRight className="w-3 h-3" />
-                            </button>
+                              {juzNum}
+                            </span>
                           )}
-                        </div>
+                        />
                       </div>
-                    )}
-                  />
+
+                      {/* Kolom Kanan: AYAT */}
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-1 px-1">
+                          <div className="flex items-center gap-1.5">
+                            <Bookmark className="w-3.5 h-3.5 text-amber-500" />
+                            <span className="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                              Ayat
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-400/30">
+                            {quickAyatNum} / {currentQuickSurah.jumlahAyat}
+                          </span>
+                        </div>
+                        <QuranRollerPicker
+                          items={Array.from({ length: currentQuickSurah.jumlahAyat }, (_, i) => i + 1)}
+                          value={quickAyatNum}
+                          onChange={(newAyat) => {
+                            setQuickAyatNum(newAyat);
+                          }}
+                          onItemClick={(ayatNum, item, wasActive) => {
+                            if (wasActive) {
+                              handleOpenSurah(currentQuickSurah, ayatNum);
+                            }
+                          }}
+                          itemHeight={38}
+                          visibleCount={3}
+                          isDark={isDark}
+                          highlightBg="bg-amber-500/15 border-amber-500/40"
+                          renderItem={(ayatNum, isSelected) => (
+                            <span
+                              className={`font-mono transition-all ${
+                                isSelected
+                                  ? 'text-lg font-black text-amber-600 dark:text-amber-300 scale-110 drop-shadow-xs'
+                                  : 'text-sm font-semibold text-slate-400 dark:text-slate-500'
+                              }`}
+                            >
+                              {ayatNum}
+                            </span>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* BARIS 2: TENGAH NO & NAMA SURAT */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center justify-between mb-1 px-1">
+                        <div className="flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-sky-500" />
+                          <span className="text-[11px] font-black uppercase tracking-wider text-sky-700 dark:text-sky-400">
+                            Surat
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-800 dark:text-sky-300 border border-sky-400/30 truncate max-w-[200px]">
+                          QS. {quickSurahNum}: {currentQuickSurah.namaLatin}
+                        </span>
+                      </div>
+                      <QuranRollerPicker
+                        items={SURAH_LIST}
+                        value={quickSurahNum}
+                        getValue={(s) => s.nomor}
+                        onChange={(newSurahNomor, surahObj) => {
+                          setQuickSurahNum(newSurahNomor);
+                          if (surahObj) {
+                            if (surahObj.juz) setWheelJuzNum(surahObj.juz);
+                            if (quickAyatNum > surahObj.jumlahAyat) setQuickAyatNum(1);
+                          }
+                        }}
+                        onItemClick={(surahNomor, surahObj, wasActive) => {
+                          if (wasActive) {
+                            handleOpenSurah(surahObj || currentQuickSurah, quickAyatNum);
+                          }
+                        }}
+                        itemHeight={44}
+                        visibleCount={3}
+                        isDark={isDark}
+                        highlightBg="bg-gradient-to-r from-emerald-500/15 via-sky-500/15 to-emerald-500/15 border-sky-400/40"
+                        renderItem={(surah, isSelected) => (
+                          <div className="w-full flex items-center justify-between px-3 gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className={`w-6 h-6 rounded-lg text-xs font-mono font-bold flex items-center justify-center shrink-0 ${
+                                  isSelected
+                                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                                    : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                }`}
+                              >
+                                {surah.nomor}
+                              </span>
+                              <div className="min-w-0 text-left">
+                                <p
+                                  className={`text-xs sm:text-sm truncate leading-tight ${
+                                    isSelected
+                                      ? 'font-black text-slate-900 dark:text-white'
+                                      : 'font-semibold text-slate-500 dark:text-slate-400'
+                                  }`}
+                                >
+                                  {surah.namaLatin}
+                                </p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-none mt-0.5 truncate">
+                                  {surah.arti} • {surah.jumlahAyat} ayat
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span
+                                className={`font-quran-lpmq text-sm sm:text-base font-bold ${
+                                  isSelected
+                                    ? 'text-[#0a7c29] dark:text-amber-300'
+                                    : 'text-slate-400 dark:text-slate-500'
+                                }`}
+                                dir="rtl"
+                              >
+                                {surah.nama}
+                              </span>
+                              {isSelected && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenSurah(surah, quickAyatNum);
+                                  }}
+                                  className={`px-2.5 py-1 rounded-xl ${currentTheme.primaryBtn} text-[11px] font-bold flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer`}
+                                  title={`Buka & Baca QS. ${surah.namaLatin} Ayat ${quickAyatNum}`}
+                                >
+                                  <span>Baca</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -3549,6 +3705,111 @@ export default function AlQuranModal({ onClose }) {
                   ))}
                 </div>
               )}
+
+              {/* ======================================================== */}
+              {/* PILIHAN UTAMA: TARGET KHATAMAN & CATATAN PENANDA (DI BAWAH DAFTAR SURAT & JUZ) */}
+              {/* ======================================================== */}
+              <div className="w-full max-w-lg mx-auto pt-3">
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span style={{ color: currentTheme.accentHex || '#f59e0b' }} className="text-xs">۞</span>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Target & Catatan Bacaan
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {khatamanSessions.length} Target • {Object.keys(userNotes).length + bookmarks.length} Penanda
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Pilihan 1: Program Khataman */}
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'khatam' ? 'surah' : 'khatam')}
+                    style={{ borderColor: indexTab === 'khatam' ? undefined : `${currentTheme.themeHex}35` }}
+                    className={`relative overflow-hidden p-3 rounded-2xl border-2 text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
+                      indexTab === 'khatam'
+                        ? `${currentTheme.activeTab} ring-2 ring-white/50 shadow-md`
+                        : isDark
+                        ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-emerald-500'
+                        : 'bg-white border-slate-200/90 text-slate-800 hover:border-emerald-500'
+                    }`}
+                  >
+                    {/* Ornamen Sudut Mushaf */}
+                    <IslamicCornerFlourish position="top-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-40" />
+
+                    {/* Siluet Motif Tema di Belakang Kartu */}
+                    <div
+                      style={{ color: currentTheme.themeHex }}
+                      className="absolute -right-2 -bottom-2 w-14 h-14 opacity-10 pointer-events-none"
+                    >
+                      <IslamicThemeMotif themeId={themeMode} className="w-full h-full" />
+                    </div>
+
+                    <div className="flex items-center justify-between w-full mb-1.5 relative z-10">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'khatam' ? 'bg-amber-400 text-slate-950' : `${currentTheme.accentBg} ${currentTheme.accentText}`}`}>
+                        <Target className="w-4 h-4" />
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'khatam' ? 'bg-white/20 text-white' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}`}>
+                        {khatamanSessions.length} Target
+                      </span>
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-1">
+                        <h4 className="text-xs sm:text-sm font-black leading-tight">Target Khataman</h4>
+                        {indexTab === 'khatam' && <span className="text-[10px] text-amber-300 font-bold">● Buka</span>}
+                      </div>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'khatam' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {khatamanSessions.length > 0 ? `${khatamanSessions[0].completedJuz.length}/30 Juz selesai` : 'Atur target baca Al-Qur\'an'}
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Pilihan 2: Catatan User Atas Ayat & Penanda */}
+                  <button
+                    type="button"
+                    onClick={() => setIndexTab(indexTab === 'bookmarks' ? 'surah' : 'bookmarks')}
+                    style={{ borderColor: indexTab === 'bookmarks' ? undefined : `${currentTheme.accentHex || '#f59e0b'}40` }}
+                    className={`relative overflow-hidden p-3 rounded-2xl border-2 text-left transition-all active:scale-95 shadow-xs flex flex-col justify-between cursor-pointer ${
+                      indexTab === 'bookmarks'
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-300 shadow-md'
+                        : isDark
+                        ? 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-amber-500'
+                        : 'bg-white border-slate-200/90 text-slate-800 hover:border-amber-500'
+                    }`}
+                  >
+                    {/* Ornamen Sudut Mushaf */}
+                    <IslamicCornerFlourish position="top-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-40" />
+
+                    {/* Siluet Motif Tema di Belakang Kartu */}
+                    <div
+                      style={{ color: currentTheme.accentHex || '#f59e0b' }}
+                      className="absolute -right-2 -bottom-2 w-14 h-14 opacity-10 pointer-events-none"
+                    >
+                      <IslamicThemeMotif themeId={themeMode} className="w-full h-full" />
+                    </div>
+
+                    <div className="flex items-center justify-between w-full mb-1.5 relative z-10">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${indexTab === 'bookmarks' ? 'bg-slate-950 text-amber-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'}`}>
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${indexTab === 'bookmarks' ? 'bg-slate-950/20 text-slate-950' : 'bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'}`}>
+                        {Object.keys(userNotes).length + bookmarks.length} Item
+                      </span>
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-1">
+                        <h4 className="text-xs sm:text-sm font-black leading-tight">Catatan & Penanda</h4>
+                        {indexTab === 'bookmarks' && <span className="text-[10px] text-slate-950 font-bold">● Buka</span>}
+                      </div>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${indexTab === 'bookmarks' ? 'text-slate-900 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {Object.keys(userNotes).length} Catatan • {bookmarks.length} Disimpan
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
 
               {/* TAB 3: TARGET KHATAMAN (MULTI-KHATAMAN) */}
               {indexTab === 'khatam' && (
@@ -3980,39 +4241,68 @@ export default function AlQuranModal({ onClose }) {
               style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 space-y-6 select-none touch-pan-y"
             >
-              {/* SURAH INTRO BANNER (SEBUTKAN ARTI SURAT DI AWALNYA) */}
-              <div className="relative mx-auto my-3 max-w-xl text-center px-4 py-4 rounded-3xl border-2 border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-950/40 backdrop-blur-xs shadow-md">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                    QS. {selectedSurah.namaLatin} ({selectedSurah.nama})
-                  </h3>
+              {/* SURAH INTRO BANNER (SEBUTKAN ARTI SURAT DI AWALNYA BERAKSEN ISLAMI & SESUAI TEMA) */}
+              <div
+                style={{ borderColor: `${currentTheme.themeHex}40` }}
+                className={`relative mx-auto my-3 max-w-xl text-center px-4 py-4 rounded-3xl border-2 shadow-md overflow-hidden ${
+                  isDark
+                    ? 'bg-slate-900/85 text-white'
+                    : 'bg-white/90 text-slate-900'
+                }`}
+              >
+                {/* Ornamen Sudut Mushaf */}
+                <IslamicCornerFlourish position="top-left" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-50" />
+                <IslamicCornerFlourish position="top-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-50" />
+                <IslamicCornerFlourish position="bottom-left" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-50" />
+                <IslamicCornerFlourish position="bottom-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-50" />
+
+                {/* Siluet Aksen Benda Tema di Latar Belakang */}
+                <div
+                  style={{ color: currentTheme.themeHex }}
+                  className="absolute -right-3 -bottom-3 w-20 h-20 opacity-10 pointer-events-none"
+                >
+                  <IslamicThemeMotif themeId={themeMode} className="w-full h-full" />
                 </div>
-                <div className="inline-block px-3.5 py-1 rounded-full bg-emerald-700 text-amber-200 font-extrabold text-xs sm:text-sm shadow-xs my-1">
-                  Arti Surat: "{selectedSurah.arti}"
-                </div>
-                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
-                  Golongan {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'} • Urutan Wahyu ke-{selectedSurah.wahyu || '-'} • Terdiri dari {selectedSurah.jumlahAyat} Ayat • Juz {selectedSurah.juz}
-                </p>
-                {lastReadPosition?.surahNomor === selectedSurah.nomor && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-400/20 px-3 py-0.5 rounded-full border border-amber-400/40">
-                    <Pin className="w-3 h-3 fill-current" />
-                    <span>Penanda Terakhir Anda: Ayat {lastReadPosition.ayatNomor}</span>
+
+                <div className="relative z-10 space-y-1">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <span style={{ color: currentTheme.accentHex || '#f59e0b' }} className="text-sm">۞</span>
+                    <h3 className="text-base sm:text-lg font-black tracking-tight">
+                      QS. {selectedSurah.namaLatin} ({selectedSurah.nama})
+                    </h3>
+                    <span style={{ color: currentTheme.accentHex || '#f59e0b' }} className="text-sm">۞</span>
                   </div>
-                )}
+                  <div className={`inline-block px-3.5 py-1 rounded-full ${currentTheme.primaryBtn} font-extrabold text-xs sm:text-sm shadow-xs my-1`}>
+                    Arti Surat: "{selectedSurah.arti}"
+                  </div>
+                  <p className="text-[11px] sm:text-xs opacity-75 mt-1 font-medium">
+                    Golongan {selectedSurah.tempatTurun === 'Mekah' ? 'Makkiyah' : 'Madaniyah'} • Urutan Wahyu ke-{selectedSurah.wahyu || '-'} • Terdiri dari {selectedSurah.jumlahAyat} Ayat • Juz {selectedSurah.juz}
+                  </p>
+                  {lastReadPosition?.surahNomor === selectedSurah.nomor && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-400/20 px-3 py-0.5 rounded-full border border-amber-400/40">
+                      <Pin className="w-3 h-3 fill-current" />
+                      <span>Penanda Terakhir Anda: Ayat {lastReadPosition.ayatNomor}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* BISMILLAH BANNER ORNAMEN KALIGRAFI */}
               {selectedSurah.nomor !== 9 && selectedSurah.nomor !== 1 && (
                 <div className="relative mx-auto my-4 max-w-xl text-center px-2 z-10">
-                  <div className={`relative py-3.5 px-6 rounded-3xl border-2 border-amber-400/50 shadow-md overflow-hidden ${
-                    currentTheme.type === 'image' || currentTheme.isDark
-                      ? 'bg-slate-900/80 backdrop-blur-md'
-                      : 'bg-gradient-to-r from-emerald-950/15 via-amber-500/10 to-emerald-950/15'
-                  }`}>
-                    <span className="absolute top-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                    <span className="absolute top-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                    <span className="absolute bottom-1.5 left-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
-                    <span className="absolute bottom-1.5 right-2.5 text-amber-500/70 text-xs font-serif select-none">۞</span>
+                  <div
+                    style={{ borderColor: `${currentTheme.accentHex || '#f59e0b'}70` }}
+                    className={`relative py-3.5 px-6 rounded-3xl border-2 shadow-md overflow-hidden ${
+                      currentTheme.type === 'image' || currentTheme.isDark
+                        ? 'bg-slate-900/85 backdrop-blur-md'
+                        : 'bg-gradient-to-r from-amber-500/10 via-white/80 to-amber-500/10'
+                    }`}
+                  >
+                    {/* Ornamen Sudut Mushaf */}
+                    <IslamicCornerFlourish position="top-left" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
+                    <IslamicCornerFlourish position="top-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
+                    <IslamicCornerFlourish position="bottom-left" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
+                    <IslamicCornerFlourish position="bottom-right" color={currentTheme.accentHex || '#f59e0b'} className="w-5 h-5 opacity-70" />
 
                     <div className="relative z-10 space-y-1">
                       <span
