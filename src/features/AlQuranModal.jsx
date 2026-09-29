@@ -5267,15 +5267,6 @@ export default function AlQuranModal({ onClose }) {
                         {/* Decorative Islamic Radial Glow */}
                         <div className="absolute inset-0 bg-radial from-amber-400/10 to-transparent pointer-events-none" />
 
-                        {/* Bingkai Hiasan Islami Mewah di Dalam Gambar (Inner Frame) */}
-                        <div className={`absolute inset-3 sm:inset-3.5 rounded-2xl border pointer-events-none z-10 ${
-                          isShareDark ? 'border-amber-400/40' : 'border-amber-700/40'
-                        }`}>
-                          <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-amber-300/80" />
-                          <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-amber-300/80" />
-                          <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-amber-300/80" />
-                          <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-amber-300/80" />
-                        </div>
 
                     {/* Header Kartu: Q.S. Nama Surat : Ayat & Rujukan Mushaf */}
                     <div className="relative z-10 text-center pt-1 mb-2">
