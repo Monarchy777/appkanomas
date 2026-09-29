@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, RefreshCw, X, Sparkles, CheckCircle2, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { APP_BUILD_VERSION, isRemoteVersionNewer, fetchRemoteVersionInfo } from '../config/version';
 
 export { APP_BUILD_VERSION };
@@ -61,19 +62,13 @@ export default function UpdateModal({
 
   const handleDownloadApk = (e) => {
     const apkUrl = remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk';
-    try {
-      const a = document.createElement('a');
-      a.href = apkUrl;
-      a.download = 'Kanomas.apk';
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        try { document.body.removeChild(a); } catch {}
-      }, 500);
-    } catch {
-      window.location.href = apkUrl;
+    if (Capacitor.isNativePlatform()) {
+      if (e && e.preventDefault) e.preventDefault();
+      try {
+        window.open(apkUrl, '_system');
+      } catch {
+        window.location.href = apkUrl;
+      }
     }
   };
 
