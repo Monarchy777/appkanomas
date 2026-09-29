@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanomas-cache-v7-lightning-speed';
+const CACHE_NAME = 'kanomas-cache-v8-native-svg-card';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

@@ -1,16 +1,13 @@
 {
-  "version": "2026.2.0",
-  "versionCode": 2031,
-  "releaseDate": "28 September 2026",
-  "title": "Aplikasi Kanomas Live Edition (Auto-Update Otomatis)",
+  "version": "2026.2.1",
+  "versionCode": 2032,
+  "releaseDate": "29 September 2026",
+  "title": "Aplikasi Kanomas Live Edition - Kartu Ayat Native HD",
   "notes": [
-    "Resmi mendukung Live Over-The-Air (OTA) Updates dari server Hostinger.",
-    "Pasang versi ini 1x saja, seluruh pembaruan fitur & tampilan di masa depan otomatis berubah di HP tanpa unduh APK lagi.",
-    "Banner kemitraan syiar 3 baris proporsional dengan tombol slim.",
-    "Tampilan beranda lebih lega dan bersih tanpa teks menu yang menumpuk.",
-    "Legalitas PPIU & PIHK Kanomas resmi Kemenag RI tertata elegan.",
-    "Logo berjalan resmi (Kemenag, IATA, KAN, AMPHURI, ASITA) meluncur bebas tanpa kotak.",
-    "Daftar rekanan resmi maskapai bintang 5, hotel tanah suci, BSI, dan GDS global."
+    "Perenderan kartu ayat Al-Qur'an 100% presisi identik dengan pratinjau menggunakan Native SVG Engine.",
+    "Fitur baru Salin Gambar langsung ke clipboard (Ctrl+V di WhatsApp Web, Canva, Telegram).",
+    "Pembersihan total artefak tatweel pada teks Arab dan mushaf.",
+    "Otomatis refresh cache untuk performa maksimal di browser dan HP Android."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
   "apkSize": "23.8 MB"
