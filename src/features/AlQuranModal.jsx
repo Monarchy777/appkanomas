@@ -483,8 +483,8 @@ export function applyKashidaToArabic(text, mode = 'unstack') {
 export function normalizeQuranText(text, isMadinah = false) {
   if (!text) return '';
   let cleaned = text
-    // 1. Bersihkan karakter kontrol tak kasat mata
-    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
+    // 1. Bersihkan karakter kontrol tak kasat mata & broken character
+    .replace(/[\uFEFF\u200B\u200C\u200E\u200F\uFFFD]/g, '')
     // 2. Hapus huruf Ae salah tempat (\u06D5) yang sering muncul sebelum waqaf di API equran.id
     .replace(/\u06D5/g, '')
     // 3. Hapus tanda ruku khusus (\u08D6) agar tampilan rapi & konsisten
@@ -492,6 +492,8 @@ export function normalizeQuranText(text, isMadinah = false) {
     // 4. Normalisasi meem iqlab Tanzil (\u06ED) ke standard small high meem (\u06E2)
     .replace(/\u06ED/g, '\u06E2')
     .replace(/[\u06EA\u06EB]/g, '')
+    // 4b. Bersihkan tanda sifr mustadir/mustathil (\u06DF, \u06E0, \u06EC) yang memicu lingkaran putus-putus hitam (dotted circle) pada font web & mobile
+    .replace(/[\u06DF\u06E0\u06EC]/g, '')
     // 5. Rapatkan meem iqlab ke kata agar duduk pas di atas tanwin/nun mati persis MyQuran
     .replace(/\s+(\u06E2)/g, '$1')
     // 6. Pisahkan tanda waqaf baik sebelum maupun sesudahnya agar tidak menindih huruf/tanwin
@@ -527,9 +529,10 @@ export function normalizeQuranText(text, isMadinah = false) {
 export function convertToUthmaniMadinah(text) {
   if (!text) return '';
   let res = text
-    .replace(/[\uFEFF\u200B\u200C\u200E\u200F]/g, '')
+    .replace(/[\uFEFF\u200B\u200C\u200E\u200F\uFFFD]/g, '')
     .replace(/\u06D5/g, '')
     .replace(/\u08D6/g, '')
+    .replace(/[\u06EA\u06EB\u06DF\u06E0\u06EC]/g, '')
     // Konversi tanda sukun bulat Kemenag ke kepala Kha' Utsmani (\u06E1)
     .replace(/\u0652/g, '\u06E1')
     // Dhommah terbalik Kemenag (U+0657) -> Dhammah biasa + Wawu kecil Utsmani (ُۥ / \u064F\u06E5)
@@ -542,7 +545,7 @@ export function convertToUthmaniMadinah(text) {
     .replace(/\u06ED/g, '\u06E2')
     // Alif washal pada alif lam ta'rif: اَلْـ -> ٱلْـ dan اَلـ -> ٱلـ
     .replace(/(^|\s)ا([َُِ]?)ل([\u06E1\u0651])/g, '$1ٱل$3')
-    // Alif washal pada nama Allah: اللّٰه -> ٱللَّه
+    // Alif washal pada nama Allah: اللّٰه -> ٱللَّهِ
     .replace(/(^|\s)الل[ّٰ]+هِ/g, '$1ٱللَّهِ')
     .replace(/(^|\s)الل[ّٰ]+هُ/g, '$1ٱللَّهُ')
     .replace(/(^|\s)الل[ّٰ]+هَ/g, '$1ٱللَّهَ')
@@ -1724,7 +1727,7 @@ export default function AlQuranModal({ onClose }) {
   // Word-by-Word fetcher
   const fetchWordByWord = async (surahNomor) => {
     if (wordByWordData[surahNomor]) return;
-    const cacheKey = `kanomas_wbw_v3_${surahNomor}`;
+    const cacheKey = `kanomas_wbw_v4_${surahNomor}`;
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -1747,7 +1750,7 @@ export default function AlQuranModal({ onClose }) {
               .map((w) => ({
                 id: w.id,
                 position: w.position,
-                arab: (w.text_uthmani || w.text || '').replace(/[\u0640]/g, ''),
+                arab: normalizeQuranText((w.text_uthmani || w.text || '').replace(/[\u0640]/g, ''), true),
                 latin: w.transliteration?.text || '',
                 arti: w.translation?.text || ''
               }));
@@ -1844,17 +1847,17 @@ export default function AlQuranModal({ onClose }) {
       setIsPlayingAudio(false);
       setActiveAyatAudio(null);
 
-      const cacheKey = `kanomas_surah_v17_${selectedSurah.nomor}`;
+      const cacheKey = `kanomas_surah_v18_${selectedSurah.nomor}`;
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.ayat && parsed.ayat.length > 0) {
-            // Pastikan setiap ayat di cache memiliki teksArabMadinah lengkap
+            // Pastikan setiap ayat di cache memiliki teksArab & teksArabMadinah bersih
             parsed.ayat = parsed.ayat.map((a) => ({
               ...a,
-              teksArab: a.teksArab || '',
-              teksArabMadinah: a.teksArabMadinah || convertToUthmaniMadinah(a.teksArab || '')
+              teksArab: normalizeQuranText(a.teksArab || '', false),
+              teksArabMadinah: normalizeQuranText(a.teksArabMadinah || convertToUthmaniMadinah(a.teksArab || ''), true)
             }));
             if (!isCancelled) {
               setSurahDetail(parsed);
