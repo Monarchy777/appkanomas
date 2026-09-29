@@ -169,14 +169,28 @@ export default function RegistrationModal({ pkg, onClose, defaultMitraCode }) {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Kode Referral Mitra (Opsional)</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-slate-700 font-semibold">Kode Referral Mitra</label>
+                    {mitraCode && (
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> Terkunci
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     placeholder="Contoh: KANOMAS-SYIAR-01"
                     value={mitraCode}
-                    onChange={(e) => setMitraCode(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono uppercase focus:outline-none focus:border-amber-500 shadow-xs"
+                    onChange={(e) => setMitraCode(e.target.value.toUpperCase())}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-slate-900 font-mono uppercase focus:outline-none shadow-xs font-bold ${
+                      mitraCode ? 'bg-emerald-50/50 border-emerald-400 text-emerald-900' : 'bg-white border-slate-300 focus:border-amber-500'
+                    }`}
                   />
+                  {mitraCode && (
+                    <span className="text-[10px] text-emerald-600 mt-1 block">
+                      Pendaftaran Anda dibimbing oleh Mitra Syiar resmi Kanomas ({mitraCode}).
+                    </span>
+                  )}
                 </div>
               </div>
 

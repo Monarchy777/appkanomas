@@ -50,6 +50,22 @@ export default function App() {
   const [dbData, setDbData] = useState(() => db.getAll());
   const [prayerInfo, setPrayerInfo] = useState(() => calculatePrayerTimes('tasikmalaya'));
 
+  // Auto-Lock Referral Code: Parse from URL (?ref=... or ?mitra=...) & persist in localStorage
+  const [persistedReferralCode, setPersistedReferralCode] = useState(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryRef = urlParams.get('ref') || urlParams.get('mitra');
+      if (queryRef) {
+        const cleanRef = queryRef.trim().toUpperCase();
+        localStorage.setItem('kanomas_referral_code', cleanRef);
+        return cleanRef;
+      }
+      return localStorage.getItem('kanomas_referral_code') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+
   // Modals state
   const [detailPackage, setDetailPackage] = useState(null);
   const [bookingPackage, setBookingPackage] = useState(null);
@@ -362,6 +378,8 @@ export default function App() {
           {activeTab === 'mitra_hub' && (
             <MitraDashboardView
               onOpenPackageDetail={(pkg) => setDetailPackage(pkg)}
+              onOpenDaftarMitra={() => setShowDaftarMitraModal(true)}
+              currentUser={currentUser}
             />
           )}
 
@@ -427,7 +445,7 @@ export default function App() {
           <RegistrationModal
             pkg={bookingPackage}
             onClose={() => setBookingPackage(null)}
-            defaultMitraCode={role === 'mitra' ? (dbData.mitra?.[0]?.code || '') : ''}
+            defaultMitraCode={persistedReferralCode || (role === 'mitra' ? (dbData.mitra?.[0]?.code || '') : '')}
           />
         )}
 

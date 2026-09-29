@@ -3,6 +3,7 @@ import {
   INITIAL_MENTORS,
   INITIAL_PACKAGES,
   INITIAL_MITRA,
+  INITIAL_WITHDRAWALS,
   INITIAL_JAMAAH,
   INITIAL_CALON_JAMAAH,
   INITIAL_TABUNGAN,
@@ -32,6 +33,7 @@ class KanomasDatabase {
           mentors: parsed.mentors || INITIAL_MENTORS,
           packages: parsed.packages || INITIAL_PACKAGES,
           mitra: parsed.mitra || INITIAL_MITRA,
+          withdrawals: parsed.withdrawals || INITIAL_WITHDRAWALS,
           jamaah: parsed.jamaah || INITIAL_JAMAAH,
           calonJamaah: parsed.calonJamaah || INITIAL_CALON_JAMAAH,
           tabungan: parsed.tabungan || INITIAL_TABUNGAN,
@@ -51,6 +53,7 @@ class KanomasDatabase {
       mentors: INITIAL_MENTORS,
       packages: INITIAL_PACKAGES,
       mitra: INITIAL_MITRA,
+      withdrawals: INITIAL_WITHDRAWALS,
       jamaah: INITIAL_JAMAAH,
       calonJamaah: INITIAL_CALON_JAMAAH,
       tabungan: INITIAL_TABUNGAN,
@@ -165,6 +168,46 @@ class KanomasDatabase {
       return m;
     });
     this.save({ ...this.data, mitra });
+  }
+
+  // Withdrawals CRUD
+  getWithdrawals() {
+    return this.data.withdrawals || [];
+  }
+
+  requestWithdrawal(withdrawalData) {
+    const amount = Number(withdrawalData.amount) || 0;
+    const newWd = {
+      id: 'WD-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4),
+      mitraId: withdrawalData.mitraId,
+      mitraCode: withdrawalData.mitraCode,
+      mitraName: withdrawalData.mitraName,
+      amount: amount,
+      bankName: withdrawalData.bankName || 'Bank Syariah Indonesia (BSI)',
+      accountNumber: withdrawalData.accountNumber || '-',
+      accountHolder: withdrawalData.accountHolder || withdrawalData.mitraName,
+      requestDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+      status: 'Selesai (Ditransfer)',
+      transferProofUrl: '',
+      notes: withdrawalData.notes || 'Pencairan Komisi Syiar Kanomas'
+    };
+
+    // Update mitra commissions
+    const mitra = this.data.mitra.map(m => {
+      if (m.id === withdrawalData.mitraId || m.code === withdrawalData.mitraCode) {
+        const payVal = Math.min(amount, m.commissionPending || 0);
+        return {
+          ...m,
+          commissionPaid: (m.commissionPaid || 0) + payVal,
+          commissionPending: Math.max(0, (m.commissionPending || 0) - payVal)
+        };
+      }
+      return m;
+    });
+
+    const withdrawals = [newWd, ...(this.data.withdrawals || [])];
+    this.save({ ...this.data, mitra, withdrawals });
+    return newWd;
   }
 
   // Jamaah Aktif CRUD
@@ -358,6 +401,7 @@ class KanomasDatabase {
       mentors: INITIAL_MENTORS,
       packages: INITIAL_PACKAGES,
       mitra: INITIAL_MITRA,
+      withdrawals: INITIAL_WITHDRAWALS,
       jamaah: INITIAL_JAMAAH,
       calonJamaah: INITIAL_CALON_JAMAAH,
       tabungan: INITIAL_TABUNGAN,
