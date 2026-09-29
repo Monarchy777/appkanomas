@@ -25,8 +25,8 @@
       // Register service worker for PWA support with auto-update cache busting
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=12').then((reg) => {
-            console.log('Kanomas PWA Service Worker terdaftar (v12):', reg.scope);
+          navigator.serviceWorker.register('/sw.js?v=13').then((reg) => {
+            console.log('Kanomas PWA Service Worker terdaftar (v13):', reg.scope);
             try { reg.update(); } catch(e) {}
           }).catch((err) => {
             console.warn('Kanomas PWA Service Worker gagal:', err);

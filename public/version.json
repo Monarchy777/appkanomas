@@ -1,13 +1,13 @@
 {
-  "version": "2026.2.2",
-  "versionCode": 2033,
+  "version": "2026.2.3",
+  "versionCode": 2034,
   "releaseDate": "29 September 2026",
-  "title": "Aplikasi Kanomas - Tema Selaras Islami & Share Card HD",
+  "title": "Aplikasi Kanomas - Navigasi Back Android & Mode Mitra Syiar",
   "notes": [
-    "Penyelarasan menyeluruh warna tema Al-Qur'an (header, tombol, aksen, badge ayat, dan kartu).",
-    "Motif siluet Islami resmi (bulan bintang, kaligrafi, kubah, menara, lentera fanous).",
-    "Perbaikan kartu share ayat bebas terpotong dan bebas tumpang tindih sesuai standar mushaf.",
-    "Otomatis pembaruan cache untuk performa maksimal di browser dan HP Android."
+    "Perbaikan tombol hardware back Android (mundur 1 langkah pada surat, modal, dan tab).",
+    "Pencegahan keluar/minimize aplikasi tanpa sengaja dengan Continuous Root Guard.",
+    "Mode Mitra Syiar lengkap (Auto-lock referral, KTA digital QR, generator flyer paket, simulasi reward).",
+    "Otomatis refresh cache PWA v13 untuk performa instan."
   ],
   "apkUrl": "https://appkanomas.mediasosial.net/kanomas.apk",
   "apkSize": "23.8 MB"
