@@ -62,14 +62,22 @@ export default function UpdateModal({
 
   const handleDownloadApk = (e) => {
     const apkUrl = remoteInfo?.apkUrl || 'https://appkanomas.mediasosial.net/kanomas.apk';
-    if (Capacitor.isNativePlatform()) {
+    // 1. Jika bridge KanomasNative tersedia di Android
+    if (typeof window !== 'undefined' && window.KanomasNative && typeof window.KanomasNative.downloadApk === 'function') {
       if (e && e.preventDefault) e.preventDefault();
+      window.KanomasNative.downloadApk(apkUrl);
+      return;
+    }
+    // 2. Jika di native platform Capacitor
+    if (Capacitor.isNativePlatform()) {
       try {
         window.open(apkUrl, '_system');
       } catch {
         window.location.href = apkUrl;
       }
+      return;
     }
+    // 3. Pada browser biasa, biarkan default href & download attribute berjalan
   };
 
   const handleHotReload = async () => {

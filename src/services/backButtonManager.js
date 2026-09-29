@@ -173,7 +173,11 @@ class BackButtonManager {
     // 3. User sudah di Home utama dan tidak ada modal/sub-menu aktif:
     // Konfirmasi 2 detik sebelum keluar
     if (now - this.lastExitPromptTime < 2000) {
-      if (Capacitor.isNativePlatform()) {
+      if (typeof window !== 'undefined' && window.KanomasNative && typeof window.KanomasNative.exitApp === 'function') {
+        try {
+          window.KanomasNative.exitApp();
+        } catch {}
+      } else if (Capacitor.isNativePlatform()) {
         try {
           CapApp.exitApp();
         } catch {}
@@ -204,3 +208,9 @@ class BackButtonManager {
 }
 
 export const backButtonManager = new BackButtonManager();
+
+// Expose secara global agar dapat dipanggil langsung oleh Android native layer (MainActivity.java)
+if (typeof window !== 'undefined') {
+  window.kanomasHandleBack = () => backButtonManager.handleBackEvent(false);
+}
+
